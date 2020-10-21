@@ -20,6 +20,8 @@ def main(args):
 
         ind_classes = get_ind_class_dict(args)
 
+        load_ds = (args.load_dataset == "True")
+
         print("Loading word vectors...")
         ft_edu = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs_edu_job.bin"))
         ft_jobs = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs.bin"))
@@ -27,7 +29,7 @@ def main(args):
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
-            FlatProfilesDataset(input_file, split, ft_jobs, ft_edu, skills_classes, ind_classes)
+            FlatProfilesDataset(CFG["gpudatadir"], input_file, split, ft_jobs, ft_edu, skills_classes, ind_classes, load_ds)
 
 
 def get_ind_class_dict(args):
@@ -65,5 +67,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--base_file", type=str, default="bp_3jobs_desc_edu_skills_industry_date_company_FR")
     parser.add_argument("--build_ind_dict", type=str, default="False")
+    parser.add_argument("--load_dataset", type=str, default="False")
     args = parser.parse_args()
     main(args)
