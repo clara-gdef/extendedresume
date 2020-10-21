@@ -34,13 +34,12 @@ class End2EndProfileBuilder(pl.LightningModule):
     def training_step(self, mini_batch, batch_nb):
         new_people, skills_pred, ind_pred = self.forward(mini_batch[1])
         lab_skills = mini_batch[-2]
-        lab_ind = mini_batch[-1]
+        lab_ind = torch.LongTensor(mini_batch[-1]).cuda()
         lab_sk_1_hot = classes_to_one_hot(lab_skills, self.num_classes_skills)
         skills_loss = torch.nn.functional.binary_cross_entropy_with_logits(skills_pred, lab_sk_1_hot)
         ind_loss = torch.nn.functional.cross_entropy(ind_pred, lab_ind)
-        ipdb.set_trace()
         loss = skills_loss + ind_loss
-        tensorboard_logs = {"skills_loss": skills_loss,"ind_loss": ind_loss, 'loss': loss}
+        tensorboard_logs = {"skills_loss": skills_loss, "ind_loss": ind_loss, 'loss': loss}
         ipdb.set_trace()
         tensorboard_logs = {'train_loss': loss}
         return {'loss': loss, 'log': tensorboard_logs}
@@ -48,13 +47,12 @@ class End2EndProfileBuilder(pl.LightningModule):
     def validation_step(self, mini_batch, batch_nb):
         new_people, skills_pred, ind_pred = self.forward(mini_batch[1])
         lab_skills = mini_batch[-2]
-        lab_ind = mini_batch[-1]
+        lab_ind = torch.LongTensor(mini_batch[-1]).cuda()
         lab_sk_1_hot = classes_to_one_hot(lab_skills, self.num_classes_skills)
         skills_val_loss = torch.nn.functional.binary_cross_entropy_with_logits(skills_pred, lab_sk_1_hot)
         ind_val_loss = torch.nn.functional.cross_entropy(ind_pred, lab_ind)
-        ipdb.set_trace()
         val_loss = skills_val_loss + ind_val_loss
-        tensorboard_logs = {"skills_val_loss": skills_val_loss,"ind_val_loss": ind_val_loss, 'val_loss': val_loss}
+        tensorboard_logs = {"skills_val_loss": skills_val_loss, "ind_val_loss": ind_val_loss, 'val_loss': val_loss}
         return {'loss': val_loss, 'log': tensorboard_logs}
 
     def configure_optimizers(self):
