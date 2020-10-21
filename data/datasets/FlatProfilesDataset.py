@@ -83,16 +83,16 @@ class FlatProfilesDataset(Dataset):
 def handle_jobs(job_list, ft_model):
     new_job_tensor = np.zeros((len(job_list), ft_model.get_dimension()))
     # sort by date, most recent first,
-    sorted_jobs = sorted(job_list, key=lambda k: k["from_ts"])
+    sorted_jobs = sorted(job_list, key=lambda k: k["from_ts"], reverse=True)
     for num, job in enumerate(sorted_jobs):
         new_job_tensor[num, :] = job_to_emb(job, ft_model)
     return new_job_tensor
 
 
 def handle_education(edu_list, ft_model):
-    ipdb.set_trace()
+    sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
     new_ed_tensor = np.zeros((len(edu_list), ft_model.get_dimension()))
-    for num, edu in enumerate(edu_list):
+    for num, edu in enumerate(sorted_edu_list):
         tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"])
         word_count = 0
         tmp = []
