@@ -11,6 +11,8 @@ class End2EndProfileBuilder(pl.LightningModule):
     def __init__(self, input_size, hidden_size, num_classes_skills, num_classes_ind, hparams):
         super(End2EndProfileBuilder, self).__init__()
         self.hparams = hparams
+        self.num_classes_skills = num_classes_skills
+        self.num_classes_ind = num_classes_ind
 
         self.atn_layer = torch.nn.Linear(input_size, 1)
         self.skill_pred = SkillsPredictor(input_size, hidden_size, num_classes_skills)
@@ -27,17 +29,32 @@ class End2EndProfileBuilder(pl.LightningModule):
         skills_pred = self.skill_pred.forward(new_people)
         ind_pred = self.industry_classifier.forward(new_people)
 
-        return skills_pred, ind_pred
+        return new_people, skills_pred, ind_pred
 
     def training_step(self, mini_batch, batch_nb):
+        new_people, skills_pred, ind_pred = self.forward(mini_batch[1])
+        lab_skills = mini_batch[-2]
+        lab_ind = mini_batch[-1]
+        lab_sk_1_hot = classes_to_one_hot(lab_skills, self.num_classes_skills)
+        skills_loss = torch.nn.functional.binary_cross_entropy_with_logits(skills_pred, lab_sk_1_hot)
+        ind_loss = torch.nn.functional.cross_entropy(ind_pred, lab_ind)
+        ipdb.set_trace()
+        loss = skills_loss + ind_loss
+        tensorboard_logs = {"skills_loss": skills_loss,"ind_loss": ind_loss, 'loss': loss}
         ipdb.set_trace()
         tensorboard_logs = {'train_loss': loss}
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
-
+        new_people, skills_pred, ind_pred = self.forward(mini_batch[1])
+        lab_skills = mini_batch[-2]
+        lab_ind = mini_batch[-1]
+        lab_sk_1_hot = classes_to_one_hot(lab_skills, self.num_classes_skills)
+        skills_val_loss = torch.nn.functional.binary_cross_entropy_with_logits(skills_pred, lab_sk_1_hot)
+        ind_val_loss = torch.nn.functional.cross_entropy(ind_pred, lab_ind)
         ipdb.set_trace()
-        tensorboard_logs = {**res_dict, 'val_loss': val_loss}
+        val_loss = skills_val_loss + ind_val_loss
+        tensorboard_logs = {"skills_val_loss": skills_val_loss,"ind_val_loss": ind_val_loss, 'val_loss': val_loss}
         return {'loss': val_loss, 'log': tensorboard_logs}
 
     def configure_optimizers(self):
@@ -49,3 +66,12 @@ class End2EndProfileBuilder(pl.LightningModule):
 
     def test_epoch_end(self, outputs):
         ipdb.set_trace()
+
+
+def classes_to_one_hot(lab_skills, num_classes):
+    new_labels = torch.zeros(len(lab_skills), num_classes)
+    for person in range(len(lab_skills)):
+        for sk in lab_skills[person]:
+            new_labels[person, sk] = 1.
+    return new_labels.cuda()
+

@@ -1,4 +1,6 @@
 import re
+import numpy as np
+import torch
 from nltk.tokenize import word_tokenize
 
 
@@ -22,7 +24,7 @@ def collate_for_flat_profiles(batch):
     edu = [i[2] for i in batch]
     skills = [i[3] for i in batch]
     ind = [i[4] for i in batch]
-    return ids, jobs, edu, skills, ind
+    return ids, torch.from_numpy(np.stack(jobs)), torch.from_numpy(np.stack(edu)), skills, ind
 
 
 def get_model_params(args, dataset):
