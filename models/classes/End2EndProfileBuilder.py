@@ -19,7 +19,7 @@ class End2EndProfileBuilder(pl.LightningModule):
         self.industry_classifier = IndustryClassifier(input_size, hidden_size, num_classes_ind)
 
     def forward(self, tmp_people):
-        people = torch.from_numpy(np.stack(tmp_people)).type(torch.FloatTensor).cuda()
+        people = tmp_people.type(torch.FloatTensor).cuda()
         atn = self.atn_layer(people)
         normed_atn = atn.clone()
         for ind, sample in enumerate(atn):
