@@ -7,6 +7,7 @@ import numpy as np
 import ipdb
 from tqdm import tqdm
 from torch.utils.data import Dataset
+from utils.utils import word_seq_into_list
 
 
 class FlatProfilesDataset(Dataset):
@@ -44,7 +45,6 @@ class FlatProfilesDataset(Dataset):
             pbar = tqdm(f, total=num_lines)
             for line in f:
                 raw_p = json.loads(line)
-                ipdb.set_trace()
                 self.tuples.append({
                     "id": raw_p[0],
                     "jobs": handle_jobs(raw_p[1], ft_job),
@@ -62,13 +62,34 @@ class FlatProfilesDataset(Dataset):
 
 
 def handle_jobs(job_list, ft_model):
+    new_job_tensor = np.zeros((len(job_list), ft_model.get_dimension()))
     # sort by date, most recent first,
-    # stadardize (??)
-    # compute rep for each job for each profile
-    ipdb.set_trace()
+    sorted_jobs = sorted(job_list, key=lambda k: k["from_ts"])
+    for num, job in enumerate(sorted_jobs):
+        new_job_tensor[num, :] = job_to_emb(job, ft_model)
+    return new_job_tensor
 
 
 def handle_education(edu_list, ft_model):
-    # sort by date, most recent first,
+    new_ed_tensor = np.zeros((len(edu_list), ft_model.get_dimension()))
+    for num, edu in enumerate(edu_list):
+        tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"])
+        word_count = 0
+        tmp = []
+        for token in tokenized_edu:
+            tmp.append(ft_model.get_word_vector(token))
+            word_count += 1
+        new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
+    return new_ed_tensor
 
-    ipdb.set_trace()
+
+def job_to_emb(job, ft_model):
+    tokenized_jobs = word_seq_into_list(job["position"], job["description"])
+    word_count = 0
+    emb = np.zeros((1, ft_model.get_dimension()))
+    tmp = []
+    for token in tokenized_jobs:
+        tmp.append(ft_model.get_word_vector(token))
+        word_count += 1
+    emb[0, :] = np.mean(np.stack(tmp), axis=0) / word_count
+    return emb
