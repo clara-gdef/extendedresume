@@ -1,5 +1,6 @@
 import re
 import ipdb
+import torch
 from nltk.tokenize import word_tokenize
 
 
@@ -18,7 +19,12 @@ def word_seq_into_list(position, description):
 
 
 def collate_for_flat_profiles(batch):
-    ipdb.set_trace()
+    ids = [i[0] for i in batch]
+    jobs = [i[1] for i in batch]
+    edu = [i[2] for i in batch]
+    skills = [i[3] for i in batch]
+    ind = [i[4] for i in batch]
+    return ids, torch.stack(torch.from_numpy(jobs)), torch.stack(torch.from_numpy(edu)), skills, ind
 
 
 def get_model_params(args, dataset):
