@@ -16,7 +16,9 @@ def main(args):
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     with ipdb.launch_ipdb_on_exception():
         with open(os.path.join(CFG["gpudatadir"], "good_skills.p"), 'rb') as f:
-            skills_classes = pkl.load(f)
+            skills = pkl.load(f)
+
+        skills_classes = {k: v for k, v in enumerate(sorted(skills))}
 
         ind_classes = get_ind_class_dict(args)
 
