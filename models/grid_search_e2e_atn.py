@@ -3,7 +3,7 @@ import os
 import pickle as pkl
 import yaml
 import ipdb
-from models import train, eval
+from models import train
 from utils import DotDict
 
 
