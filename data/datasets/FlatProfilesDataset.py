@@ -83,25 +83,29 @@ class FlatProfilesDataset(Dataset):
 
 
 def handle_jobs(job_list, ft_model):
-    new_job_tensor = np.zeros((len(job_list), ft_model.get_dimension()))
+    # keeps 90% of the dataset without trimming experience
+    new_job_tensor = np.zeros((8, ft_model.get_dimension()))
     # sort by date, most recent first,
     sorted_jobs = sorted(job_list, key=lambda k: k["from_ts"], reverse=True)
     for num, job in enumerate(sorted_jobs):
-        new_job_tensor[num, :] = job_to_emb(job, ft_model)
+        if num < 8:
+            new_job_tensor[num, :] = job_to_emb(job, ft_model)
     return new_job_tensor
 
 
 def handle_education(edu_list, ft_model):
     sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
-    new_ed_tensor = np.zeros((len(edu_list), ft_model.get_dimension()))
+    # keeps 90% of the dataset without trimming experience
+    new_ed_tensor = np.zeros((4, ft_model.get_dimension()))
     for num, edu in enumerate(sorted_edu_list):
-        tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"])
-        word_count = 0
-        tmp = []
-        for token in tokenized_edu:
-            tmp.append(ft_model.get_word_vector(token))
-            word_count += 1
-        new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
+        if num < 4:
+            tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"])
+            word_count = 0
+            tmp = []
+            for token in tokenized_edu:
+                tmp.append(ft_model.get_word_vector(token))
+                word_count += 1
+            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
     return new_ed_tensor
 
 
