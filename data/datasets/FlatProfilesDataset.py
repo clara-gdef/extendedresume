@@ -57,7 +57,8 @@ class FlatProfilesDataset(Dataset):
     def handle_skills(self, skill_list):
         skills_ind = []
         for sk in skill_list:
-            skills_ind.append(self.rev_sk_classes[sk])
+            if sk in self.rev_sk_classes.keys():
+                skills_ind.append(self.rev_sk_classes[sk])
         return skills_ind
 
 
