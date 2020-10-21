@@ -24,7 +24,7 @@ class FlatProfilesDataset(Dataset):
             self.datadir = datadir
 
             self.tuples = []
-            self.build_tuples(input_file, ft_job, ft_edu)
+            self.build_tuples(input_file, ft_job, ft_edu, split)
             self.save_dataset(split)
 
     def __len__(self):
@@ -58,11 +58,11 @@ class FlatProfilesDataset(Dataset):
         self.tuples = dico["tuples"]
         print("Data length: " + str(len(self.tuples)))
 
-    def build_tuples(self, input_file, ft_job, ft_edu):
+    def build_tuples(self, input_file, ft_job, ft_edu, split):
         with open(input_file, 'r') as f:
             num_lines = sum(1 for line in f)
         with open(input_file, 'r') as f:
-            pbar = tqdm(f, total=num_lines)
+            pbar = tqdm(f, total=num_lines, desc="Building tuple for split: " + split)
             for line in f:
                 raw_p = json.loads(line)
                 self.tuples.append({
