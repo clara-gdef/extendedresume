@@ -47,7 +47,8 @@ def train(hparams):
     arguments = {'input_size': in_size,
                  'hidden_size': hidden_size,
                  "num_classes_skills": num_class_sk,
-                 "num_classes_ind": num_class_ind}
+                 "num_classes_ind": num_class_ind,
+                 "hparams": hparams}
 
     # print("Initiating model with params (" + str(in_size) + ", " + str(out_size) + ")")
     model = End2EndProfileBuilder(**arguments)

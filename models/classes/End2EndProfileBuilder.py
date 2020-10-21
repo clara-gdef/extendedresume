@@ -5,11 +5,13 @@ import numpy as np
 
 from models.classes.SkillsPredictor import SkillsPredictor
 from models.classes.IndustryClassifier import IndustryClassifier
-    
+
 
 class End2EndProfileBuilder(pl.LightningModule):
-    def __init__(self, input_size, hidden_size, num_classes_skills, num_classes_ind):
+    def __init__(self, input_size, hidden_size, num_classes_skills, num_classes_ind, hparams):
         super(End2EndProfileBuilder, self).__init__()
+        self.hparams = hparams
+
         self.atn_layer = torch.nn.Linear(input_size, 1)
         self.skill_pred = SkillsPredictor(input_size, hidden_size, num_classes_skills)
         self.industry_classifier = IndustryClassifier(input_size, hidden_size, num_classes_ind)
@@ -38,7 +40,6 @@ class End2EndProfileBuilder(pl.LightningModule):
         return {'loss': val_loss, 'log': tensorboard_logs}
 
     def configure_optimizers(self):
-        ipdb.set_trace()
         return torch.optim.SGD(self.parameters(), lr=self.hparams.lr, weight_decay=self.wd)
 
 
