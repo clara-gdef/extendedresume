@@ -40,7 +40,7 @@ class End2EndProfileBuilder(pl.LightningModule):
         return {'loss': val_loss, 'log': tensorboard_logs}
 
     def configure_optimizers(self):
-        return torch.optim.SGD(self.parameters(), lr=self.hparams.lr, weight_decay=self.wd)
+        return torch.optim.SGD(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.wd)
 
 
     def test_step(self, mini_batch, batch_idx):
