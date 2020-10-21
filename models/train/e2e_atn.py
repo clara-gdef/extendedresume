@@ -32,7 +32,7 @@ def train(hparams):
                          checkpoint_callback=checkpoint_callback,
                          early_stop_callback=early_stop_callback,
                          logger=logger,
-                         auto_lr_find=True
+                         auto_lr_find=False
                          )
     #TODO : replace by TRAIN
     datasets = load_datasets(["VALID", "VALID"])
@@ -40,9 +40,9 @@ def train(hparams):
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
     train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate_for_flat_profiles,
-                              num_workers=0, shuffle=True)
+                              num_workers=8, shuffle=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate_for_flat_profiles,
-                              num_workers=0)
+                              num_workers=8)
     print("Dataloaders initiated.")
     arguments = {'input_size': in_size,
                  'hidden_size': hidden_size,

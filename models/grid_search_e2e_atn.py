@@ -16,45 +16,28 @@ def grid_search(hparams):
             test_results[lr] = {}
             for b_size in hparams.b_size:
                 test_results[lr][int(b_size)] = {}
-                if hparams.input_type == "hadamard":
-                    for mid_size in [50, 200, 600]:
-                        print("Grid Search for (lr=" + str(lr) + ", b_size=" + str(b_size) + ", middle size=" + str(mid_size) + ")")
-                        dico['lr'] = lr
-                        dico["b_size"] = b_size
-                        dico["middle_size"] = mid_size
-                        arg = DotDict(dico)
-                        if hparams.TRAIN == "True":
-                            train.atn_disc_poly.main(arg)
-                        test_results[lr][b_size][mid_size] = eval.atn_disc_poly.main(arg)
-                else:
-                    print("Grid Search for (lr=" + str(lr) + ", b_size=" + str(b_size) + ")")
-                    dico['lr'] = lr
-                    dico["b_size"] = b_size
-                    dico["middle_size"] = hparams.middle_size
-                    arg = DotDict(dico)
-                    if hparams.TRAIN == "True":
-                        train.atn_disc_poly.main(arg)
-
-                    test_results[lr][b_size] = eval.atn_disc_poly.main(arg)
-            ## TODO REMOVE THIS - UNINDENT
-            res_path = os.path.join(CFG["gpudatadir"], "EVAL_gs_" + hparams.model_type + "_topK_disc_poly_" + hparams.rep_type + "_" + hparams.input_type)
-            with open(res_path, "wb") as f:
-                pkl.dump(test_results, f)
+                print("Grid Search for (lr=" + str(lr) + ", b_size=" + str(b_size) + ")")
+                dico['lr'] = lr
+                dico["b_size"] = b_size
+                dico["middle_size"] = hparams.middle_size
+                arg = DotDict(dico)
+                if hparams.TRAIN == "True":
+                    train.e2e_atn.main(arg)
+                    #test_results[lr][b_size] = eval.e2e_atn.main(arg)
+            # ## TODO REMOVE THIS - UNINDENT
+            # res_path = os.path.join(CFG["gpudatadir"], "EVAL_gs_" + hparams.model_type + "_topK_disc_poly_" + hparams.rep_type + "_" + hparams.input_type)
+            # with open(res_path, "wb") as f:
+            #     pkl.dump(test_results, f)
 
 
 def init_args(hparams):
-    dico = {'rep_type': hparams.rep_type,
-            'gpus': hparams.gpus,
-            'input_type': hparams.input_type,
+    dico = {'gpus': hparams.gpus,
             'load_dataset': hparams.load_dataset,
-            'auto_lr_find': False,
-            'data_agg_type': 'avg',
             'epochs': hparams.epochs,
-            "load_from_checkpoint": False,
-            "checkpoint": 49,
             "wd": 0.0,
             "DEBUG": hparams.DEBUG,
-            "model_type": hparams.model_type
+            "model_type": hparams.model_type,
+            "hidden_size": hparams.hidden_size
             }
     return dico
 
@@ -64,18 +47,14 @@ if __name__ == "__main__":
     with open("config.yaml", "r") as ymlfile:
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rep_type", type=str, default='ft')
     parser.add_argument("--gpus", type=int, default=1)
-    parser.add_argument("--input_type", type=str, default="matMul")
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--TRAIN", default="True")
-    parser.add_argument("--auto_lr_find", type=bool, default=True)
-    parser.add_argument("--data_agg_type", type=str, default="avg")
     parser.add_argument("--DEBUG", type=bool, default=False)
-    parser.add_argument("--model_type", type=str, default="atn_disc_poly")
-    parser.add_argument("--middle_size", type=int, default=50)
-    parser.add_argument("--epochs", type=int, default=100)
-    parser.add_argument("--b_size", nargs='+', default=[64, 512])
-    parser.add_argument("--lr", nargs='+', default=[1e-5, 1e-6])
+    parser.add_argument("--model_type", type=str, default="e2e_atn")
+    parser.add_argument("--hidden_size", type=int, default=300)
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--b_size", nargs='+', default=[16, 64, 512])
+    parser.add_argument("--lr", nargs='+', default=[1e-1, 1e-2, 1e-3])
     hparams = parser.parse_args()
     grid_search(hparams)
