@@ -21,8 +21,8 @@ def main(args):
         ind_classes = get_ind_class_dict(args)
 
         print("Loading word vectors...")
-        ft_edu = fastText.load_model(os.path.join(CFG["modeldir"], "ft_fs_edu_job.bin"))
-        ft_jobs = fastText.load_model(os.path.join(CFG["modeldir"], "ft_fs.bin"))
+        ft_edu = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs_edu_job.bin"))
+        ft_jobs = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs.bin"))
         print("Word vectors loaded.")
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:

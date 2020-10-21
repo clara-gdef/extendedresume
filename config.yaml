@@ -2,6 +2,7 @@ datadir: /local/gainondefor/work/lip6/data/extendedresume
 prevdatadir: /local/gainondefor/work/lip6/data/seq2seq
 gpudatadir: /local/gainondefor/work/data/extendedresume
 modeldir: /data/gainondefor/extendedresume/
+prevmodeldir: /data/gainondefor/companies/
 rep:
   ft:
     total: reps/ft_emb/30_latest_clus_cie_per_skills
