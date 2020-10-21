@@ -11,7 +11,7 @@ from utils.utils import word_seq_into_list
 
 
 class FlatProfilesDataset(Dataset):
-    def __init__(self, datadir,  input_file, split, ft_job, ft_edu, skills_classes, ind_classes, load):
+    def __init__(self, datadir, input_file, split, ft_job, ft_edu, skills_classes, ind_classes, load):
         if load:
             self.load_dataset(split)
         else:
