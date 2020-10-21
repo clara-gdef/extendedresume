@@ -15,7 +15,7 @@ def main(args):
     with open("config.yaml", "r") as ymlfile:
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     with ipdb.launch_ipdb_on_exception():
-        with open(os.path.join(CFG["datadir"], "good_skills.p"), 'rb') as f:
+        with open(os.path.join(CFG["gpudatadir"], "good_skills.p"), 'rb') as f:
             skills_classes = pkl.load(f)
 
         ind_classes = get_ind_class_dict(args)
@@ -26,17 +26,17 @@ def main(args):
         print("Word vectors loaded.")
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
-            input_file = os.path.join(CFG["datadir"], args.base_file + split + ".json")
+            input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
             FlatProfilesDataset(input_file, split, ft_jobs, ft_edu, skills_classes, ind_classes)
 
 
 def get_ind_class_dict(args):
     if args.build_ind_dict == "True":
         class_dict = build_ind_class_dict()
-        with open(os.path.join(CFG["datadir"], "ind_class_dict.pkl"), 'wb') as f:
+        with open(os.path.join(CFG["gpudatadir"], "ind_class_dict.pkl"), 'wb') as f:
             pkl.dump(class_dict, f)
     else:
-        with open(os.path.join(CFG["datadir"], "ind_class_dict.pkl"), 'rb') as f:
+        with open(os.path.join(CFG["gpudatadir"], "ind_class_dict.pkl"), 'rb') as f:
             class_dict = pkl.load(f)
     return class_dict
 
@@ -64,6 +64,6 @@ def build_ind_class_dict():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--base_file", type=str, default="bp_3jobs_desc_edu_skills_industry_date_company_FR")
-    parser.add_argument("--build_ind_dict", type=str, default="True")
+    parser.add_argument("--build_ind_dict", type=str, default="False")
     args = parser.parse_args()
     main(args)
