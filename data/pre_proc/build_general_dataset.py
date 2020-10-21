@@ -14,19 +14,20 @@ def main(args):
     global CFG
     with open("config.yaml", "r") as ymlfile:
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
-    with open(os.path.join(CFG["datadir"], "good_skills.p"), 'rb') as f:
-        skills_classes = pkl.load(f)
+    with ipdb.launch_ipdb_on_exception():
+        with open(os.path.join(CFG["datadir"], "good_skills.p"), 'rb') as f:
+            skills_classes = pkl.load(f)
 
-    ind_classes = get_ind_class_dict(args)
+        ind_classes = get_ind_class_dict(args)
 
-    print("Loading word vectors...")
-    ft_edu = fastText.load_model(os.path.join(CFG["modeldir"], "ft_fs_edu_job.bin"))
-    ft_jobs = fastText.load_model(os.path.join(CFG["modeldir"], "ft_fs.bin"))
-    print("Word vectors loaded.")
+        print("Loading word vectors...")
+        ft_edu = fastText.load_model(os.path.join(CFG["modeldir"], "ft_fs_edu_job.bin"))
+        ft_jobs = fastText.load_model(os.path.join(CFG["modeldir"], "ft_fs.bin"))
+        print("Word vectors loaded.")
 
-    for split in ["_TEST", "_VALID", "_TRAIN"]:
-        input_file = os.path.join(CFG["datadir"], args.base_file + split + ".json")
-        FlatProfilesDataset(input_file, split, ft_jobs, ft_edu, skills_classes, ind_classes)
+        for split in ["_TEST", "_VALID", "_TRAIN"]:
+            input_file = os.path.join(CFG["datadir"], args.base_file + split + ".json")
+            FlatProfilesDataset(input_file, split, ft_jobs, ft_edu, skills_classes, ind_classes)
 
 
 def get_ind_class_dict(args):
@@ -43,7 +44,7 @@ def get_ind_class_dict(args):
 def build_ind_class_dict():
     input_files = []
     for split in ["_TEST", "_VALID", "_TRAIN"]:
-        input_files.append(os.path.join(CFG["datadir"], args.base_file + split + ".json"))
+        input_files.append(os.path.join(CFG["prevdatadir"], args.base_file + split + ".json"))
 
     classes = set()
     for filename in itertools.chain(input_files):
