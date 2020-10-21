@@ -42,6 +42,7 @@ def get_ind_class_dict(args):
 
 
 def build_ind_class_dict():
+    print("Building industry class dict...")
     input_files = []
     for split in ["_TEST", "_VALID", "_TRAIN"]:
         input_files.append(os.path.join(CFG["prevdatadir"], args.base_file + split + ".json"))
@@ -51,13 +52,12 @@ def build_ind_class_dict():
         with open(filename, "r") as f:
             for line in f:
                 person = json.loads(line)
-                ipdb.set_trace()
-                classes.add(person[0])
+                classes.add(person[-1])
 
     class_dict = {}
     for num, industry in enumerate(sorted(classes)):
         class_dict[num] = industry
-
+    print("Done.")
     return class_dict
 
 
