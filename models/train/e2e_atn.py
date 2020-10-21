@@ -35,7 +35,7 @@ def train(hparams):
                          auto_lr_find=False
                          )
     #TODO : replace by TRAIN
-    datasets = load_datasets(["VALID", "VALID"])
+    datasets = load_datasets(["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
