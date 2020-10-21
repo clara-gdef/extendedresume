@@ -44,7 +44,7 @@ class FlatProfilesDataset(Dataset):
                 "rev_ind_classes": self.rev_ind_classes,
                 "datadir": self.datadir,
                 "tuples": self.tuples}
-        with open(os.path.join(self.datadir, "flat_profiles_dataset_" + split + ".pkl"), 'wb') as f:
+        with open(os.path.join(self.datadir, "flat_profiles_dataset" + split + ".pkl"), 'wb') as f:
             pkl.dump(dico, f)
 
     def load_dataset(self, split):
