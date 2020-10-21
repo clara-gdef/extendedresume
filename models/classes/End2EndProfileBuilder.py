@@ -3,8 +3,9 @@ import torch
 import ipdb
 import numpy as np
 
-from models.classes import SkillsPredictor, IndustryClassifier
-
+from models.classes.SkillsPredictor import SkillsPredictor
+from models.classes.IndustryClassifier import IndustryClassifier
+    
 
 class End2EndProfileBuilder(pl.LightningModule):
     def __init__(self, input_size, hidden_size, num_classes_skills, num_classes_ind):
