@@ -56,6 +56,7 @@ class FlatProfilesDataset(Dataset):
         self.rev_ind_classes = dico["rev_ind_classes"]
         self.datadir = dico["datadir"]
         self.tuples = dico["tuples"]
+        print("Data length: " + str(len(self.tuples)))
 
     def build_tuples(self, input_file, ft_job, ft_edu):
         with open(input_file, 'r') as f:
