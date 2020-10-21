@@ -52,7 +52,7 @@ class FlatProfilesDataset(Dataset):
                     "edu": handle_education(raw_p[3], ft_edu),
                     "ind": self.rev_ind_classes[raw_p[4]]
                 })
-            pbar.update(1)
+                pbar.update(1)
 
     def handle_skills(self, skill_list):
         skills_ind = []
