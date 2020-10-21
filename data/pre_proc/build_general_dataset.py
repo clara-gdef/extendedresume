@@ -46,9 +46,12 @@ def build_ind_class_dict():
         input_files.append(os.path.join(CFG["datadir"], args.base_file + split + ".json"))
 
     classes = set()
-    for person in tqdm(itertools.chain(input_files), desc="Building industry label dict..."):
-        ipdb.set_trace()
-        classes.add(person[0])
+    for filename in itertools.chain(input_files):
+        with open(filename, "r") as f:
+            for line in f:
+                person = json.loads(line)
+                ipdb.set_trace()
+                classes.add(person[0])
 
     class_dict = {}
     for num, industry in enumerate(sorted(classes)):
@@ -59,7 +62,7 @@ def build_ind_class_dict():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base_file", type=str, default="bp_3jobs_desc_edu_skills_industry_date_company_FR_")
+    parser.add_argument("--base_file", type=str, default="bp_3jobs_desc_edu_skills_industry_date_company_FR")
     parser.add_argument("--build_ind_dict", type=str, default="True")
     args = parser.parse_args()
     main(args)
