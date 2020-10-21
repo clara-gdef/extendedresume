@@ -13,6 +13,7 @@ from utils.utils import word_seq_into_list
 class FlatProfilesDataset(Dataset):
     def __init__(self, datadir, input_file, split, ft_job, ft_edu, skills_classes, ind_classes, load):
         if load:
+            self.datadir = datadir
             self.load_dataset(split)
         else:
             self.skills_classes = skills_classes
