@@ -35,6 +35,7 @@ class End2EndProfileBuilder(pl.LightningModule):
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
+
         ipdb.set_trace()
         tensorboard_logs = {**res_dict, 'val_loss': val_loss}
         return {'loss': val_loss, 'log': tensorboard_logs}
