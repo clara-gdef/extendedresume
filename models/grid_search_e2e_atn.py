@@ -19,7 +19,6 @@ def grid_search(hparams):
                 print("Grid Search for (lr=" + str(lr) + ", b_size=" + str(b_size) + ")")
                 dico['lr'] = lr
                 dico["b_size"] = b_size
-                dico["middle_size"] = hparams.middle_size
                 arg = DotDict(dico)
                 if hparams.TRAIN == "True":
                     train.e2e_atn.main(arg)
