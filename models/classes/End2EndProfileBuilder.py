@@ -67,6 +67,19 @@ class End2EndProfileBuilder(pl.LightningModule):
     def test_epoch_end(self, outputs):
         ipdb.set_trace()
 
+    def ponderate_jobs(self, people, atn):
+        new_people = torch.zeros(len(people), 300).cuda()
+        for num, person in enumerate(people):
+            job_counter = 0
+            new_p = torch.zeros(300).cuda()
+            for j, job in enumerate(person):
+                # that means the job is a placeholder, and equal to zero everywhere
+                if (job != torch.zeros(300).cuda()).all():
+                    job_counter += 1
+                    new_p += atn[num][j] * job
+            new_people[num] = new_p / job_counter
+        return new_people
+
 
 def classes_to_one_hot(lab_skills, num_classes):
     new_labels = torch.zeros(len(lab_skills), num_classes)
