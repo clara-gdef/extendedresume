@@ -40,7 +40,6 @@ class End2EndProfileBuilder(pl.LightningModule):
         ind_loss = torch.nn.functional.cross_entropy(ind_pred, lab_ind)
         loss = skills_loss + ind_loss
         tensorboard_logs = {"skills_loss": skills_loss, "ind_loss": ind_loss, 'loss': loss}
-        tensorboard_logs = {'train_loss': loss}
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
