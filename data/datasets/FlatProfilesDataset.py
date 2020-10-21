@@ -13,7 +13,7 @@ from utils.utils import word_seq_into_list
 class FlatProfilesDataset(Dataset):
     def __init__(self, datadir,  input_file, split, ft_job, ft_edu, skills_classes, ind_classes, load):
         if load:
-            self.load_dataset()
+            self.load_dataset(split)
         else:
             self.skills_classes = skills_classes
             self.rev_sk_classes = {v: k for k, v in skills_classes.items()}
@@ -24,19 +24,37 @@ class FlatProfilesDataset(Dataset):
 
             self.tuples = []
             self.build_tuples(input_file, ft_job, ft_edu)
-            self.save_dataset()
+            self.save_dataset(split)
 
     def __len__(self):
-        pass
+        return len(self.tuples)
 
     def __getitem__(self, idx):
-        pass
+        return self.tuples[idx]["id"],  \
+               self.tuples[idx]["jobs"], \
+               self.tuples[idx]["edu"], \
+               self.tuples[idx]["skills"], \
+               self.tuples[idx]["ind"]
 
-    def save_dataset(self):
-        pass
+    def save_dataset(self, split):
+        dico = {"skills_classes": self.skills_classes,
+                "rev_sk_classes": self.rev_sk_classes,
+                "ind_classes": self.ind_classes,
+                "rev_ind_classes": self.rev_ind_classes,
+                "datadir": self.datadir,
+                "tuples": self.tuples}
+        with open(os.path.join(self.datadir, "flat_profiles_dataset_" + split + ".pkl"), 'wb') as f:
+            pkl.dump(dico, f)
 
-    def load_dataset(self):
-        pass
+    def load_dataset(self, split):
+        with open(os.path.join(self.datadir, "flat_profiles_dataset_" + split + ".pkl"), 'rb') as f:
+            dico = pkl.load(f)
+        self.skills_classes = dico["skills_classes"]
+        self.rev_sk_classes = dico["rev_sk_classes"]
+        self.ind_classes = dico["ind_classes"]
+        self.rev_ind_classes = dico["rev_ind_classes"]
+        self.datadir = dico["datadir"]
+        self.tuples = dico["tuples"]
 
     def build_tuples(self, input_file, ft_job, ft_edu):
         with open(input_file, 'r') as f:
@@ -72,6 +90,7 @@ def handle_jobs(job_list, ft_model):
 
 
 def handle_education(edu_list, ft_model):
+    ipdb.set_trace()
     new_ed_tensor = np.zeros((len(edu_list), ft_model.get_dimension()))
     for num, edu in enumerate(edu_list):
         tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"])
