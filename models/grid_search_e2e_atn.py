@@ -3,7 +3,7 @@ import os
 import pickle as pkl
 import yaml
 import ipdb
-from models import train
+from models import train, eval
 from utils import DotDict
 
 
@@ -22,11 +22,11 @@ def grid_search(hparams):
                 arg = DotDict(dico)
                 if hparams.TRAIN == "True":
                     train.e2e_atn.main(arg)
-                    #test_results[lr][b_size] = eval.e2e_atn.main(arg)
+                test_results[lr][b_size] = eval.e2e_atn.main(arg)
             # ## TODO REMOVE THIS - UNINDENT
-            # res_path = os.path.join(CFG["gpudatadir"], "EVAL_gs_" + hparams.model_type + "_topK_disc_poly_" + hparams.rep_type + "_" + hparams.input_type)
-            # with open(res_path, "wb") as f:
-            #     pkl.dump(test_results, f)
+            res_path = os.path.join(CFG["gpudatadir"], "EVAL_gs_" + hparams.model_type + "_topK.pkl")
+            with open(res_path, "wb") as f:
+                pkl.dump(test_results, f)
 
 
 def init_args(hparams):

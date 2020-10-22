@@ -13,9 +13,6 @@ from utils.utils import collate_for_flat_profiles, get_model_params
 
 
 def init(hparams):
-    global CFG
-    with open("config.yaml", "r") as ymlfile:
-        CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     if hparams.DEBUG:
         with ipdb.launch_ipdb_on_exception():
             return main(hparams)
@@ -24,6 +21,10 @@ def init(hparams):
 
 
 def main(hparams):
+    global CFG
+    with open("config.yaml", "r") as ymlfile:
+        CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
+
     xp_title = hparams.model_type + "_" + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
     logger = init_lightning(xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
@@ -52,7 +53,7 @@ def main(hparams):
     print("Evaluating model " + latest_file)
     model.load_state_dict(torch.load(latest_file)["state_dict"])
     print("Model Loaded.")
-    trainer.test(model.cuda(), test_loader)
+    return trainer.test(model.cuda(), test_loader)
 
 
 def load_datasets(splits):
@@ -82,6 +83,7 @@ def init_lightning(xp_title):
 
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--rep_type", type=str, default='ft')
     parser.add_argument("--gpus", type=int, default=1)
