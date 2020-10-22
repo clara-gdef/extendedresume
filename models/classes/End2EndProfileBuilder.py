@@ -1,6 +1,7 @@
 import pytorch_lightning as pl
 import torch
 import ipdb
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 import numpy as np
 
 from models.classes.SkillsPredictor import SkillsPredictor
@@ -13,6 +14,11 @@ class End2EndProfileBuilder(pl.LightningModule):
         self.hparams = hparams
         self.num_classes_skills = num_classes_skills
         self.num_classes_ind = num_classes_ind
+
+        self.test_pred_ind = []
+        self.test_pred_skills = []
+        self.test_label_ind = []
+        self.test_label_skills = []
 
         self.atn_layer = torch.nn.Linear(input_size, 1)
         self.skill_pred = SkillsPredictor(input_size, hidden_size, num_classes_skills)
@@ -56,12 +62,25 @@ class End2EndProfileBuilder(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.SGD(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.wd)
 
-
     def test_step(self, mini_batch, batch_idx):
-        ipdb.set_trace()
+        new_people, skills_pred, ind_pred = self.forward(mini_batch[1])
+        self.test_pred_skills.append(skills_pred)
+        self.test_pred_ind.append(ind_pred)
+
+        lab_skills = mini_batch[-2]
+        lab_ind = torch.LongTensor(mini_batch[-1]).cuda()
+        lab_sk_1_hot = classes_to_one_hot(lab_skills, self.num_classes_skills)
+        self.test_label_ind.append(lab_ind)
+        self.test_label_skills.append(lab_sk_1_hot)
 
     def test_epoch_end(self, outputs):
-        ipdb.set_trace()
+        skills_preds = torch.stack(self.test_pred_skills)
+        skills_labels = torch.stack(self.test_label_skills)
+        res_skills = test_for_skills(skills_preds, skills_labels, self.num_classes_skills)
+        ind_preds = torch.stack(self.test_pred_ind)
+        ind_labels = torch.stack(self.test_label_ind)
+        res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
+        return {**res_ind, **res_skills}
 
     def ponderate_jobs(self, people, atn):
         new_people = torch.zeros(len(people), 300).cuda()
@@ -77,10 +96,32 @@ class End2EndProfileBuilder(pl.LightningModule):
         return new_people
 
 
+def test_for_skills(pred, labels, num_class):
+    ipdb.set_trace()
+    return get_metrics(pred, labels, num_class, "skills")
+
+
+def test_for_ind(pred, labels, num_class):
+    ipdb.set_trace()
+    return get_metrics(pred, labels, num_class, "ind")
+
+
 def classes_to_one_hot(lab_skills, num_classes):
     new_labels = torch.zeros(len(lab_skills), num_classes)
     for person in range(len(lab_skills)):
         for sk in lab_skills[person]:
             new_labels[person, sk] = 1.
     return new_labels.cuda()
+
+
+def get_metrics(preds, labels, num_classes, handle):
+    num_c = num_classes
+    res_dict = {
+        "acc_" + handle: accuracy_score(labels, preds) * 100,
+        "precision_" + handle: precision_score(labels, preds, average='weighted',
+                                               labels=num_c, zero_division=0) * 100,
+        "recall_" + handle: recall_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100,
+        "f1_" + handle: f1_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100}
+    return res_dict
+
 
