@@ -75,8 +75,7 @@ class AggregatedEduDataset(Dataset):
 
 
 def to_avg_emb(emb_list):
-    ipdb.set_trace()
-    return torch.FloatTensor(torch.from_numpy(np.mean(emb_list, axis=0)))
+    return torch.from_numpy(np.mean(emb_list, axis=0)).type(torch.FloatTensor)
 
 
 def job_to_emb(job, ft_model):
