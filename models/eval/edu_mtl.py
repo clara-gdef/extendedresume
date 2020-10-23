@@ -35,7 +35,7 @@ def train(hparams):
     dataset_test = datasets[0]
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_test)
-    test_loader = DataLoader(dataset_test, batch_size=0, collate_fn=collate_for_edu,
+    test_loader = DataLoader(dataset_test, batch_size=1, collate_fn=collate_for_edu,
                               num_workers=8, shuffle=True)
 
     print("Dataloaders initiated.")

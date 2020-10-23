@@ -91,3 +91,6 @@ class EvalModels(pl.LightningModule):
         ind_preds = torch.stack(self.test_pred_ind)
         ind_labels = torch.stack(self.test_label_ind)
         res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
+        return {**res_ind, **res_skills}
+
+
