@@ -138,6 +138,6 @@ def to_elmo_emb(edu_list, elmo):
         if num < 4:
             character_ids = batch_to_ids(line)
             emb = elmo(character_ids.cuda())
-            tmp.append(np.sum(emb["elmo_representations"][-1].detach().cpu().numpy()) / len(line))
-        new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0)
+            tmp.append(np.sum(emb["elmo_representations"][-1].detach().cpu().numpy(), axis=0) / len(line))
+            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0)
     return new_ed_tensor
