@@ -26,34 +26,27 @@ def main(hparams):
 def train(hparams):
 
     xp_title = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
-    logger, checkpoint_callback, early_stop_callback = init_lightning(hparams, xp_title)
+    logger = init_lightning(xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
-                         max_epochs=hparams.epochs,
-                         checkpoint_callback=checkpoint_callback,
-                         early_stop_callback=early_stop_callback,
-                         logger=logger,
-                         auto_lr_find=False
+                         logger=logger
                          )
-    #TODO : replace by TRAIN
-    datasets = load_datasets(["TRAIN", "VALID"])
-    dataset_train, dataset_valid = datasets[0], datasets[1]
 
-    in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
-    train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate_for_edu,
+    datasets = load_datasets(["TEST"])
+    dataset_test = datasets[0]
+
+    in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_test)
+    test_loader = DataLoader(dataset_test, batch_size=0, collate_fn=collate_for_edu,
                               num_workers=8, shuffle=True)
-    valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate_for_edu,
-                              num_workers=8)
+
     print("Dataloaders initiated.")
     arguments = {'input_size': in_size,
                  'hidden_size': hidden_size,
                  "num_classes_skills": num_class_sk,
                  "num_classes_ind": num_class_ind,
                  "hparams": hparams}
-
-    # print("Initiating model with params (" + str(in_size) + ", " + str(out_size) + ")")
     model = EvalModels(**arguments)
     print("Model Loaded.")
-    trainer.fit(model.cuda(), train_loader, valid_loader)
+    trainer.test(model.cuda(), test_loader)
 
 
 def load_datasets(splits):
@@ -70,35 +63,13 @@ def load_datasets(splits):
     return datasets
 
 
-def init_lightning(hparams, xp_title):
-    model_name = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
-    model_path = os.path.join(CFG['modeldir'], model_name)
-
+def init_lightning(xp_title):
     logger = TensorBoardLogger(
         save_dir='./models/logs',
         name=xp_title)
     print("Logger initiated.")
 
-    checkpoint_callback = ModelCheckpoint(
-        filepath=os.path.join(model_path, '{epoch:02d}'),
-        save_top_k=True,
-        verbose=True,
-        monitor='val_loss',
-        mode='min',
-        prefix=''
-    )
-    print("callback initiated.")
-
-    early_stop_callback = EarlyStopping(
-        monitor='val_loss',
-        min_delta=0.000,
-        patience=10,
-        verbose=False,
-        mode='min'
-    )
-    print("early stopping procedure initiated.")
-
-    return logger, checkpoint_callback, early_stop_callback
+    return logger
 
 
 if __name__ == "__main__":
