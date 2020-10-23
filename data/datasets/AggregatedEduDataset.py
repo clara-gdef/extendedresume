@@ -36,7 +36,7 @@ class AggregatedEduDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.tuples[idx]["id"],  \
-               self.tuples[idx]["edu"], \
+               self.tuples[idx]["edu_" + self.ft_type], \
                self.tuples[idx]["skills"], \
                self.tuples[idx]["ind"]
 
