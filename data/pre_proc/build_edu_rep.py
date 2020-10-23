@@ -25,7 +25,7 @@ def main(args):
 
         print("Word vectors loaded.")
 
-        for split in ["_TEST", "_VALID", "_TRAIN"]:
+        for split in ["TEST", "VALID", "TRAIN"]:
             edu_dataset_fs = []
             dataset = FlatProfilesDataset(CFG["gpudatadir"], None, split, None, None, None, None, load_ds)
             loader = DataLoader(dataset, batch_size=1, collate_fn=collate_for_flat_profiles,
@@ -37,7 +37,7 @@ def main(args):
                                    "ind": profile[4]}
                 edu_dataset_fs.append(embedded_person)
 
-            with open(os.path.join(CFG["gpudatadir"], "reps_edu_fs" + split + ".pkl"), 'wb') as f:
+            with open(os.path.join(CFG["gpudatadir"], "reps_edu_fs_" + split + ".pkl"), 'wb') as f:
                 pkl.dump(edu_dataset_fs)
 
 
