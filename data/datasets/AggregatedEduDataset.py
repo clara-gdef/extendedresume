@@ -20,10 +20,10 @@ class AggregatedEduDataset(Dataset):
                 general_ds = pkl.load(f)
 
             self.ft_type = ft_type
-            self.skills_classes = general_ds.skills_classes
-            self.rev_sk_classes = general_ds.rev_sk_classes
-            self.ind_classes = general_ds.ind_classes
-            self.rev_ind_classes = general_ds.rev_ind_classes
+            self.skills_classes = general_ds["skills_classes"]
+            self.rev_sk_classes = general_ds["rev_sk_classes"]
+            self.ind_classes = general_ds["ind_classes"]
+            self.rev_ind_classes = general_ds["rev_ind_classes"]
 
             self.datadir = datadir
 
@@ -66,7 +66,7 @@ class AggregatedEduDataset(Dataset):
         print("Data length: " + str(len(self.tuples)))
 
     def build_tuples(self, general_ds, ft_type):
-        for person in tqdm(general_ds, desc="Parse general dataset..."):
+        for person in tqdm(general_ds["tuples"], desc="Parse general dataset..."):
             new_p = {}
             for key in ["id", "ind", "skills"]:
                 new_p[key] = person[key]
@@ -77,7 +77,7 @@ class AggregatedEduDataset(Dataset):
 def to_avg_emb(emb_list):
     ipdb.set_trace()
     return torch.FloatTensor(torch.from_numpy(np.mean(emb_list, axis=0)))
-    
+
 
 def job_to_emb(job, ft_model):
     tokenized_jobs = word_seq_into_list(job["position"], job["description"])
