@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--TRAIN", default="True")
     parser.add_argument("--ft_type", type=str, default='fs')
     parser.add_argument("--DEBUG", type=bool, default=False)
-    parser.add_argument("--model_type", type=str, default="e2e_atn")
+    parser.add_argument("--model_type", type=str, default="edu_mtl")
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--b_size", nargs='+', default=[16, 64, 512])
