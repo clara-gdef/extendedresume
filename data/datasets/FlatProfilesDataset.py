@@ -135,7 +135,6 @@ def to_elmo_emb(edu_list, elmo):
     tmp = []
     for num, edu in enumerate(sorted_edu_list):
         line = edu["degree"].lower() + ' ' + edu["institution"].lower()
-        ipdb.set_trace()
         if num < 4:
             character_ids = batch_to_ids(line)
             emb = elmo(character_ids.cuda())
