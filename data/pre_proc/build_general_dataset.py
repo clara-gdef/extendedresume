@@ -36,7 +36,8 @@ def main(args):
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
-            FlatProfilesDataset(CFG["gpudatadir"], input_file, split, ft_jobs, ft_edu, ft_pt, elmo, skills_classes, ind_classes, False)
+            FlatProfilesDataset(CFG["gpudatadir"], input_file, split, ft_jobs, ft_edu, ft_pt, elmo.cuda(),
+                                skills_classes, ind_classes, False)
 
 
 def get_ind_class_dict(args):

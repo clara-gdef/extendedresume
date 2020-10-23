@@ -127,14 +127,18 @@ def job_to_emb(job, ft_model):
     emb[0, :] = np.mean(np.stack(tmp), axis=0) / word_count
     return emb
 
+
 def to_elmo_emb(edu_list, elmo):
     sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
     # keeps 90% of the dataset without trimming experience
     new_ed_tensor = np.zeros((4, 1024))
+    tmp = []
     for num, edu in enumerate(sorted_edu_list):
+        line = edu["degree"].lower() + ' ' + edu["institution"].lower()
         ipdb.set_trace()
         if num < 4:
-            character_ids = batch_to_ids(edu)
+            character_ids = batch_to_ids(line)
             emb = elmo(character_ids.cuda())
-            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
-    return emb["elmo_representations"][-1]
+            tmp.append(np.sum(emb["elmo_representations"][-1].detach().cpu().numpy()) / len(line))
+        new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0)
+    return new_ed_tensor
