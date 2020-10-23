@@ -32,7 +32,7 @@ def train(hparams):
                          checkpoint_callback=checkpoint_callback,
                          early_stop_callback=early_stop_callback,
                          logger=logger,
-                         auto_lr_find=False
+                         auto_lr_find=True
                          )
     #TODO : replace by TRAIN
     datasets = load_datasets(["TRAIN", "VALID"])
