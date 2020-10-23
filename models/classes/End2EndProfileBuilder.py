@@ -1,6 +1,8 @@
 import pytorch_lightning as pl
 import torch
 import ipdb
+from line_profiler import LineProfiler
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 import numpy as np
 
 from models.classes.SkillsPredictor import SkillsPredictor
@@ -14,6 +16,11 @@ class End2EndProfileBuilder(pl.LightningModule):
         self.num_classes_skills = num_classes_skills
         self.num_classes_ind = num_classes_ind
 
+        self.test_pred_ind = []
+        self.test_pred_skills = []
+        self.test_label_ind = []
+        self.test_label_skills = []
+
         self.atn_layer = torch.nn.Linear(input_size, 1)
         self.skill_pred = SkillsPredictor(input_size, hidden_size, num_classes_skills)
         self.industry_classifier = IndustryClassifier(input_size, hidden_size, num_classes_ind)
@@ -24,6 +31,7 @@ class End2EndProfileBuilder(pl.LightningModule):
         normed_atn = atn.clone()
         for ind, sample in enumerate(atn):
             normed_atn[ind] = torch.softmax(atn[ind], dim=0)
+
         new_people = self.ponderate_jobs(people, normed_atn)
 
         skills_pred = self.skill_pred.forward(new_people)
@@ -48,20 +56,49 @@ class End2EndProfileBuilder(pl.LightningModule):
         lab_ind = torch.LongTensor(mini_batch[-1]).cuda()
         lab_sk_1_hot = classes_to_one_hot(lab_skills, self.num_classes_skills)
         skills_val_loss = torch.nn.functional.binary_cross_entropy_with_logits(skills_pred, lab_sk_1_hot)
+        # ipdb.set_trace()
         ind_val_loss = torch.nn.functional.cross_entropy(ind_pred, lab_ind)
         val_loss = skills_val_loss + ind_val_loss
-        tensorboard_logs = {"skills_val_loss": skills_val_loss, "ind_val_loss": ind_val_loss, 'val_loss': val_loss}
-        return {'loss': val_loss, 'log': tensorboard_logs}
+        # print(ind_val_loss)
+        tensorboard_logs = {"skills_val_loss": skills_val_loss, "ind_val_loss": ind_val_loss, "val_loss": val_loss}
+        return {'val_loss': val_loss, 'log': tensorboard_logs}
+
+    def validation_end(self, outputs):
+        val_losses = [i["val_loss"] for i in outputs]
+        logs_skills_val_losses = [i["log"]["skills_val_loss"] for i in outputs]
+        logs_ind_val_losses = [i["log"]["ind_val_loss"] for i in outputs]
+        logs_val_losses = [i["log"]["val_loss"] for i in outputs]
+        res_dict = {"val_loss": torch.mean(torch.stack(val_losses)),
+                    "log": {
+                        "skills_val_loss": torch.mean(torch.stack(logs_skills_val_losses)),
+                        "ind_val_loss": torch.mean(torch.stack(logs_ind_val_losses)),
+                        "val_loss": torch.mean(torch.stack(logs_val_losses)),
+                    }}
+        return res_dict
+        # return outputs[-1]
 
     def configure_optimizers(self):
         return torch.optim.SGD(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.wd)
 
-
     def test_step(self, mini_batch, batch_idx):
-        ipdb.set_trace()
+        new_people, skills_pred, ind_pred = self.forward(mini_batch[1])
+        self.test_pred_skills.append(skills_pred)
+        self.test_pred_ind.append(ind_pred)
+
+        lab_skills = mini_batch[-2]
+        lab_ind = torch.LongTensor(mini_batch[-1]).cuda()
+        lab_sk_1_hot = classes_to_one_hot(lab_skills, self.num_classes_skills)
+        self.test_label_ind.append(lab_ind)
+        self.test_label_skills.append(lab_sk_1_hot)
 
     def test_epoch_end(self, outputs):
-        ipdb.set_trace()
+        skills_preds = torch.stack(self.test_pred_skills)
+        skills_labels = torch.stack(self.test_label_skills)
+        res_skills = test_for_skills(skills_preds, skills_labels, self.num_classes_skills)
+        ind_preds = torch.stack(self.test_pred_ind)
+        ind_labels = torch.stack(self.test_label_ind)
+        res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
+        return {**res_ind, **res_skills}
 
     def ponderate_jobs(self, people, atn):
         new_people = torch.zeros(len(people), 300).cuda()
@@ -70,11 +107,28 @@ class End2EndProfileBuilder(pl.LightningModule):
             new_p = torch.zeros(300).cuda()
             for j, job in enumerate(person):
                 # that means the job is a placeholder, and equal to zero everywhere
-                if (job != torch.zeros(300).cuda()).all():
+                if torch.sum(job) != 0:
                     job_counter += 1
                     new_p += atn[num][j] * job
             new_people[num] = new_p / job_counter
         return new_people
+
+
+def test_for_skills(pred, labels, num_class):
+    res = {}
+    for threshold in np.linspace(0, 1, 10):
+        new_preds = get_preds_wrt_threshold(pred, round(threshold, 1))
+        res[round(threshold, 1)] = get_metrics(new_preds.squeeze(1).cpu().numpy(), labels.squeeze(1).cpu().numpy(), num_class, "skills")
+        # res[round(threshold, 1) + "_@10"] = get_metrics(new_preds.cpu().numpy(), labels.cpu().numpy(), num_class, "skills")
+    return res
+
+
+def test_for_ind(pred, labels, num_class):
+    predicted_classes = torch.argsort(pred, dim=-1, descending=True)
+    res = {}
+    res["ind"] = get_metrics(predicted_classes.squeeze(1).cpu().numpy()[:, 0], labels.squeeze(1).cpu().numpy(), num_class, "ind")
+    res["ind_@10"] = get_metrics_at_k(predicted_classes.squeeze(1).cpu().numpy()[:, :10], labels.squeeze(1).cpu().numpy(), num_class, "ind")
+    return res
 
 
 def classes_to_one_hot(lab_skills, num_classes):
@@ -83,4 +137,36 @@ def classes_to_one_hot(lab_skills, num_classes):
         for sk in lab_skills[person]:
             new_labels[person, sk] = 1.
     return new_labels.cuda()
+
+
+def get_metrics(preds, labels, num_classes, handle):
+    num_c = range(num_classes)
+    res_dict = {
+        "acc_" + handle: accuracy_score(labels, preds) * 100,
+        "precision_" + handle: precision_score(labels, preds, average='weighted',
+                                               labels=num_c, zero_division=0) * 100,
+        "recall_" + handle: recall_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100,
+        "f1_" + handle: f1_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100}
+    return res_dict
+
+
+def get_metrics_at_k(predictions, labels, num_classes, handle):
+    out_predictions = []
+    for index, pred in enumerate(predictions):
+        if labels[index].item() in pred:
+            out_predictions.append(labels[index].item())
+        else:
+            if type(pred[0]) == torch.Tensor:
+                out_predictions.append(pred[0].item())
+            else:
+                out_predictions.append(pred[0])
+    return get_metrics(out_predictions, labels, num_classes, handle)
+
+
+def get_preds_wrt_threshold(pred, th):
+    preds = []
+    for person in pred:
+        preds.append(((person > th).float()*1).type(torch.uint8))
+    pred = torch.stack(preds).type(torch.FloatTensor)
+    return pred
 

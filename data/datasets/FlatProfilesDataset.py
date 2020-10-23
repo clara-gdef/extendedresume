@@ -55,7 +55,11 @@ class FlatProfilesDataset(Dataset):
         self.ind_classes = dico["ind_classes"]
         self.rev_ind_classes = dico["rev_ind_classes"]
         self.datadir = dico["datadir"]
+        ##################
+        np.random.shuffle(dico["tuples"])
+        # self.tuples = dico["tuples"][:1000]
         self.tuples = dico["tuples"]
+        ###########
         print("Data length: " + str(len(self.tuples)))
 
     def build_tuples(self, input_file, ft_job, ft_edu, split):
