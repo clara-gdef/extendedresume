@@ -52,6 +52,7 @@ def train(hparams):
     # print("Initiating model with params (" + str(in_size) + ", " + str(out_size) + ")")
     model = EvalModels(**arguments)
     print("Model Loaded.")
+    print("Starting training for model " + xp_title)
     trainer.fit(model.cuda(), train_loader, valid_loader)
 
 
