@@ -24,7 +24,6 @@ def main(hparams):
 
 
 def train(hparams):
-
     xp_title = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
     logger, checkpoint_callback, early_stop_callback = init_lightning(hparams, xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
@@ -35,7 +34,7 @@ def train(hparams):
                          auto_lr_find=False
                          )
     #TODO : replace by TRAIN
-    datasets = load_datasets(["TRAIN", "VALID"])
+    datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
@@ -56,7 +55,7 @@ def train(hparams):
     trainer.fit(model.cuda(), train_loader, valid_loader)
 
 
-def load_datasets(splits):
+def load_datasets(hparams, splits):
     datasets = []
     common_hparams = {
         "datadir": CFG["gpudatadir"],
