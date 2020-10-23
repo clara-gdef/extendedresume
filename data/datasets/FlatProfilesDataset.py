@@ -13,8 +13,10 @@ from utils.utils import word_seq_into_list
 
 class FlatProfilesDataset(Dataset):
     def __init__(self, datadir, input_file, split, ft_job, ft_edu, ft_pt, elmo, skills_classes, ind_classes, load):
+        self.elmo = elmo
+        self.datadir = datadir
+
         if load:
-            self.datadir = datadir
             self.load_dataset(split)
         else:
             self.skills_classes = skills_classes
@@ -22,10 +24,11 @@ class FlatProfilesDataset(Dataset):
             self.ind_classes = ind_classes
             self.rev_ind_classes = {v: k for k, v in ind_classes.items()}
 
-            self.datadir = datadir
-
             self.tuples = []
-            self.build_tuples(input_file, ft_job, ft_edu, ft_pt, elmo, split)
+            if elmo is None:
+                self.build_tuples(input_file, ft_job, ft_edu, ft_pt, split)
+            else:
+                self.build_tuples_with_elmo(input_file, elmo, split)
             self.save_dataset(split)
 
     def __len__(self):
@@ -45,11 +48,18 @@ class FlatProfilesDataset(Dataset):
                 "rev_ind_classes": self.rev_ind_classes,
                 "datadir": self.datadir,
                 "tuples": self.tuples}
-        with open(os.path.join(self.datadir, "flat_profiles_dataset" + split + "2.pkl"), 'wb') as f:
+
+        tgt_file = "flat_profiles_dataset"
+        if self.elmo is not None:
+            tgt_file += "_elmo"
+        with open(os.path.join(self.datadir, tgt_file + split + "2.pkl"), 'wb') as f:
             pkl.dump(dico, f)
 
     def load_dataset(self, split):
-        with open(os.path.join(self.datadir, "flat_profiles_dataset_" + split + "2.pkl"), 'rb') as f:
+        tgt_file = "flat_profiles_dataset"
+        if self.elmo is not None:
+            tgt_file += "_elmo"
+        with open(os.path.join(self.datadir, tgt_file + split + "2.pkl"), 'rb') as f:
             dico = pkl.load(f)
         self.skills_classes = dico["skills_classes"]
         self.rev_sk_classes = dico["rev_sk_classes"]
@@ -63,7 +73,7 @@ class FlatProfilesDataset(Dataset):
         ###########
         print("Data length: " + str(len(self.tuples)))
 
-    def build_tuples(self, input_file, ft_job, ft_edu, ft_pt, elmo, split):
+    def build_tuples(self, input_file, ft_job, ft_edu, ft_pt, split):
         with open(input_file, 'r') as f:
             num_lines = sum(1 for line in f)
         with open(input_file, 'r') as f:
@@ -76,10 +86,26 @@ class FlatProfilesDataset(Dataset):
                     "skills": self.handle_skills(raw_p[2]),
                     "edu_fs": handle_education(raw_p[3], ft_edu),
                     "edu_pt": handle_education(raw_p[3], ft_pt),
+                    #"edu_elmo": to_elmo_emb(raw_p[3], elmo),
+                    "ind": self.rev_ind_classes[raw_p[4]]
+                })
+                pbar.update(1)
+
+    def build_tuples_with_elmo(self, input_file, elmo, split):
+        with open(input_file, 'r') as f:
+            num_lines = sum(1 for line in f)
+        with open(input_file, 'r') as f:
+            pbar = tqdm(f, total=num_lines, desc="Building tuple for split: " + split)
+            for line in f:
+                raw_p = json.loads(line)
+                self.tuples.append({
+                    "id": raw_p[0],
+                    "skills": self.handle_skills(raw_p[2]),
                     "edu_elmo": to_elmo_emb(raw_p[3], elmo),
                     "ind": self.rev_ind_classes[raw_p[4]]
                 })
                 pbar.update(1)
+
 
     def handle_skills(self, skill_list):
         skills_ind = []

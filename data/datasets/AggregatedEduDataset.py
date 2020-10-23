@@ -72,7 +72,7 @@ class AggregatedEduDataset(Dataset):
             new_p = {}
             for key in ["id", "ind", "skills"]:
                 new_p[key] = person[key]
-            new_p["edu_" + ft_type] = to_avg_emb(person["edu"])
+                new_p["edu_" + ft_type] = to_avg_emb(person["edu_" + ft_type])
             self.tuples.append(new_p)
 
 
