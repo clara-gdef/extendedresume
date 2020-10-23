@@ -1,1 +1,2 @@
 from .FlatProfilesDataset import FlatProfilesDataset
+from .AggregatedEduDataset import AggregatedEduDataset

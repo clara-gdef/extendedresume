@@ -7,8 +7,8 @@ from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 import yaml
-from data.datasets import FlatProfilesDataset
-from models.classes.End2EndProfileBuilder import End2EndProfileBuilder
+from data.datasets import AggregatedEduDataset
+from models.classes.EvalModels import EvalModels
 from utils.utils import collate_for_flat_profiles, get_model_params
 
 
@@ -24,7 +24,8 @@ def main(hparams):
 
 
 def train(hparams):
-    xp_title = hparams.model_type + "_" + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
+
+    xp_title = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
     logger, checkpoint_callback, early_stop_callback = init_lightning(hparams, xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
                          max_epochs=hparams.epochs,
@@ -33,6 +34,7 @@ def train(hparams):
                          logger=logger,
                          auto_lr_find=False
                          )
+    #TODO : replace by TRAIN
     datasets = load_datasets(["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
@@ -49,7 +51,7 @@ def train(hparams):
                  "hparams": hparams}
 
     # print("Initiating model with params (" + str(in_size) + ", " + str(out_size) + ")")
-    model = End2EndProfileBuilder(**arguments)
+    model = EvalModels(**arguments)
     print("Model Loaded.")
     trainer.fit(model.cuda(), train_loader, valid_loader)
 
@@ -58,21 +60,18 @@ def load_datasets(splits):
     datasets = []
     common_hparams = {
         "datadir": CFG["gpudatadir"],
-        "input_file": None,
-        "ft_job": None,
-        "ft_edu": None,
-        "skills_classes": None,
-        "ind_classes": None,
-        "load": True
+        "ft_type": hparams.ft_type,
+        "load": (hparams.load_dataset == "True")
     }
     for split in splits:
-        datasets.append(FlatProfilesDataset(**common_hparams, split=split))
+        common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset" + split + ".pkl")
+        datasets.append(AggregatedEduDataset(**common_hparams, split=split))
 
     return datasets
 
 
 def init_lightning(hparams, xp_title):
-    model_name = hparams.model_type + "_" + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
+    model_name = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
     model_path = os.path.join(CFG['modeldir'], model_name)
 
     logger = TensorBoardLogger(
@@ -104,7 +103,7 @@ def init_lightning(hparams, xp_title):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rep_type", type=str, default='ft')
+    parser.add_argument("--ft_type", type=str, default='fs')
     parser.add_argument("--gpus", type=int, default=1)
     parser.add_argument("--b_size", type=int, default=16)
     parser.add_argument("--hidden_size", type=int, default=300)
@@ -113,7 +112,7 @@ if __name__ == "__main__":
     parser.add_argument("--load_from_checkpoint", default=False)
     parser.add_argument("--checkpoint", type=int, default=45)
     parser.add_argument("--DEBUG", type=bool, default=False)
-    parser.add_argument("--model_type", type=str, default="e2e_atn")
+    parser.add_argument("--model_type", type=str, default="edu")
     parser.add_argument("--lr", type=float, default=1e-1)
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--epochs", type=int, default=50)
