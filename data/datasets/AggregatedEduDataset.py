@@ -46,6 +46,7 @@ class AggregatedEduDataset(Dataset):
                 "ind_classes": self.ind_classes,
                 "rev_ind_classes": self.rev_ind_classes,
                 "datadir": self.datadir,
+                "ft_type" :ft_type,
                 "tuples": self.tuples}
         with open(os.path.join(self.datadir, "agg_edu_dataset_" + ft_type + "_" + split + ".pkl"), 'wb') as f:
             pkl.dump(dico, f)
@@ -56,6 +57,7 @@ class AggregatedEduDataset(Dataset):
         self.skills_classes = dico["skills_classes"]
         self.rev_sk_classes = dico["rev_sk_classes"]
         self.ind_classes = dico["ind_classes"]
+        self.ft_type = dico["ft_type"]
         self.rev_ind_classes = dico["rev_ind_classes"]
         self.datadir = dico["datadir"]
         ##################
