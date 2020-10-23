@@ -28,6 +28,14 @@ def collate_for_flat_profiles(batch):
     return ids, torch.from_numpy(np.stack(jobs)), torch.from_numpy(np.stack(edu)), skills, ind
 
 
+def collate_for_edu(batch):
+    ids = [i[0] for i in batch]
+    edu = [i[1] for i in batch]
+    skills = [i[2] for i in batch]
+    ind = [i[3] for i in batch]
+    return ids, torch.stack(edu), skills, ind
+
+
 def get_model_params(args, dataset):
     return 300, args.hidden_size, len(dataset.skills_classes), len(dataset.ind_classes)
 

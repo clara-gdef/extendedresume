@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import yaml
 from data.datasets import AggregatedEduDataset
 from models.classes.EvalModels import EvalModels
-from utils.utils import collate_for_flat_profiles, get_model_params
+from utils.utils import collate_for_edu, get_model_params
 
 
 def main(hparams):
@@ -39,9 +39,9 @@ def train(hparams):
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
-    train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate_for_flat_profiles,
+    train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate_for_edu,
                               num_workers=8, shuffle=True)
-    valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate_for_flat_profiles,
+    valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate_for_edu,
                               num_workers=8)
     print("Dataloaders initiated.")
     arguments = {'input_size': in_size,
