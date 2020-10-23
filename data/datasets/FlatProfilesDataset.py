@@ -11,7 +11,7 @@ from utils.utils import word_seq_into_list
 
 
 class FlatProfilesDataset(Dataset):
-    def __init__(self, datadir, input_file, split, ft_job, ft_edu, skills_classes, ind_classes, load):
+    def __init__(self, datadir, input_file, split, ft_job, ft_edu, ft_pt, skills_classes, ind_classes, load):
         if load:
             self.datadir = datadir
             self.load_dataset(split)
@@ -24,7 +24,7 @@ class FlatProfilesDataset(Dataset):
             self.datadir = datadir
 
             self.tuples = []
-            self.build_tuples(input_file, ft_job, ft_edu, split)
+            self.build_tuples(input_file, ft_job, ft_edu, ft_pt, split)
             self.save_dataset(split)
 
     def __len__(self):
@@ -44,11 +44,11 @@ class FlatProfilesDataset(Dataset):
                 "rev_ind_classes": self.rev_ind_classes,
                 "datadir": self.datadir,
                 "tuples": self.tuples}
-        with open(os.path.join(self.datadir, "flat_profiles_dataset" + split + ".pkl"), 'wb') as f:
+        with open(os.path.join(self.datadir, "flat_profiles_dataset" + split + "2.pkl"), 'wb') as f:
             pkl.dump(dico, f)
 
     def load_dataset(self, split):
-        with open(os.path.join(self.datadir, "flat_profiles_dataset_" + split + ".pkl"), 'rb') as f:
+        with open(os.path.join(self.datadir, "flat_profiles_dataset_" + split + "2.pkl"), 'rb') as f:
             dico = pkl.load(f)
         self.skills_classes = dico["skills_classes"]
         self.rev_sk_classes = dico["rev_sk_classes"]
@@ -62,7 +62,7 @@ class FlatProfilesDataset(Dataset):
         ###########
         print("Data length: " + str(len(self.tuples)))
 
-    def build_tuples(self, input_file, ft_job, ft_edu, split):
+    def build_tuples(self, input_file, ft_job, ft_edu, ft_pt, split):
         with open(input_file, 'r') as f:
             num_lines = sum(1 for line in f)
         with open(input_file, 'r') as f:
@@ -73,7 +73,8 @@ class FlatProfilesDataset(Dataset):
                     "id": raw_p[0],
                     "jobs": handle_jobs(raw_p[1], ft_job),
                     "skills": self.handle_skills(raw_p[2]),
-                    "edu": handle_education(raw_p[3], ft_edu),
+                    "edu_fs": handle_education(raw_p[3], ft_edu),
+                    "edu_pt": handle_education(raw_p[3], ft_pt),
                     "ind": self.rev_ind_classes[raw_p[4]]
                 })
                 pbar.update(1)

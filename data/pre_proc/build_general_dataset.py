@@ -27,11 +27,12 @@ def main(args):
         print("Loading word vectors...")
         ft_edu = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs_edu_job.bin"))
         ft_jobs = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs.bin"))
+        ft_pt = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_en.bin"))
         print("Word vectors loaded.")
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
-            FlatProfilesDataset(CFG["gpudatadir"], input_file, split, ft_jobs, ft_edu, skills_classes, ind_classes, load_ds)
+            FlatProfilesDataset(CFG["gpudatadir"], input_file, split, ft_jobs, ft_edu, ft_pt, skills_classes, ind_classes, False)
 
 
 def get_ind_class_dict(args):
