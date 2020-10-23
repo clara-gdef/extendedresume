@@ -7,11 +7,12 @@ import numpy as np
 import ipdb
 from tqdm import tqdm
 from torch.utils.data import Dataset
+from allennlp.modules.elmo import batch_to_ids
 from utils.utils import word_seq_into_list
 
 
 class FlatProfilesDataset(Dataset):
-    def __init__(self, datadir, input_file, split, ft_job, ft_edu, ft_pt, skills_classes, ind_classes, load):
+    def __init__(self, datadir, input_file, split, ft_job, ft_edu, ft_pt, elmo, skills_classes, ind_classes, load):
         if load:
             self.datadir = datadir
             self.load_dataset(split)
@@ -24,7 +25,7 @@ class FlatProfilesDataset(Dataset):
             self.datadir = datadir
 
             self.tuples = []
-            self.build_tuples(input_file, ft_job, ft_edu, ft_pt, split)
+            self.build_tuples(input_file, ft_job, ft_edu, ft_pt, elmo, split)
             self.save_dataset(split)
 
     def __len__(self):
@@ -62,7 +63,7 @@ class FlatProfilesDataset(Dataset):
         ###########
         print("Data length: " + str(len(self.tuples)))
 
-    def build_tuples(self, input_file, ft_job, ft_edu, ft_pt, split):
+    def build_tuples(self, input_file, ft_job, ft_edu, ft_pt, elmo, split):
         with open(input_file, 'r') as f:
             num_lines = sum(1 for line in f)
         with open(input_file, 'r') as f:
@@ -75,6 +76,7 @@ class FlatProfilesDataset(Dataset):
                     "skills": self.handle_skills(raw_p[2]),
                     "edu_fs": handle_education(raw_p[3], ft_edu),
                     "edu_pt": handle_education(raw_p[3], ft_pt),
+                    "edu_elmo": to_elmo_emb(raw_p[3], elmo),
                     "ind": self.rev_ind_classes[raw_p[4]]
                 })
                 pbar.update(1)
@@ -124,3 +126,15 @@ def job_to_emb(job, ft_model):
         word_count += 1
     emb[0, :] = np.mean(np.stack(tmp), axis=0) / word_count
     return emb
+
+def to_elmo_emb(edu_list, elmo):
+    sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
+    # keeps 90% of the dataset without trimming experience
+    new_ed_tensor = np.zeros((4, 1024))
+    for num, edu in enumerate(sorted_edu_list):
+        ipdb.set_trace()
+        if num < 4:
+            character_ids = batch_to_ids(edu)
+            emb = elmo(character_ids.cuda())
+            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
+    return emb["elmo_representations"][-1]
