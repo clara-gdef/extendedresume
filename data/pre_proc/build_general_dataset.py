@@ -31,7 +31,7 @@ def main(args):
         elmo = Elmo(options_file, weight_file, 2, dropout=0)
         ft_edu = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs_edu_job.bin"))
         ft_jobs = fastText.load_model(os.path.join(CFG["prevmodeldir"], "ft_fs.bin"))
-        ft_pt = fastText.load_model(os.path.join(CFG["modeldir"], "ft_pre_trained.bin.bin"))
+        ft_pt = fastText.load_model(os.path.join(CFG["modeldir"], "ft_pre_trained.bin"))
         print("Word vectors loaded.")
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
