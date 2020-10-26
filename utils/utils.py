@@ -37,7 +37,11 @@ def collate_for_edu(batch):
 
 
 def get_model_params(args, dataset):
-    return 300, args.hidden_size, len(dataset.skills_classes), len(dataset.ind_classes)
+    if args.ft_type == "elmo":
+        dim = 1024
+    else:
+        dim = 300
+    return dim, args.hidden_size, len(dataset.skills_classes), len(dataset.ind_classes)
 
 
 def test_for_skills(pred, labels, num_class):

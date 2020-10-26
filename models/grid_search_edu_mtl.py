@@ -21,8 +21,8 @@ def grid_search(hparams):
                 dico["b_size"] = b_size
                 arg = DotDict(dico)
                 if hparams.TRAIN == "True":
-                    train.edu_mtl.main(arg)
-                test_results[lr][b_size] = eval.edu_mtl.main(arg)
+                    train.edu_mtl.init(arg)
+                test_results[lr][b_size] = eval.edu_mtl.init(arg)
             # ## TODO REMOVE THIS - UNINDENT
             res_path = os.path.join(CFG["gpudatadir"], "EVAL_gs_" + hparams.model_type + "_topK.pkl")
             with open(res_path, "wb") as f:

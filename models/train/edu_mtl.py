@@ -12,18 +12,18 @@ from models.classes.EvalModels import EvalModels
 from utils.utils import collate_for_edu, get_model_params
 
 
-def main(hparams):
+def init(hparams):
     global CFG
     with open("config.yaml", "r") as ymlfile:
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     if hparams.DEBUG:
         with ipdb.launch_ipdb_on_exception():
-            return train(hparams)
+            return main(hparams)
     else:
-        return train(hparams)
+        return main(hparams)
 
 
-def train(hparams):
+def main(hparams):
     xp_title = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
     logger, checkpoint_callback, early_stop_callback = init_lightning(hparams, xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
@@ -64,7 +64,10 @@ def load_datasets(hparams, splits):
         "load": (hparams.load_dataset == "True")
     }
     for split in splits:
-        common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_" + split + ".pkl")
+        if hparams.ft_type !=  "elmo":
+            common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_" + split + ".pkl")
+        else:
+            common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_elmo_" + split + ".pkl")
         datasets.append(AggregatedEduDataset(**common_hparams, split=split))
 
     return datasets
@@ -117,4 +120,4 @@ if __name__ == "__main__":
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--epochs", type=int, default=50)
     hparams = parser.parse_args()
-    main(hparams)
+    init(hparams)

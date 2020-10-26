@@ -46,7 +46,7 @@ class AggregatedEduDataset(Dataset):
                 "ind_classes": self.ind_classes,
                 "rev_ind_classes": self.rev_ind_classes,
                 "datadir": self.datadir,
-                "ft_type" :ft_type,
+                "ft_type": ft_type,
                 "tuples": self.tuples}
         with open(os.path.join(self.datadir, "agg_edu_dataset_" + ft_type + "_" + split + ".pkl"), 'wb') as f:
             pkl.dump(dico, f)
@@ -72,8 +72,8 @@ class AggregatedEduDataset(Dataset):
             new_p = {}
             for key in ["id", "ind", "skills"]:
                 new_p[key] = person[key]
-                #new_p["edu_" + ft_type] = to_avg_emb(person["edu_" + ft_type])
-                new_p["edu_" + ft_type] = to_avg_emb(person["edu"])
+                new_p["edu_" + ft_type] = to_avg_emb(person["edu_" + ft_type])
+
             self.tuples.append(new_p)
 
 

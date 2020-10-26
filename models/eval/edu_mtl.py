@@ -12,7 +12,7 @@ from models.classes.EvalModels import EvalModels
 from utils.utils import collate_for_edu, get_model_params
 
 
-def main(hparams):
+def init(hparams):
     global CFG
     with open("config.yaml", "r") as ymlfile:
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
@@ -20,10 +20,10 @@ def main(hparams):
         with ipdb.launch_ipdb_on_exception():
             return train(hparams)
     else:
-        return train(hparams)
+        return main(hparams)
 
 
-def train(hparams):
+def main(hparams):
 
     xp_title = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
     logger = init_lightning(xp_title)
@@ -31,7 +31,7 @@ def train(hparams):
                          logger=logger
                          )
 
-    datasets = load_datasets(["TEST"])
+    datasets = load_datasets(hparams, ["TEST"])
     dataset_test = datasets[0]
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_test)
@@ -49,7 +49,7 @@ def train(hparams):
     trainer.test(model.cuda(), test_loader)
 
 
-def load_datasets(splits):
+def load_datasets(hparams, splits):
     datasets = []
     common_hparams = {
         "datadir": CFG["gpudatadir"],
@@ -88,4 +88,4 @@ if __name__ == "__main__":
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--epochs", type=int, default=50)
     hparams = parser.parse_args()
-    main(hparams)
+    init(hparams)
