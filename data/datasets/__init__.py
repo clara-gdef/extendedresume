@@ -1,2 +1,3 @@
 from .FlatProfilesDataset import FlatProfilesDataset
 from .AggregatedEduDataset import AggregatedEduDataset
+from .TextGenerationDataset import TextGenerationDataset

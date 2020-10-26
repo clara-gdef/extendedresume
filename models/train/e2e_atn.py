@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import yaml
 from data.datasets import FlatProfilesDataset
 from models.classes.End2EndProfileBuilder import End2EndProfileBuilder
-from utils.utils import collate_for_flat_profiles, get_model_params
+from utils.model import collate_for_flat_profiles, get_model_params
 
 
 def main(hparams):

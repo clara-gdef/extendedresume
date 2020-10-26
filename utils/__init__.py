@@ -1,2 +1,2 @@
-from .utils import *
+from .model import *
 from .DotDict import *

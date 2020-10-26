@@ -9,6 +9,7 @@ import ipdb
 from allennlp.modules.elmo import Elmo
 import fastText
 from data.datasets import FlatProfilesDataset
+from utils.pre_processing import get_ind_class_dict
 
 
 def main(args):
@@ -21,7 +22,7 @@ def main(args):
 
         skills_classes = {k: v for k, v in enumerate(sorted(skills))}
 
-        ind_classes = get_ind_class_dict(args)
+        ind_classes = get_ind_class_dict(args.build_ind_dict, CFG)
 
         load_ds = (args.load_dataset == "True")
         elmo = (args.elmo == "True")
@@ -46,35 +47,8 @@ def main(args):
                                 skills_classes, ind_classes, False)
 
 
-def get_ind_class_dict(args):
-    if args.build_ind_dict == "True":
-        class_dict = build_ind_class_dict()
-        with open(os.path.join(CFG["gpudatadir"], "ind_class_dict.pkl"), 'wb') as f:
-            pkl.dump(class_dict, f)
-    else:
-        with open(os.path.join(CFG["gpudatadir"], "ind_class_dict.pkl"), 'rb') as f:
-            class_dict = pkl.load(f)
-    return class_dict
 
 
-def build_ind_class_dict():
-    print("Building industry class dict...")
-    input_files = []
-    for split in ["_TEST", "_VALID", "_TRAIN"]:
-        input_files.append(os.path.join(CFG["prevdatadir"], args.base_file + split + ".json"))
-
-    classes = set()
-    for filename in itertools.chain(input_files):
-        with open(filename, "r") as f:
-            for line in f:
-                person = json.loads(line)
-                classes.add(person[-1])
-
-    class_dict = {}
-    for num, industry in enumerate(sorted(classes)):
-        class_dict[num] = industry
-    print("Done.")
-    return class_dict
 
 
 if __name__ == "__main__":

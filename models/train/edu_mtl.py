@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import yaml
 from data.datasets import AggregatedEduDataset
 from models.classes.EvalModels import EvalModels
-from utils.utils import collate_for_edu, get_model_params
+from utils.model import collate_for_edu, get_model_params
 
 
 def init(hparams):

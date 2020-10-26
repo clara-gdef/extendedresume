@@ -5,7 +5,7 @@ import pickle as pkl
 from tqdm import tqdm
 import itertools
 import yaml
-from utils.utils import collate_for_flat_profiles
+from utils.model import collate_for_flat_profiles
 from torch.utils.data import DataLoader
 import ipdb
 import fastText

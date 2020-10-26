@@ -8,7 +8,7 @@ import ipdb
 from tqdm import tqdm
 from torch.utils.data import Dataset
 from allennlp.modules.elmo import batch_to_ids
-from utils.utils import word_seq_into_list
+from utils.model import word_seq_into_list
 
 
 class FlatProfilesDataset(Dataset):
