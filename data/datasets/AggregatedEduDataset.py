@@ -7,7 +7,7 @@ import numpy as np
 import ipdb
 from tqdm import tqdm
 from torch.utils.data import Dataset
-from utils.model import word_seq_into_list
+from utils.pre_processing import word_seq_into_list
 
 
 class AggregatedEduDataset(Dataset):
@@ -82,7 +82,7 @@ def to_avg_emb(emb_list):
 
 
 def job_to_emb(job, ft_model):
-    tokenized_jobs = word_seq_into_list(job["position"], job["description"])
+    tokenized_jobs = word_seq_into_list(job["position"], job["description"], None)
     word_count = 0
     emb = np.zeros((1, ft_model.get_dimension()))
     tmp = []

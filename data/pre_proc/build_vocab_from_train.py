@@ -51,7 +51,7 @@ def build_word_set(input_file, args):
             data = json.loads(line)
             sorted_edu = sorted(data[-2], key=lambda k: k['to'], reverse=True)
             for edu in sorted_edu:
-                tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"])
+                tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], None)
                 for word in tokenized_edu:
                     if re.match(number_regex, word):
                         word_count["NUM"] += 1

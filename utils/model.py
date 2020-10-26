@@ -1,23 +1,7 @@
 import re
 import numpy as np
 import torch
-from nltk.tokenize import word_tokenize
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
-
-
-def word_seq_into_list(position, description):
-    number_regex = re.compile(r'\d+(,\d+)?')
-    new_tup = []
-    whole_job = position.lower() + ' ' + description.lower()
-    job = word_tokenize(whole_job)
-    for tok in job:
-        if re.match(number_regex, tok):
-            new_tup.append("NUM")
-        else:
-            new_tup.append(tok.lower())
-    cleaned_tup = [item for item in new_tup if item != ""]
-    return cleaned_tup
-
 
 def collate_for_flat_profiles(batch):
     ids = [i[0] for i in batch]

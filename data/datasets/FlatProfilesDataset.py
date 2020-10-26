@@ -8,7 +8,7 @@ import ipdb
 from tqdm import tqdm
 from torch.utils.data import Dataset
 from allennlp.modules.elmo import batch_to_ids
-from utils.model import word_seq_into_list
+from utils.pre_processing import word_seq_into_list
 
 
 class FlatProfilesDataset(Dataset):
@@ -106,7 +106,6 @@ class FlatProfilesDataset(Dataset):
                 })
                 pbar.update(1)
 
-
     def handle_skills(self, skill_list):
         skills_ind = []
         for sk in skill_list:
@@ -132,7 +131,7 @@ def handle_education(edu_list, ft_model):
     new_ed_tensor = np.zeros((4, ft_model.get_dimension()))
     for num, edu in enumerate(sorted_edu_list):
         if num < 4:
-            tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"])
+            tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], None)
             word_count = 0
             tmp = []
             for token in tokenized_edu:
@@ -143,7 +142,7 @@ def handle_education(edu_list, ft_model):
 
 
 def job_to_emb(job, ft_model):
-    tokenized_jobs = word_seq_into_list(job["position"], job["description"])
+    tokenized_jobs = word_seq_into_list(job["position"], job["description"], None)
     word_count = 0
     emb = np.zeros((1, ft_model.get_dimension()))
     tmp = []
