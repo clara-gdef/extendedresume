@@ -57,7 +57,10 @@ def load_datasets(hparams, splits):
         "load": (hparams.load_dataset == "True")
     }
     for split in splits:
-        common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_" + split + ".pkl")
+        if hparams.ft_type !=  "elmo":
+            common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_" + split + ".pkl")
+        else:
+            common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_elmo_" + split + ".pkl")
         datasets.append(AggregatedEduDataset(**common_hparams, split=split))
 
     return datasets
