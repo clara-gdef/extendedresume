@@ -3,6 +3,8 @@ import torch
 import ipdb
 from line_profiler import LineProfiler
 import numpy as np
+import pickle as pkl
+import os
 from utils.model import classes_to_one_hot, test_for_ind, test_for_skills
 from models.classes.SkillsPredictor import SkillsPredictor
 from models.classes.IndustryClassifier import IndustryClassifier
@@ -91,6 +93,14 @@ class EvalModels(pl.LightningModule):
         ind_preds = torch.stack(self.test_pred_ind)
         ind_labels = torch.stack(self.test_label_ind)
         res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
+        self.save_outputs()
         return {**res_ind, **res_skills}
 
-
+    def save_outputs(self):
+        hp = self.hparams
+        tgt_file = os.path.join(hp.datadir,
+                                "outputs_eval_models_" + hp.model_type + "_" + hp.lr + "_" + hp.b_size + ".pkl")
+        with open(tgt_file, "wb") as f:
+            pkl.dump({"sk": {"preds": self.test_pred_skills, "labels": self.test_label_skills},
+                      "ind": {"preds": self.test_pred_ind, "labels": self.test_label_ind}
+                      }, f)

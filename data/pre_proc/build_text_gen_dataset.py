@@ -1,13 +1,8 @@
 import argparse
 import os
-import json
 import pickle as pkl
-from tqdm import tqdm
-import itertools
 import yaml
 import ipdb
-from allennlp.modules.elmo import Elmo
-import fastText
 from data.datasets import TextGenerationDataset
 from utils.pre_processing import get_ind_class_dict
 
@@ -37,7 +32,8 @@ def main(args):
         for split in ["_TEST", "_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
             TextGenerationDataset(CFG["gpudatadir"], input_file, index,
-                                skills_classes, ind_classes, split, args.ft_type, args.max_seq_length, load)
+                                  skills_classes, ind_classes, split, args.ft_type, args.max_seq_length, load)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
