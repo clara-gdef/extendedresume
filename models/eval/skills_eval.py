@@ -20,10 +20,14 @@ def main(args):
         with open(tgt_file, "rb") as f:
             res_dict = pkl.load(f)
 
-        sk_preds = res_dict["sk"]["preds"]
-        sk_labels = res_dict["sk"]["labels"]
+        sk_preds = torch.stack(res_dict["sk"]["preds"])
+        sk_labels = torch.stack(res_dict["sk"]["labels"])
         res = {}
-        for threshold in tqdm(np.linspace(0, .1, 10), desc="evaluating skills..."):
+        lower_bound = torch.min(sk_preds) / 3
+        higher_bound = torch.max(sk_preds) + (torch.max(sk_preds) / 3)
+        print("Lower bound : " + str(lower_bound))
+        print("Higher bound : " + str(higher_bound))
+        for threshold in tqdm(np.linspace(lower_bound, higher_bound, 10), desc="evaluating skills..."):
             new_preds = get_preds_wrt_threshold(sk_preds, threshold)
             res[threshold] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), torch.stack(sk_labels).squeeze(1).cpu().numpy(), 523, "skills")
         ipdb.set_trace()
