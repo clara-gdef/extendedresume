@@ -26,6 +26,7 @@ def main(args):
 
         ind_classes = get_ind_class_dict(args.build_ind_dict, CFG)
         print("Industries loaded.")
+        ipdb.set_trace()
 
         load = (args.load_dataset == "True")
 
