@@ -22,7 +22,6 @@ def main(args):
 
         sk_preds = res_dict["sk"]["preds"]
         sk_labels = res_dict["sk"]["labels"]
-        ipdb.set_trace()
         res = {}
         for threshold in tqdm(np.linspace(0, .1, 10), desc="evaluating skills..."):
             new_preds = get_preds_wrt_threshold(sk_preds, threshold)
