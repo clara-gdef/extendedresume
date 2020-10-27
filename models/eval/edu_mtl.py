@@ -96,7 +96,7 @@ if __name__ == "__main__":
     parser.add_argument("--load_from_checkpoint", default=False)
     parser.add_argument("--checkpoint", type=int, default=45)
     parser.add_argument("--DEBUG", type=bool, default=False)
-    parser.add_argument("--model_type", type=str, default="edu")
+    parser.add_argument("--model_type", type=str, default="edu_mtl")
     parser.add_argument("--lr", type=float, default=1e-1)
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--epochs", type=int, default=50)

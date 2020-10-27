@@ -94,7 +94,9 @@ class EvalModels(pl.LightningModule):
         ind_preds = torch.stack(self.test_pred_ind)
         ind_labels = torch.stack(self.test_label_ind)
         res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
+        print("Saving model outputs...")
         self.save_outputs()
+        print("Model outputs saved!")
         return {**res_ind, **res_skills}
 
     def save_outputs(self):

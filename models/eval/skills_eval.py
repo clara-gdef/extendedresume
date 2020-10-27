@@ -3,6 +3,8 @@ import os
 import pickle as pkl
 import ipdb
 import yaml
+import numpy as np
+from utils.model import get_preds_wrt_threshold, get_metrics
 
 
 def main(args):
@@ -17,7 +19,11 @@ def main(args):
     sk_preds = res_dict["sk"]["preds"]
     sk_labels = res_dict["sk"]["labels"]
     ipdb.set_trace()
-
+    res = {}
+    for threshold in np.linspace(0, 1, 10):
+        new_preds = get_preds_wrt_threshold(sk_preds, round(threshold, 1))
+        res[round(threshold, 1)] = get_metrics(new_preds.squeeze(1).cpu().numpy(), sk_labels.squeeze(1).cpu().numpy(), 523, "skills")
+    ipdb.set_trace()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-import re
 import numpy as np
 import torch
+from tqdm import tqdm
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 
 def collate_for_flat_profiles(batch):
@@ -30,7 +30,8 @@ def get_model_params(args, dataset):
 
 def test_for_skills(pred, labels, num_class):
     res = {}
-    for threshold in np.linspace(0, 1, 10):
+    for threshold in tqdm(np.linspace(0, 1, 10)):
+        print('Testing skills for threshold ' + str(round(threshold, 1)) + ' ...')
         new_preds = get_preds_wrt_threshold(pred, round(threshold, 1))
         res[round(threshold, 1)] = get_metrics(new_preds.squeeze(1).cpu().numpy(), labels.squeeze(1).cpu().numpy(), num_class, "skills")
         # res[round(threshold, 1) + "_@10"] = get_metrics(new_preds.cpu().numpy(), labels.cpu().numpy(), num_class, "skills")
@@ -38,10 +39,12 @@ def test_for_skills(pred, labels, num_class):
 
 
 def test_for_ind(pred, labels, num_class):
+    print("Testing for industries")
     predicted_classes = torch.argsort(pred, dim=-1, descending=True)
     res = {}
     res["ind"] = get_metrics(predicted_classes.squeeze(1).cpu().numpy()[:, 0], labels.squeeze(1).cpu().numpy(), num_class, "ind")
     res["ind_@10"] = get_metrics_at_k(predicted_classes.squeeze(1).cpu().numpy()[:, :10], labels.squeeze(1).cpu().numpy(), num_class, "ind")
+    print("Industries tested.")
     return res
 
 
