@@ -15,7 +15,8 @@ def main(args):
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     with ipdb.launch_ipdb_on_exception():
         tgt_file = os.path.join(CFG["gpudatadir"],
-                                "outputs_eval_models_" + args.model_type + "_" + str(args.lr) + "_" + str(args.b_size) + ".pkl")
+                                "outputs_eval_models_" + args.model_type + "_" + args.ft_type + "_" + str(
+                                    args.b_size) + "_" + str(args.lr) + ".pkl")
         with open(tgt_file, "rb") as f:
             res_dict = pkl.load(f)
 
