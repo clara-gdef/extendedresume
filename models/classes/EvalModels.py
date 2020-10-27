@@ -110,3 +110,4 @@ class EvalModels(pl.LightningModule):
                                     hp.b_size) + "_" + str(hp.lr) + ".pkl")
         with open(tgt_file, "wb") as f:
             pkl.dump(outputs, f)
+        print("Outputs saved at: " + tgt_file)
