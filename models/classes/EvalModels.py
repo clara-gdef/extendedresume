@@ -101,8 +101,8 @@ class EvalModels(pl.LightningModule):
 
     def save_outputs(self):
         hp = self.hparams
-        tgt_file = os.path.join(hp.datadir,
-                                "outputs_eval_models_" + hp.model_type + "_" + hp.lr + "_" + hp.b_size + ".pkl")
+        tgt_file = os.path.join(self.datadir,
+                                "outputs_eval_models_" + hp.model_type + "_" + str(hp.lr) + "_" + str(hp.b_size) + ".pkl")
         with open(tgt_file, "wb") as f:
             pkl.dump({"sk": {"preds": self.test_pred_skills, "labels": self.test_label_skills},
                       "ind": {"preds": self.test_pred_ind, "labels": self.test_label_ind}
