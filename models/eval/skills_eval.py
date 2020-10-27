@@ -2,7 +2,9 @@ import argparse
 import os
 import pickle as pkl
 import ipdb
+import torch
 import yaml
+from tqdm import tqdm
 import numpy as np
 from utils.model import get_preds_wrt_threshold, get_metrics
 
@@ -21,9 +23,9 @@ def main(args):
         sk_labels = res_dict["sk"]["labels"]
         ipdb.set_trace()
         res = {}
-        for threshold in np.linspace(0, 1, 10):
+        for threshold in tqdm(np.linspace(0, 1, 10), desc="evaluating skills..."):
             new_preds = get_preds_wrt_threshold(sk_preds, round(threshold, 1))
-            res[round(threshold, 1)] = get_metrics(new_preds.squeeze(1).cpu().numpy(), sk_labels.squeeze(1).cpu().numpy(), 523, "skills")
+            res[round(threshold, 1)] = get_metrics(new_preds.squeeze(1).cpu().numpy(), torch.stack(sk_labels).squeeze(1).cpu().numpy(), 523, "skills")
         ipdb.set_trace()
 
 
