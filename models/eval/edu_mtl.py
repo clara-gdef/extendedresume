@@ -18,7 +18,7 @@ def init(hparams):
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     if hparams.DEBUG:
         with ipdb.launch_ipdb_on_exception():
-            return train(hparams)
+            return main(hparams)
     else:
         return main(hparams)
 
