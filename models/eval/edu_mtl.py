@@ -3,6 +3,7 @@ import os
 import ipdb
 import argparse
 import pytorch_lightning as pl
+import torch
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
@@ -47,6 +48,14 @@ def main(hparams):
                  "hparams": hparams}
     model = EvalModels(**arguments)
     print("Model Loaded.")
+    model_name = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
+    model_path = os.path.join(CFG['modeldir'], model_name)
+    model_files = glob.glob(os.path.join(model_path, "*"))
+    latest_file = max(model_files, key=os.path.getctime)
+    print("Evaluating model " + latest_file)
+    model.load_state_dict(torch.load(latest_file)["state_dict"])
+    print("Model Loaded.")
+    print()
     trainer.test(model.cuda(), test_loader)
 
 
