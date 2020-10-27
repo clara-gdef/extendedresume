@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from tqdm import tqdm
-from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, hamming_loss
 
 def collate_for_flat_profiles(batch):
     ids = [i[0] for i in batch]
@@ -60,6 +60,17 @@ def get_metrics(preds, labels, num_classes, handle):
     num_c = range(num_classes)
     res_dict = {
         "acc_" + handle: accuracy_score(labels, preds) * 100,
+        "precision_" + handle: precision_score(labels, preds, average='weighted',
+                                               labels=num_c, zero_division=0) * 100,
+        "recall_" + handle: recall_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100,
+        "f1_" + handle: f1_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100}
+    return res_dict
+
+
+def get_metrics_for_skills(preds, labels, num_classes, handle):
+    num_c = range(num_classes)
+    res_dict = {
+        "hamming_" + handle: hamming_loss(labels, preds) * 100,
         "precision_" + handle: precision_score(labels, preds, average='weighted',
                                                labels=num_c, zero_division=0) * 100,
         "recall_" + handle: recall_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100,
