@@ -23,13 +23,17 @@ def main(args):
         sk_preds = torch.stack(res_dict["sk"]["preds"])
         sk_labels = torch.stack(res_dict["sk"]["labels"])
         res = {}
-        lower_bound = torch.min(sk_preds) / 3
-        higher_bound = torch.max(sk_preds) + (torch.max(sk_preds) / 3)
-        print("Lower bound : " + str(lower_bound))
-        print("Higher bound : " + str(higher_bound))
-        for threshold in tqdm(np.linspace(lower_bound, higher_bound, 10), desc="evaluating skills..."):
-            new_preds = get_preds_wrt_threshold(sk_preds, threshold)
-            res[threshold] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), torch.stack(sk_labels).squeeze(1).cpu().numpy(), 523, "skills")
+        # lower_bound = torch.min(sk_preds).item() / 3
+        # higher_bound = torch.max(sk_preds).item() + (torch.max(sk_preds).item() / 3)
+        # print("Lower bound : " + str(lower_bound))
+        # print("Higher bound : " + str(higher_bound))
+        # for threshold in tqdm(np.linspace(lower_bound, higher_bound, 10), desc="evaluating skills..."):
+        #     new_preds = get_preds_wrt_threshold(sk_preds, threshold)
+        #     res[threshold] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), sk_labels.squeeze(1).cpu().numpy(), 523, "skills")
+        th = 0.000227824674059067
+        new_preds = get_preds_wrt_threshold(sk_preds, th)
+        res[th] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), sk_labels.squeeze(1).cpu().numpy(), 523, "skills")
+        print(res)
         ipdb.set_trace()
 
 
