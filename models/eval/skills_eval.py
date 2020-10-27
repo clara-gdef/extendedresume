@@ -33,10 +33,10 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ft_type", type=str, default='fs')
-    parser.add_argument("--b_size", type=int, default=16)
+    parser.add_argument("--b_size", type=int, default=64)
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--DEBUG", type=bool, default=False)
-    parser.add_argument("--model_type", type=str, default="edu")
+    parser.add_argument("--model_type", type=str, default="edu_mtl")
     parser.add_argument("--lr", type=float, default=1e-1)
     parser.add_argument("--wd", type=float, default=0.0)
     hparams = parser.parse_args()
