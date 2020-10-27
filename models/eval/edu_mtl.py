@@ -43,6 +43,7 @@ def main(hparams):
                  'hidden_size': hidden_size,
                  "num_classes_skills": num_class_sk,
                  "num_classes_ind": num_class_ind,
+                 "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
     model = EvalModels(**arguments)
     print("Model Loaded.")

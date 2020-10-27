@@ -11,9 +11,10 @@ from models.classes.IndustryClassifier import IndustryClassifier
 
 
 class EvalModels(pl.LightningModule):
-    def __init__(self, input_size, hidden_size, num_classes_skills, num_classes_ind, hparams):
+    def __init__(self, input_size, hidden_size, num_classes_skills, num_classes_ind, datadir, hparams):
         super(EvalModels, self).__init__()
         self.hparams = hparams
+        self.datadir = datadir
         self.num_classes_skills = num_classes_skills
         self.num_classes_ind = num_classes_ind
 
