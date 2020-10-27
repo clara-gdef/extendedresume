@@ -106,7 +106,7 @@ class EvalModels(pl.LightningModule):
                    }
         hp = self.hparams
         tgt_file = os.path.join(self.datadir,
-                                "outputs_eval_models_" + hp.model_type + "_" + self.ft_type + "_" + str(
+                                "outputs_eval_models_" + hp.model_type + "_" + hp.ft_type + "_" + str(
                                     hp.b_size) + "_" + str(hp.lr) + ".pkl")
         with open(tgt_file, "wb") as f:
             pkl.dump(outputs, f)
