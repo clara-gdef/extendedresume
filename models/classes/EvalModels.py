@@ -90,20 +90,23 @@ class EvalModels(pl.LightningModule):
     def test_epoch_end(self, outputs):
         skills_preds = torch.stack(self.test_pred_skills)
         skills_labels = torch.stack(self.test_label_skills)
-        res_skills = test_for_skills(skills_preds, skills_labels, self.num_classes_skills)
+        # res_skills = test_for_skills(skills_preds, skills_labels, self.num_classes_skills)
         ind_preds = torch.stack(self.test_pred_ind)
         ind_labels = torch.stack(self.test_label_ind)
         res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
         print("Saving model outputs...")
         self.save_outputs()
         print("Model outputs saved!")
-        return {**res_ind, **res_skills}
+        #return {**res_ind, **res_skills}
+        return res_ind
 
     def save_outputs(self):
+        outputs = {"sk": {"preds": self.test_pred_skills, "labels": self.test_label_skills},
+                   "ind": {"preds": self.test_pred_ind, "labels": self.test_label_ind}
+                   }
         hp = self.hparams
         tgt_file = os.path.join(self.datadir,
-                                "outputs_eval_models_" + hp.model_type + "_" + str(hp.lr) + "_" + str(hp.b_size) + ".pkl")
+                                "outputs_eval_models_" + hp.model_type + "_" + str(hp.lr) + "_" + str(
+                                    hp.b_size) + ".pkl")
         with open(tgt_file, "wb") as f:
-            pkl.dump({"sk": {"preds": self.test_pred_skills, "labels": self.test_label_skills},
-                      "ind": {"preds": self.test_pred_ind, "labels": self.test_label_ind}
-                      }, f)
+            pkl.dump(outputs, f)

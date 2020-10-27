@@ -14,7 +14,7 @@ def main(args):
     with ipdb.launch_ipdb_on_exception():
         tgt_file = os.path.join(CFG["gpudatadir"],
                                 "outputs_eval_models_" + args.model_type + "_" + str(args.lr) + "_" + str(args.b_size) + ".pkl")
-        with open(tgt_file, "wb") as f:
+        with open(tgt_file, "rb") as f:
             res_dict = pkl.load(f)
 
         sk_preds = res_dict["sk"]["preds"]
