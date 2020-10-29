@@ -58,7 +58,7 @@ def word_seq_into_list(position, description, index):
     new_tup = []
     if index is not None:
         new_tup.append("SOD")
-        whole_job = position.lower() + "SOI" + ' ' + description.lower()
+        whole_job = position.lower() + " SOI" + ' ' + description.lower()
     else:
         whole_job = position.lower() + ' ' + description.lower()
     job = word_tokenize(whole_job)
