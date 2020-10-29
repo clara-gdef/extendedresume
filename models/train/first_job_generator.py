@@ -73,8 +73,6 @@ def load_datasets(hparams, splits):
     common_hparams = {
         "input_file": None,
         "index": None,
-        "skills_classes": None,
-        "ind_classes": None,
         "max_seq_length": None,
         "datadir": CFG["gpudatadir"],
         "ft_type": hparams.ft_type,
