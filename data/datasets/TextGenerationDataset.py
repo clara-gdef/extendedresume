@@ -32,7 +32,7 @@ class TextGenerationDataset(Dataset):
     def __getitem__(self, idx):
         return self.tuples[idx]["id"],  \
                self.tuples[idx]["edu"], \
-               self.tuples[idx]["first_job"]
+               self.tuples[idx]["first_jobs"]
 
     def save_dataset(self, split, ft_type):
         dico = {"datadir": self.datadir,
