@@ -34,7 +34,7 @@ def main(hparams):
                          logger=logger,
                          auto_lr_find=False
                          )
-    datasets = load_datasets(hparams, ["TRAIN", "VALID"])
+    datasets = load_datasets(hparams, ["_TRAIN", "_VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
