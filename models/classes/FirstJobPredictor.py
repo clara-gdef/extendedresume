@@ -15,8 +15,8 @@ class FirstJobPredictor(pl.LightningModule):
         self.embedding_layer.load_state_dict({'weight': embeddings[:, :100]})
 
         if self.hp.ft_type != "elmo":
-            self.enc = EncoderBiLSTM(embeddings, self.hp)
-            self.dec = DecoderLSTM(embeddings, self.hp.hidden_size)
+            self.enc = EncoderBiLSTM(embeddings[:, :100], self.hp)
+            self.dec = DecoderLSTM(embeddings[:, :100], self.hp.hidden_size)
         else:
             self.enc = EncoderBiLSTM(self.hp)
             self.dec = DecoderLSTM(self.hp)
