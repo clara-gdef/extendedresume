@@ -50,8 +50,7 @@ def word_list_to_indices(word_list, index, max_seq_length):
         else:
             indices.append(index["EOI"])
             break
-    ipdb.set_trace()
-    while len(indices) < max_seq_length - 1:
+    while len(indices) < max_seq_length:
         indices.append(0)
     return indices
 
