@@ -26,7 +26,7 @@ def collate_for_text_gen(batch):
     len_edu = [i[2] for i in batch]
     fj = [torch.LongTensor(i[3]) for i in batch]
     len_fj = [i[4] for i in batch]
-    return ids, torch.stack(edu), len_edu, torch.stack(fj), len_fj
+    return ids, edu, len_edu, torch.stack(fj), len_fj
 
 
 def collate_for_text_gen_elmo(batch):
