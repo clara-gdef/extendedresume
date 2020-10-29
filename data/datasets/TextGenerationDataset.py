@@ -52,6 +52,7 @@ class TextGenerationDataset(Dataset):
         np.random.shuffle(dico["tuples"])
         # self.tuples = dico["tuples"][:1000]
         self.tuples = dico["tuples"]
+        self.index = dico["index"]
         ###########
         print("Data length: " + str(len(self.tuples)))
 
