@@ -38,9 +38,9 @@ def main(hparams):
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
     train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate_for_edu,
-                              num_workers=8, shuffle=True)
+                              num_workers=0, shuffle=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate_for_edu,
-                              num_workers=8)
+                              num_workers=0)
     print("Dataloaders initiated.")
     arguments = {'input_size': in_size,
                  'hidden_size': hidden_size,

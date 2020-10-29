@@ -11,7 +11,7 @@ from utils.pre_processing import word_seq_into_list, word_list_to_indices
 
 
 class TextGenerationDataset(Dataset):
-    def __init__(self, datadir, input_file, index, skills_classes, ind_classes, split, ft_type, max_seq_length, load):
+    def __init__(self, datadir, input_file, index, split, ft_type, max_seq_length, load):
         if load:
             self.datadir = datadir
             self.load_dataset(split, ft_type)
@@ -19,10 +19,6 @@ class TextGenerationDataset(Dataset):
             self.max_seq_length = max_seq_length
             self.index = index
             self.ft_type = ft_type
-            self.skills_classes = skills_classes
-            self.rev_sk_classes = {v: k for k, v in skills_classes.items()}
-            self.ind_classes = ind_classes
-            self.rev_ind_classes = {v: k for k, v in ind_classes.items()}
 
             self.datadir = datadir
 
@@ -40,11 +36,7 @@ class TextGenerationDataset(Dataset):
                self.tuples[idx]["ind"]
 
     def save_dataset(self, split, ft_type):
-        dico = {"skills_classes": self.skills_classes,
-                "rev_sk_classes": self.rev_sk_classes,
-                "ind_classes": self.ind_classes,
-                "rev_ind_classes": self.rev_ind_classes,
-                "datadir": self.datadir,
+        dico = {"datadir": self.datadir,
                 'max_seq_length': self.max_seq_length,
                 "index": self.index,
                 "ft_type": ft_type,
@@ -55,11 +47,7 @@ class TextGenerationDataset(Dataset):
     def load_dataset(self, split, ft_type):
         with open(os.path.join(self.datadir, "text_gen_dataset_" + ft_type + "_" + split + ".pkl"), 'rb') as f:
             dico = pkl.load(f)
-        self.skills_classes = dico["skills_classes"]
-        self.rev_sk_classes = dico["rev_sk_classes"]
-        self.ind_classes = dico["ind_classes"]
         self.ft_type = dico["ft_type"]
-        self.rev_ind_classes = dico["rev_ind_classes"]
         self.datadir = dico["datadir"]
         ##################
         np.random.shuffle(dico["tuples"])
@@ -72,11 +60,12 @@ class TextGenerationDataset(Dataset):
         with open(json_file, 'r') as f:
             num_lines = sum(1 for line in f)
         with open(json_file, 'r') as f:
-            pbar = tqdm(f, total=num_lines, desc="Building text_gen dataset for split " + split + " & "+ self.ft_type +" ...")
+            pbar = tqdm(f, total=num_lines, desc="Building text_gen dataset for split " + split + " & " + self.ft_type + " ...")
             for line in f:
                 data = json.loads(line)
                 edu_list = sorted(data[-2], key=lambda k: k["to"], reverse=True)
                 for edu in edu_list:
+                    ipdb.set_trace()
                     tokenized_sentence = word_seq_into_list(edu["degree"], edu["institution"], index)
                     if ft_type != "elmo":
                         edu_transformed = word_list_to_indices(tokenized_sentence, index, max_seq_length)
@@ -84,9 +73,8 @@ class TextGenerationDataset(Dataset):
                         edu_transformed = tokenized_sentence
                     self.tuples.append({
                         "id": data[0],
-                        "skills": self.handle_skills(data[2]),
                         "edu": edu_transformed,
-                        "ind": self.rev_ind_classes[data[4]]
+                        "first_jobs": data[1][-1]
                     })
                     # ipdb.set_trace()
                 pbar.update(1)

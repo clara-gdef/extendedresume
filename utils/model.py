@@ -20,6 +20,14 @@ def collate_for_edu(batch):
     return ids, torch.stack(edu), skills, ind
 
 
+def collate_for_text_gen(batch):
+    ids = [i[0] for i in batch]
+    edu = [i[1] for i in batch]
+    skills = [i[2] for i in batch]
+    ind = [i[3] for i in batch]
+    return ids, torch.stack(edu), skills, ind
+
+
 def get_model_params(args, dataset):
     if args.ft_type == "elmo":
         dim = 1024

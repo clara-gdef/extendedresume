@@ -18,22 +18,13 @@ def main(args):
             index = pkl.load(f)
         print("index loaded.")
 
-        with open(os.path.join(CFG["gpudatadir"], "good_skills.p"), 'rb') as f:
-            skills = pkl.load(f)
-
-        skills_classes = {k: v for k, v in enumerate(sorted(skills))}
-        print("Skills loaded.")
-
-        ind_classes = get_ind_class_dict(args.build_ind_dict, CFG)
-        print("Industries loaded.")
         ipdb.set_trace()
 
         load = (args.load_dataset == "True")
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
-            TextGenerationDataset(CFG["gpudatadir"], input_file, index,
-                                  skills_classes, ind_classes, split, args.ft_type, args.max_seq_length, load)
+            TextGenerationDataset(CFG["gpudatadir"], input_file, index, split, args.ft_type, args.max_seq_length, load)
 
 
 if __name__ == "__main__":
