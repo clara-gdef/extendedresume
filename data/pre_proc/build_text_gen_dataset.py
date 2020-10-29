@@ -18,8 +18,6 @@ def main(args):
             index = pkl.load(f)
         print("index loaded.")
 
-        ipdb.set_trace()
-
         load = (args.load_dataset == "True")
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
