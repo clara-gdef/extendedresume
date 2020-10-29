@@ -132,6 +132,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_type", type=str, default="fj_gen")
     parser.add_argument("--lr", type=float, default=1e-1)
     parser.add_argument("--wd", type=float, default=0.0)
+    parser.add_argument("--dpo", type=float, default=0.2)
     parser.add_argument("--epochs", type=int, default=50)
     hparams = parser.parse_args()
     init(hparams)
