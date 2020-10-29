@@ -112,7 +112,7 @@ def init_lightning(hparams, xp_title):
     return logger, checkpoint_callback, early_stop_callback
 
 
-def get_model_params(args, dataset):
+def get_model_params(args):
     if args.ft_type == "elmo":
         dim = 1024
     else:
