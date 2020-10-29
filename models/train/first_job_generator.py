@@ -34,10 +34,8 @@ def main(hparams):
                          logger=logger,
                          auto_lr_find=False
                          )
-    datasets = load_datasets(hparams, ["_TRAIN", "_VALID"])
+    datasets = load_datasets(hparams, ["_VALID", "_VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
-
-    in_size, hidden_size = get_model_params(hparams)
 
     if hparams.ft_type !='elmo':
         collate = collate_for_text_gen
@@ -109,13 +107,6 @@ def init_lightning(hparams, xp_title):
 
     return logger, checkpoint_callback, early_stop_callback
 
-
-def get_model_params(args):
-    if args.ft_type == "elmo":
-        dim = 1024
-    else:
-        dim = 300
-    return dim, args.hidden_size
 
 
 if __name__ == "__main__":
