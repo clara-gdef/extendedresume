@@ -80,18 +80,19 @@ class TextGenerationDataset(Dataset):
                         edu_lengths.append(len(edu_transformed))
                 job_list = sorted(data[1], key=lambda k: k["from_ts"], reverse=True)
                 tokenized_first_job = word_seq_into_list(job_list[-1]["position"], job_list[-1]["description"], index)
-                if ft_type != "elmo":
-                    first_job, job_len = word_list_to_indices(tokenized_first_job, index, max_seq_length)
-                else:
-                    first_job = tokenized_first_job
-                    job_len = len(first_job)
-                self.tuples.append({
-                    "id": data[0],
-                    "edu": new_edu,
-                    "edu_lengths": edu_lengths,
-                    "first_job": first_job,
-                    "job_len": job_len
-                })
+                if len(new_edu) > 0:
+                    if ft_type != "elmo":
+                        first_job, job_len = word_list_to_indices(tokenized_first_job, index, max_seq_length)
+                    else:
+                        first_job = tokenized_first_job
+                        job_len = len(first_job)
+                    self.tuples.append({
+                        "id": data[0],
+                        "edu": new_edu,
+                        "edu_lengths": edu_lengths,
+                        "first_job": first_job,
+                        "job_len": job_len
+                    })
                 pbar.update(1)
 
     def handle_skills(self, skill_list):
