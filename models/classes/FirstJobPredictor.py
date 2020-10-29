@@ -23,21 +23,26 @@ class FirstJobPredictor(pl.LightningModule):
 
     def forward(self, job_id, len_seq):
         rep, att, hidden_state = self.enc.forward(job_id, len_seq, enforce_sorted=True)
-        ipdb.set_trace()
         return rep, att, hidden_state
 
     def training_step(self, mini_batch, batch_nb):
-        ipdb.set_trace()
+        id, edu, edu_len, fj, fj_len = mini_batch
+        enc_rep, attn, hidden = self.forward(edu, edu_len)
+        res, hidden_dec = self.dec.forward(enc_rep, hidden, fj)
+        loss = torch.nn.functional.cross_entropy(res.transpose(2, 1), fj)
+        tensorboard_logs = {'loss': loss}
+        return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
         id, edu, edu_len, fj, fj_len = mini_batch
-        results, attn, hidden = self.forward(edu, edu_len)
-        # token =
-        for step in range(len(fj_len)):
-            ipdb.set_trace()
+        enc_rep, attn, hidden = self.forward(edu, edu_len)
+        res, hidden_dec = self.dec.forward(enc_rep, hidden, fj)
+        loss = torch.nn.functional.cross_entropy(res.transpose(2, 1), fj)
+        tensorboard_logs = {'loss': loss}
+        return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_end(self, outputs):
-        ipdb.set_trace()
+        return outputs[-1]
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hp.lr, weight_decay=self.hp.wd)
