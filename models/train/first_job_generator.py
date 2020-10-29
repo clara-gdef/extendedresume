@@ -34,7 +34,7 @@ def main(hparams):
                          logger=logger,
                          auto_lr_find=False
                          )
-    datasets = load_datasets(hparams, ["_VALID", "_VALID"])
+    datasets = load_datasets(hparams, ["_TRAIN", "_VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     if hparams.ft_type !='elmo':
@@ -52,6 +52,7 @@ def main(hparams):
                               num_workers=0)
     print("Dataloaders initiated.")
     arguments = {"embeddings": embeddings,
+                 "index": dataset_train.index,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
 
