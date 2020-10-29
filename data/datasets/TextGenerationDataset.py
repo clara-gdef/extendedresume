@@ -32,8 +32,7 @@ class TextGenerationDataset(Dataset):
     def __getitem__(self, idx):
         return self.tuples[idx]["id"],  \
                self.tuples[idx]["edu"], \
-               self.tuples[idx]["skills"], \
-               self.tuples[idx]["ind"]
+               self.tuples[idx]["first_job"]
 
     def save_dataset(self, split, ft_type):
         dico = {"datadir": self.datadir,
@@ -64,19 +63,22 @@ class TextGenerationDataset(Dataset):
             for line in f:
                 data = json.loads(line)
                 edu_list = sorted(data[-2], key=lambda k: k["to"], reverse=True)
+                job_list = sorted(data[1], key=lambda k: k["from_ts"], reverse=True)
                 for edu in edu_list:
                     ipdb.set_trace()
-                    tokenized_sentence = word_seq_into_list(edu["degree"], edu["institution"], index)
+                    tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], index)
+                    tokenized_first_job = word_seq_into_list(job_list[-1]["degree"], job_list[-1]["institution"], index)
                     if ft_type != "elmo":
-                        edu_transformed = word_list_to_indices(tokenized_sentence, index, max_seq_length)
+                        edu_transformed = word_list_to_indices(tokenized_edu, index, max_seq_length)
+                        first_jobs = word_list_to_indices(tokenized_first_job, index, max_seq_length)
                     else:
-                        edu_transformed = tokenized_sentence
+                        edu_transformed = tokenized_edu
+                        first_jobs = tokenized_first_job
                     self.tuples.append({
                         "id": data[0],
                         "edu": edu_transformed,
-                        "first_jobs": data[1][-1]
+                        "first_jobs":first_jobs
                     })
-                    # ipdb.set_trace()
                 pbar.update(1)
 
     def handle_skills(self, skill_list):
