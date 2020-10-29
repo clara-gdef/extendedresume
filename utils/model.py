@@ -23,9 +23,9 @@ def collate_for_edu(batch):
 def collate_for_text_gen(batch):
     ids = [i[0] for i in batch]
     edu = [torch.LongTensor(i[1]) for i in batch]
-    len_edu = [len(i[1]) for i in batch]
-    fj = [torch.LongTensor(i[2]) for i in batch]
-    len_fj = [len(i[2]) for i in batch]
+    len_edu = [i[2] for i in batch]
+    fj = [torch.LongTensor(i[3]) for i in batch]
+    len_fj = [i[4] for i in batch]
     return ids, torch.stack(edu), len_edu, torch.stack(fj), len_fj
 
 
