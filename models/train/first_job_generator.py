@@ -1,5 +1,6 @@
 import glob
 import os
+import pickle as pkl
 import ipdb
 import argparse
 import pytorch_lightning as pl
@@ -8,8 +9,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 import yaml
 from data.datasets import TextGenerationDataset
-from models.classes.EvalModels import EvalModels
-from utils.model import collate_for_edu, get_model_params
+from models.classes.FirstJobPredictor import FirstJobPredictor
+from utils.model import collate_for_text_gen, collate_for_text_gen_elmo, get_model_params
 
 
 def init(hparams):
@@ -37,12 +38,23 @@ def main(hparams):
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
-    train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate_for_edu,
+
+    if hparams.ft_type !='elmo':
+        collate = collate_for_text_gen
+    else:
+        collate = collate_for_text_gen_elmo()
+    print("Loading word vectors...")
+    with open(os.path.join(CFG["gpudatadir"], "tensor_40k_" + hparams.ft_type + ".pkl"), "rb") as f:
+        embeddings = pkl.load(f)
+    print("Word vectors loaded")
+
+    train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0, shuffle=True)
-    valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate_for_edu,
+    valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0)
     print("Dataloaders initiated.")
     arguments = {'input_size': in_size,
+                 "embeddings": embeddings,
                  'hidden_size': hidden_size,
                  "num_classes_skills": num_class_sk,
                  "num_classes_ind": num_class_ind,
@@ -50,7 +62,7 @@ def main(hparams):
                  "hparams": hparams}
 
     # print("Initiating model with params (" + str(in_size) + ", " + str(out_size) + ")")
-    model = EvalModels(**arguments)
+    model = FirstJobPredictor(**arguments)
     print("Model Loaded.")
     print("Starting training for model " + xp_title)
     trainer.fit(model.cuda(), train_loader, valid_loader)
@@ -109,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument("--ft_type", type=str, default='fs')
     parser.add_argument("--gpus", type=int, default=1)
     parser.add_argument("--b_size", type=int, default=16)
-    parser.add_argument("--hidden_size", type=int, default=300)
+    parser.add_argument("--hidden_size", type=int, default=100)
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
     parser.add_argument("--load_from_checkpoint", default=False)
