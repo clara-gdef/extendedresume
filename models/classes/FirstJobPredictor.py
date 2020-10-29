@@ -36,6 +36,7 @@ class FirstJobPredictor(pl.LightningModule):
     def validation_step(self, mini_batch, batch_nb):
         id, edu, edu_len, fj, fj_len = mini_batch
         enc_rep, attn, hidden = self.forward(edu, edu_len)
+        enc_rep.unsqueeze(1).expand(b_size, max(edu_len), enc_rep.shape[-1])
         res, hidden_dec = self.dec.forward(enc_rep, hidden, fj)
         loss = torch.nn.functional.cross_entropy(res.transpose(2, 1), fj)
         tensorboard_logs = {'loss': loss}

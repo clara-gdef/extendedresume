@@ -32,7 +32,9 @@ class TextGenerationDataset(Dataset):
     def __getitem__(self, idx):
         return self.tuples[idx]["id"],  \
                self.tuples[idx]["edu"], \
-               self.tuples[idx]["first_jobs"]
+               self.tuples[idx]["edu_lengths"], \
+               self.tuples[idx]["first_job"], \
+               self.tuples[idx]["job_len"]
 
     def save_dataset(self, split, ft_type):
         dico = {"datadir": self.datadir,
@@ -40,7 +42,7 @@ class TextGenerationDataset(Dataset):
                 "index": self.index,
                 "ft_type": ft_type,
                 "tuples": self.tuples}
-        with open(os.path.join(self.datadir, "text_gen_dataset_" + ft_type + "_" + split + ".pkl"), 'wb') as f:
+        with open(os.path.join(self.datadir, "text_gen_dataset_" + ft_type + split + ".pkl"), 'wb') as f:
             pkl.dump(dico, f)
 
     def load_dataset(self, split, ft_type):
@@ -64,21 +66,32 @@ class TextGenerationDataset(Dataset):
             for line in f:
                 data = json.loads(line)
                 edu_list = sorted(data[-2], key=lambda k: k["to"], reverse=True)
-                job_list = sorted(data[1], key=lambda k: k["from_ts"], reverse=True)
+                new_edu = []
+                edu_lengths = []
                 for edu in edu_list:
                     tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], index)
-                    tokenized_first_job = word_seq_into_list(job_list[-1]["position"], job_list[-1]["description"], index)
                     if ft_type != "elmo":
-                        edu_transformed = word_list_to_indices(tokenized_edu, index, max_seq_length)
-                        first_jobs = word_list_to_indices(tokenized_first_job, index, max_seq_length)
+                        edu_transformed, edu_len = word_list_to_indices(tokenized_edu, index, max_seq_length)
+                        new_edu.append(edu_transformed)
+                        edu_lengths.append(edu_len)
                     else:
                         edu_transformed = tokenized_edu
-                        first_jobs = tokenized_first_job
-                    self.tuples.append({
-                        "id": data[0],
-                        "edu": edu_transformed,
-                        "first_jobs":first_jobs
-                    })
+                        new_edu.append(edu_transformed)
+                        edu_lengths.append(len(edu_transformed))
+                job_list = sorted(data[1], key=lambda k: k["from_ts"], reverse=True)
+                tokenized_first_job = word_seq_into_list(job_list[-1]["position"], job_list[-1]["description"], index)
+                if ft_type != "elmo":
+                    first_job, job_len = word_list_to_indices(tokenized_first_job, index, max_seq_length)
+                else:
+                    first_job = tokenized_first_job
+                    job_len = len(first_job)
+                self.tuples.append({
+                    "id": data[0],
+                    "edu": new_edu,
+                    "edu_lengths": edu_lengths,
+                    "first_job": first_job,
+                    "job_len": job_len
+                })
                 pbar.update(1)
 
     def handle_skills(self, skill_list):

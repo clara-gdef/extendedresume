@@ -50,9 +50,10 @@ def word_list_to_indices(word_list, index, max_seq_length):
         else:
             indices.append(index["EOI"])
             break
+    actual_len = len(indices)
     while len(indices) < max_seq_length:
         indices.append(0)
-    return indices
+    return indices, actual_len
 
 
 def word_seq_into_list(position, description, index):
