@@ -34,7 +34,8 @@ def main(hparams):
                          logger=logger,
                          auto_lr_find=False
                          )
-    datasets = load_datasets(hparams, ["TRAIN", "VALID"])
+    # TODO : remove valid and replace by train 
+    datasets = load_datasets(hparams, ["VALID", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     if hparams.ft_type !='elmo':
