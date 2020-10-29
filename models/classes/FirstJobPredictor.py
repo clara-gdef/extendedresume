@@ -32,11 +32,9 @@ class FirstJobPredictor(pl.LightningModule):
     def validation_step(self, mini_batch, batch_nb):
         id, edu, edu_len, fj, fj_len = mini_batch
         results, attn, hidden = self.forward(edu, edu_len)
-        token =
+        # token =
         for step in range(len(fj_len)):
-
-
-        ipdb.set_trace()
+            ipdb.set_trace()
 
     def validation_end(self, outputs):
         ipdb.set_trace()
