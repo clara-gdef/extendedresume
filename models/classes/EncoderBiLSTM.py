@@ -5,7 +5,7 @@ import ipdb
 
 
 class EncoderBiLSTM(pl.LightningModule):
-    def __init__(self, embeddings, vector_size, MAX_CAREER_LENGTH, hparams):
+    def __init__(self, embeddings, hparams):
         super().__init__()
 
         self.hparams = hparams
@@ -14,11 +14,10 @@ class EncoderBiLSTM(pl.LightningModule):
         self.hidden_size = self.hparams.hidden_size
         self.embeddings = torch.nn.Embedding(embeddings.size(0), 100, padding_idx=0)
         self.embeddings.load_state_dict({'weight': embeddings[:, :100]})
-        self.MAX_CAREER_LENGTH = MAX_CAREER_LENGTH
 
         self.hidden_size = self.hparams.hidden_size
         # Niveau mot
-        self.bi_lstm = torch.nn.LSTM(vector_size, self.hidden_size, num_layers=1, batch_first=True, bidirectional=True)
+        self.bi_lstm = torch.nn.LSTM(embeddings.shape[-1], self.hidden_size, num_layers=1, batch_first=True, bidirectional=True)
         self.dropout = torch.nn.Dropout(self.hparams.dpo)
         self.lin_lstm_out = torch.nn.Linear(self.hidden_size * 2, self.hidden_size * 2, bias=True)
 

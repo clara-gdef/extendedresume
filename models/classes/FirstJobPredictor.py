@@ -6,16 +6,16 @@ from torch.nn import functional as F
 
 
 class FirstJobPredictor(pl.LightningModule):
-    def __init__(self, embeddings, hidden_size, num_layer, vector_size, output_size, MAX_SEQ_LENGTH, hparams):
+    def __init__(self, embeddings, datadir,  hparams):
         super().__init__()
+        self.datadir = datadir
         self.hp = hparams
-        self.MAX_SEQ_LENGTH = MAX_SEQ_LENGTH
         self.embedding_layer = torch.nn.Embedding(embeddings.size(0), 100, padding_idx=0)
         self.embedding_layer.load_state_dict({'weight': embeddings[:, :100]})
 
         if self.hp.ft_type != "elmo":
-            self.enc = EncoderBiLSTM(self.hp)
-            self.dec = DecoderLSTM(self.hp)
+            self.enc = EncoderBiLSTM(embeddings, self.hp)
+            self.dec = DecoderLSTM(embeddings, self.hp.hidden_size)
         else:
             self.enc = EncoderBiLSTM(self.hp)
             self.dec = DecoderLSTM(self.hp)

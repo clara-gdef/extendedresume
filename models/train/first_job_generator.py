@@ -53,9 +53,7 @@ def main(hparams):
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0)
     print("Dataloaders initiated.")
-    arguments = {'input_size': in_size,
-                 "embeddings": embeddings,
-                 'hidden_size': hidden_size,
+    arguments = {"embeddings": embeddings,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
 
