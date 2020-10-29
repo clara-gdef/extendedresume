@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 import yaml
 from data.datasets import TextGenerationDataset
 from models.classes.FirstJobPredictor import FirstJobPredictor
-from utils.model import collate_for_text_gen, collate_for_text_gen_elmo, get_model_params
+from utils.model import collate_for_text_gen, collate_for_text_gen_elmo
 
 
 def init(hparams):
@@ -37,7 +37,7 @@ def main(hparams):
     datasets = load_datasets(hparams, ["_TRAIN", "_VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
-    in_size, hidden_size, num_class_sk, num_class_ind = get_model_params(hparams, dataset_train)
+    in_size, hidden_size = get_model_params(hparams)
 
     if hparams.ft_type !='elmo':
         collate = collate_for_text_gen
@@ -56,8 +56,6 @@ def main(hparams):
     arguments = {'input_size': in_size,
                  "embeddings": embeddings,
                  'hidden_size': hidden_size,
-                 "num_classes_skills": num_class_sk,
-                 "num_classes_ind": num_class_ind,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
 
@@ -112,6 +110,14 @@ def init_lightning(hparams, xp_title):
     print("early stopping procedure initiated.")
 
     return logger, checkpoint_callback, early_stop_callback
+
+
+def get_model_params(args, dataset):
+    if args.ft_type == "elmo":
+        dim = 1024
+    else:
+        dim = 300
+    return dim, args.hidden_size
 
 
 if __name__ == "__main__":
