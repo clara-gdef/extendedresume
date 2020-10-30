@@ -16,7 +16,8 @@ class DecoderLSTM(pl.LightningModule):
         enc_rep = encoder_representation
 
         emb = self.embedding_layer(token)
-        inputs = torch.cat([enc_rep, emb], dim=2)
+        tmp = enc_rep.expand(enc_rep.shape[0], emb.shape[1], enc_rep.shape[-1])
+        inputs = torch.cat([tmp, emb.type(torch.float64)], dim=2)
         out, hidden = self.lstm(inputs)
         results = self.lin_out(out)
 

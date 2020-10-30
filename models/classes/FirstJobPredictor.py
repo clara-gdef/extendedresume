@@ -20,7 +20,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.decoded_tokens = []
 
     def forward(self, profile, fj):
-        decoder_output, decoder_hidden = self.dec.forward(profile, fj[:, :, :-1])
+        decoder_output, decoder_hidden = self.dec.forward(profile, fj[:, :-1])
         self.decoded_tokens.append(decoder_output.argmax(-1))
         return decoder_output
 
