@@ -29,8 +29,9 @@ def main(hparams):
     logger, checkpoint_callback, early_stop_callback = init_lightning(hparams, xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
                          max_epochs=hparams.epochs,
-                         checkpoint_callback=checkpoint_callback,
-                         early_stop_callback=early_stop_callback,
+                         callbacks=[checkpoint_callback, early_stop_callback],
+                         # checkpoint_callback=checkpoint_callback,
+                         # early_stop_callback=early_stop_callback,
                          logger=logger,
                          auto_lr_find=True
                          )
