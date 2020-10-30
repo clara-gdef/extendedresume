@@ -48,7 +48,7 @@ def main(hparams):
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0)
     print("Dataloaders initiated.")
-    arguments = {"embeddings": get_emb_dim(hparams),
+    arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_train.index,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
