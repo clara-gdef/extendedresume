@@ -30,8 +30,6 @@ def main(hparams):
     trainer = pl.Trainer(gpus=[hparams.gpus],
                          max_epochs=hparams.epochs,
                          callbacks=[checkpoint_callback, early_stop_callback],
-                         # checkpoint_callback=checkpoint_callback,
-                         # early_stop_callback=early_stop_callback,
                          logger=logger,
                          auto_lr_find=True
                          )
