@@ -110,7 +110,6 @@ def init_lightning(hparams, xp_title):
     return logger, checkpoint_callback, early_stop_callback
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ft_type", type=str, default='fs')

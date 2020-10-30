@@ -1,8 +1,7 @@
 import torch
 import ipdb
 import pytorch_lightning as pl
-from models.classes import EncoderBiLSTM, DecoderLSTM, EncoderWithElmo, DecoderWithElmo
-from torch.nn import functional as F
+from models.classes import DecoderLSTM, DecoderWithElmo
 
 
 class FirstJobPredictor(pl.LightningModule):
@@ -15,39 +14,31 @@ class FirstJobPredictor(pl.LightningModule):
         self.embedding_layer.load_state_dict({'weight': embeddings[:, :100]})
 
         if self.hp.ft_type != "elmo":
-            self.enc = EncoderBiLSTM(embeddings[:, :100], self.hp)
             self.dec = DecoderLSTM(embeddings[:, :100], self.hp.hidden_size)
         else:
-            self.enc = EncoderBiLSTM(self.hp)
-            self.dec = DecoderLSTM(self.hp)
+            self.dec = DecoderWithElmo(self.hp)
+        self.decoded_tokens = []
 
-    def forward(self, job_id, len_seq):
-        rep, att, hidden_state = self.enc.forward(job_id, len_seq, enforce_sorted=True)
-        return rep, att, hidden_state
+    def forward(self, profile, fj):
+        decoder_output, decoder_hidden = self.dec.forward(profile, fj[:, :-1])
+        self.decoded_tokens.append(decoder_output.argmax(-1))
+        return decoder_output
 
     def training_step(self, mini_batch, batch_nb):
-        id, edu, edu_len, fj, fj_len = mini_batch
-        enc_rep, attn, hidden = self.forward(edu, edu_len)
-        res, hidden_dec = self.dec.forward(enc_rep, hidden, fj)
-        loss = torch.nn.functional.cross_entropy(res.transpose(2, 1), fj)
+        edu = mini_batch[1]
+        fj = mini_batch[-2]
+        dec_outputs = self.forward(edu, fj)
+        loss = torch.nn.functional.cross_entropy(dec_outputs, fj)
         tensorboard_logs = {'loss': loss}
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
-        loss = 0
-        id, prof, prof_len, fj, fj_len = mini_batch
-
-        for identifier, profile, profile_len, first_job, first_job_length in zip(id, prof, prof_len, fj, fj_len):
-            edu_tensor = torch.zeros(1, sum(profile_len), dtype=torch.int64)
-            counter = 0
-            for i in range(len(profile)):
-                edu_tensor[0, :prof_len[i]] = prof[i].cuda()
-            ipdb.set_trace()
-            enc_rep, attn, hidden = self.forward(edu, edu_len)
-            res, hidden_dec = self.dec.forward(enc_rep, hidden, fj)
-            loss += torch.nn.functional.cross_entropy(res.transpose(2, 1), fj)
-            tensorboard_logs = {'loss': loss}
-        return {'loss': loss, 'log': tensorboard_logs}
+        edu = mini_batch[1]
+        fj = mini_batch[-2]
+        dec_outputs = self.forward(edu, fj)
+        val_loss = torch.nn.functional.cross_entropy(dec_outputs, fj)
+        tensorboard_logs = {'val_loss': val_loss}
+        return {'val_loss': val_loss, 'log': tensorboard_logs}
 
     def validation_end(self, outputs):
         return outputs[-1]
