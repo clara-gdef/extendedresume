@@ -32,10 +32,9 @@ def main(hparams):
                          checkpoint_callback=checkpoint_callback,
                          early_stop_callback=early_stop_callback,
                          logger=logger,
-                         auto_lr_find=False
+                         auto_lr_find=True
                          )
-    # TODO : remove test and replace by train
-    datasets = load_datasets(hparams, ["TEST", "TEST"])
+    datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     if hparams.ft_type != 'elmo':
@@ -53,7 +52,6 @@ def main(hparams):
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
 
-    # print("Initiating model with params (" + str(in_size) + ", " + str(out_size) + ")")
     model = FirstJobPredictor(**arguments)
     print("Model Loaded.")
     print("Starting training for model " + xp_title)

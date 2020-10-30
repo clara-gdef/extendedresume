@@ -1,3 +1,5 @@
+import os
+
 import torch
 import ipdb
 import pytorch_lightning as pl
@@ -16,6 +18,8 @@ class FirstJobPredictor(pl.LightningModule):
         else:
             self.dec = DecoderWithElmo(self.hp)
         self.decoded_tokens = []
+        self.decoded_tokens_test = []
+        self.label_tokens_test = []
 
     def forward(self, profile, fj):
         decoder_output, decoder_hidden = self.dec.forward(profile, fj[:, :-1])
@@ -45,7 +49,31 @@ class FirstJobPredictor(pl.LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hp.lr, weight_decay=self.hp.wd)
 
     def test_step(self, mini_batch, batch_idx):
+        edu = mini_batch[1].unsqueeze(1)
+        fj = mini_batch[-2]
+        token = self.index["SOD"]
+        for i in range(len(fj[0])):
+            tok_tensor = torch.LongTensor(1, 1)
+            tok_tensor[:, 0] = token
+            output, decoder_hidden = self.dec(edu, tok_tensor)
+            dec_word = output.argmax(-1).item()
+            self.decoded_tokens_test.append(dec_word)
+            self.label_tokens_test.append(fj[0][i])
+            token = dec_word
         ipdb.set_trace()
 
     def test_epoch_end(self, outputs):
+        rev_index = {v: k for k, v in self.index.items()}
+
+        pred_file = os.path.join(self.datadir, "pred_ft_" + self.ft_type + ".txt")
+        with open(pred_file, 'a') as f:
+            for w in self.decoded_tokens_test:
+                f.write(rev_index[w] + ' ')
+            f.write("\n")
+
+        lab_file = os.path.join(self.datadir, "label_ft_" + self.ft_type + ".txt")
+        with open(lab_file, 'a') as f:
+            for w in self.label_tokens_test[1:]:
+                f.write(rev_index[w] + ' ')
+            f.write("\n")
         ipdb.set_trace()
