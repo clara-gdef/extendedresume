@@ -52,6 +52,24 @@ def main(hparams):
                  "hparams": hparams}
 
     model = FirstJobPredictor(**arguments)
+
+    # Run learning rate finder
+    lr_finder = trainer.tuner.lr_find(model)
+
+    # Results can be found in
+    print(lr_finder.results)
+
+    # Plot with
+    fig = lr_finder.plot(suggest=True)
+    fig.show()
+
+    # Pick point based on plot, or get suggestion
+    new_lr = lr_finder.suggestion()
+
+    # update hparams of the model
+    model.hparams.lr = new_lr
+    ipdb.set_trace()
+
     print("Model Loaded.")
     print("Starting training for model " + xp_title)
     trainer.fit(model.cuda(), train_loader, valid_loader)
@@ -115,7 +133,7 @@ def get_emb_dim(hparams):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ft_type", type=str, default='fs')
-    parser.add_argument("--gpus", type=int, default=1)
+    parser.add_argument("--gpus", type=int, default=0)
     parser.add_argument("--b_size", type=int, default=16)
     parser.add_argument("--hidden_size", type=int, default=100)
     parser.add_argument("--load_dataset", default="True")
