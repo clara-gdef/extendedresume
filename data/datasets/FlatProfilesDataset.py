@@ -7,8 +7,7 @@ import numpy as np
 import ipdb
 from tqdm import tqdm
 from torch.utils.data import Dataset
-from allennlp.modules.elmo import batch_to_ids
-from utils.pre_processing import word_seq_into_list
+from utils.pre_processing import word_seq_into_list, handle_education_ft, to_elmo_emb
 
 
 class FlatProfilesDataset(Dataset):
@@ -84,8 +83,8 @@ class FlatProfilesDataset(Dataset):
                     "id": raw_p[0],
                     "jobs": handle_jobs(raw_p[1], ft_job),
                     "skills": self.handle_skills(raw_p[2]),
-                    "edu_fs": handle_education(raw_p[3], ft_edu),
-                    "edu_pt": handle_education(raw_p[3], ft_pt),
+                    "edu_fs": handle_education_ft(raw_p[3], ft_edu),
+                    "edu_pt": handle_education_ft(raw_p[3], ft_pt),
                     #"edu_elmo": to_elmo_emb(raw_p[3], elmo),
                     "ind": self.rev_ind_classes[raw_p[4]]
                 })
@@ -125,21 +124,6 @@ def handle_jobs(job_list, ft_model):
     return new_job_tensor
 
 
-def handle_education(edu_list, ft_model):
-    sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
-    # keeps 90% of the dataset without trimming experience
-    new_ed_tensor = np.zeros((4, ft_model.get_dimension()))
-    for num, edu in enumerate(sorted_edu_list):
-        if num < 4:
-            tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], None)
-            word_count = 0
-            tmp = []
-            for token in tokenized_edu:
-                tmp.append(ft_model.get_word_vector(token))
-                word_count += 1
-            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
-    return new_ed_tensor
-
 
 def job_to_emb(job, ft_model):
     tokenized_jobs = word_seq_into_list(job["position"], job["description"], None)
@@ -152,17 +136,3 @@ def job_to_emb(job, ft_model):
     emb[0, :] = np.mean(np.stack(tmp), axis=0) / word_count
     return emb
 
-
-def to_elmo_emb(edu_list, elmo):
-    sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
-    # keeps 90% of the dataset without trimming experience
-    new_ed_tensor = np.zeros((4, 1024))
-    tmp = []
-    for num, edu in enumerate(sorted_edu_list):
-        line = edu["degree"].lower() + ' ' + edu["institution"].lower()
-        if num < 4:
-            character_ids = batch_to_ids(line)
-            emb = elmo(character_ids.cuda())
-            tmp.append(np.sum(emb["elmo_representations"][-1].detach().cpu().numpy(), axis=0) / len(line))
-            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0)
-    return new_ed_tensor

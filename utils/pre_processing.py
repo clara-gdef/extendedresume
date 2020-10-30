@@ -3,7 +3,9 @@ import itertools
 import pickle as pkl
 
 import ipdb
+import numpy as np
 from nltk.tokenize import word_tokenize
+from allennlp.modules.elmo import batch_to_ids
 import re
 import json
 
@@ -74,4 +76,35 @@ def word_seq_into_list(position, description, index):
         new_tup.append("EOI")
     cleaned_tup = [item for item in new_tup if item != ""]
     return cleaned_tup
+
+
+def handle_education_ft(edu_list, ft_model):
+    sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
+    # keeps 90% of the dataset without trimming experience
+    new_ed_tensor = np.zeros((4, ft_model.get_dimension()))
+    for num, edu in enumerate(sorted_edu_list):
+        if num < 4:
+            tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], None)
+            word_count = 0
+            tmp = []
+            for token in tokenized_edu:
+                tmp.append(ft_model.get_word_vector(token))
+                word_count += 1
+            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
+    return new_ed_tensor
+
+
+def to_elmo_emb(edu_list, elmo):
+    sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
+    # keeps 90% of the dataset without trimming experience
+    new_ed_tensor = np.zeros((4, 1024))
+    tmp = []
+    for num, edu in enumerate(sorted_edu_list):
+        line = edu["degree"].lower() + ' ' + edu["institution"].lower()
+        if num < 4:
+            character_ids = batch_to_ids(line)
+            emb = elmo(character_ids.cuda())
+            tmp.append(np.sum(emb["elmo_representations"][-1].detach().cpu().numpy(), axis=0) / len(line))
+            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0)
+    return new_ed_tensor
 

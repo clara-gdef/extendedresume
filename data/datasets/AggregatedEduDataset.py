@@ -81,13 +81,3 @@ def to_avg_emb(emb_list):
     return torch.from_numpy(np.mean(emb_list, axis=0)).type(torch.FloatTensor)
 
 
-def job_to_emb(job, ft_model):
-    tokenized_jobs = word_seq_into_list(job["position"], job["description"], None)
-    word_count = 0
-    emb = np.zeros((1, ft_model.get_dimension()))
-    tmp = []
-    for token in tokenized_jobs:
-        tmp.append(ft_model.get_word_vector(token))
-        word_count += 1
-    emb[0, :] = np.mean(np.stack(tmp), axis=0) / word_count
-    return emb

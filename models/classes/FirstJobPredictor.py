@@ -35,7 +35,13 @@ class FirstJobPredictor(pl.LightningModule):
 
     def validation_step(self, mini_batch, batch_nb):
         loss = 0
-        for id, prof, prof_len, fj, fj_len in mini_batch:
+        id, prof, prof_len, fj, fj_len = mini_batch
+
+        for identifier, profile, profile_len, first_job, first_job_length in zip(id, prof, prof_len, fj, fj_len):
+            edu_tensor = torch.zeros(1, sum(profile_len), dtype=torch.int64)
+            counter = 0
+            for i in range(len(profile)):
+                edu_tensor[0, :prof_len[i]] = prof[i].cuda()
             ipdb.set_trace()
             enc_rep, attn, hidden = self.forward(edu, edu_len)
             res, hidden_dec = self.dec.forward(enc_rep, hidden, fj)
