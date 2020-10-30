@@ -22,9 +22,10 @@ def collate_for_edu(batch):
 
 def collate_for_text_gen(batch):
     ids = [i[0] for i in batch]
-    edu = [i[1] for i in batch]
+    edu = [torch.from_numpy(i[1]).type(torch.FloatTensor) for i in batch]
     fj = [torch.LongTensor(i[2]) for i in batch]
     len_fj = [i[3] for i in batch]
+    ipdb.set_trace()
     return ids, torch.stack(edu), torch.stack(fj), len_fj
 
 

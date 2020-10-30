@@ -12,12 +12,12 @@ class DecoderLSTM(pl.LightningModule):
         self.lstm = torch.nn.LSTM(embeddings.shape[-1] + (hidden_size * 2), hidden_size * 2, 1,  batch_first=True)
         self.lin_out = torch.nn.Linear(hidden_size * 2, embeddings.shape[0])
 
-    def forward(self, encoder_representation, hidden_state, token):
+    def forward(self, encoder_representation, token):
         enc_rep = encoder_representation
 
         emb = self.embedding_layer(token)
         inputs = torch.cat([enc_rep, emb], dim=2)
-        out, hidden = self.lstm(inputs, hidden_state)
+        out, hidden = self.lstm(inputs)
         results = self.lin_out(out)
 
         return results, hidden
