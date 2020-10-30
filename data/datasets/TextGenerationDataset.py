@@ -21,7 +21,7 @@ class TextGenerationDataset(Dataset):
             self.datadir = datadir
 
             self.tuples = []
-            self.build_tuples(input_file, index, ft_type, max_seq_length, embedder, split)
+            self.build_tuples(input_file, index, max_seq_length, embedder, split)
             self.save_dataset(split, ft_type)
 
     def __len__(self):
