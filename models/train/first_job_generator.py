@@ -38,21 +38,17 @@ def main(hparams):
     datasets = load_datasets(hparams, ["TEST", "TEST"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
-    if hparams.ft_type !='elmo':
+    if hparams.ft_type != 'elmo':
         collate = collate_for_text_gen
     else:
-        collate = collate_for_text_gen_elmo()
-    print("Loading word vectors...")
-    with open(os.path.join(CFG["gpudatadir"], "tensor_40k_" + hparams.ft_type + ".pkl"), "rb") as f:
-        embeddings = pkl.load(f)
-    print("Word vectors loaded")
+        collate = collate_for_text_gen_elmo
 
     train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0, shuffle=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0)
     print("Dataloaders initiated.")
-    arguments = {"embeddings": embeddings,
+    arguments = {"embeddings": get_emb_dim(hparams),
                  "index": dataset_train.index,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
@@ -109,6 +105,14 @@ def init_lightning(hparams, xp_title):
     print("early stopping procedure initiated.")
 
     return logger, checkpoint_callback, early_stop_callback
+
+
+def get_emb_dim(hparams):
+    if hparams.ft_type == "elmo":
+        dim = 1024
+    else:
+        dim = 300
+    return dim
 
 
 if __name__ == "__main__":

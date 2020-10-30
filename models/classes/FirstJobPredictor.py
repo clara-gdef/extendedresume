@@ -5,16 +5,14 @@ from models.classes import DecoderLSTM, DecoderWithElmo
 
 
 class FirstJobPredictor(pl.LightningModule):
-    def __init__(self, embeddings, datadir, index, hparams):
+    def __init__(self, dim, datadir, index, hparams):
         super().__init__()
         self.datadir = datadir
         self.hp = hparams
         self.index = index
-        self.embedding_layer = torch.nn.Embedding(embeddings.size(0), 100, padding_idx=0)
-        self.embedding_layer.load_state_dict({'weight': embeddings[:, :100]})
 
         if self.hp.ft_type != "elmo":
-            self.dec = DecoderLSTM(embeddings[:, :100], self.hp.hidden_size)
+            self.dec = DecoderLSTM(dim, self.hp.hidden_size, len(index))
         else:
             self.dec = DecoderWithElmo(self.hp)
         self.decoded_tokens = []
