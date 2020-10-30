@@ -16,4 +16,4 @@ class DecoderLSTM(pl.LightningModule):
         out, hidden = self.lstm(inputs)
         results = self.lin_out(out)
 
-        return results, hidden
+        return results.transpose(1, 0), hidden
