@@ -2,6 +2,7 @@ import json
 import os
 import pickle as pkl
 import numpy as np
+import torch
 import ipdb
 from tqdm import tqdm
 from torch.utils.data import Dataset
@@ -66,10 +67,10 @@ class TextGenerationDataset(Dataset):
                 tokenized_first_job = word_seq_into_list(job_list[-1]["position"], job_list[-1]["description"], index)
                 if len(data[-2]) > 0:
                     if self.ft_type != "elmo":
-                        new_edu = handle_education_ft(data[-2], embedder)
+                        new_edu = torch.mean(torch.from_numpy(handle_education_ft(data[-2], embedder)), dim=0)
                         first_job, job_len = word_list_to_indices(tokenized_first_job, index, max_seq_length)
                     else:
-                        new_edu = to_elmo_emb(data[-2], embedder)
+                        new_edu = torch.mean(to_elmo_emb(data[-2], embedder), dim=0)
                         first_job = tokenized_first_job
                         job_len = len(first_job)
                     self.tuples.append({
