@@ -26,7 +26,7 @@ class FirstJobPredictor(pl.LightningModule):
 
     def training_step(self, mini_batch, batch_nb):
         edu = mini_batch[1].unsqueeze(1)
-        fj = mini_batch[-2].unsqueeze(1)
+        fj = mini_batch[-2]
         dec_outputs = self.forward(edu, fj)
         loss = torch.nn.functional.cross_entropy(dec_outputs, fj)
         tensorboard_logs = {'loss': loss}
@@ -34,7 +34,7 @@ class FirstJobPredictor(pl.LightningModule):
 
     def validation_step(self, mini_batch, batch_nb):
         edu = mini_batch[1].unsqueeze(1)
-        fj = mini_batch[-2].unsqueeze(1)
+        fj = mini_batch[-2]
         dec_outputs = self.forward(edu, fj)
         val_loss = torch.nn.functional.cross_entropy(dec_outputs, fj)
         tensorboard_logs = {'val_loss': val_loss}
