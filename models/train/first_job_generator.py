@@ -54,7 +54,7 @@ def main(hparams):
     model = FirstJobPredictor(**arguments)
 
     # Run learning rate finder
-    lr_finder = trainer.tuner.lr_find(model)
+    lr_finder = trainer.tuner.lr_find(model, train_dataloader=train_loader, val_dataloaders=valid_loader)
 
     # Results can be found in
     print(lr_finder.results)
