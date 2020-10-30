@@ -22,8 +22,9 @@ def grid_search(hparams):
                 arg = DotDict(dico)
                 if hparams.TRAIN == "True":
                     train.first_job_generator.init(arg)
-                test_results[lr][b_size] = eval.first_job_generator.init(arg)
-            # ## TODO REMOVE THIS - UNINDENT
+                if hparams.EVAL == "True":
+                    test_results[lr][b_size] = eval.first_job_generator.init(arg)
+        if hparams.EVAL == "True":
             res_path = os.path.join(CFG["gpudatadir"], "EVAL_gs_" + hparams.model_type + "_topK.pkl")
             with open(res_path, "wb") as f:
                 pkl.dump(test_results, f)
@@ -31,7 +32,7 @@ def grid_search(hparams):
 
 def init_args(hparams):
     dico = {'gpus': hparams.gpus,
-            "ft_type" : hparams.ft_type,
+            "ft_type": hparams.ft_type,
             'load_dataset': hparams.load_dataset,
             'epochs': hparams.epochs,
             "wd": 0.0,
@@ -47,15 +48,16 @@ if __name__ == "__main__":
     with open("config.yaml", "r") as ymlfile:
         CFG = yaml.load(ymlfile, Loader=yaml.SafeLoader)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gpus", type=int, default=1)
+    parser.add_argument("--gpus", type=int, default=0)
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--TRAIN", default="True")
+    parser.add_argument("--EVAL", default="False")
     parser.add_argument("--ft_type", type=str, default='fs')
     parser.add_argument("--DEBUG", type=bool, default=False)
     parser.add_argument("--model_type", type=str, default="edu_mtl")
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--b_size", nargs='+', default=[16, 64, 512])
-    parser.add_argument("--lr", nargs='+', default=[1e-1, 1e-2, 1e-3])
+    parser.add_argument("--lr", nargs='+', default=[1e-2, 1e-3, 1e-4])
     hparams = parser.parse_args()
     grid_search(hparams)
