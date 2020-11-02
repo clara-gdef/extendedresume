@@ -39,8 +39,8 @@ class FirstJobPredictor(pl.LightningModule):
         fj = mini_batch[-2]
         dec_outputs = self.forward(edu, fj)
         val_loss = torch.nn.functional.cross_entropy(dec_outputs.transpose(2, 1), fj[:, :-1])
-        tensorboard_logs = {'val_CE': val_loss}
-        return {'val_loss': val_loss, 'log': tensorboard_logs}
+        self.log('val_CE', val_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True )
+        return {'val_loss': val_loss}
 
     def validation_end(self, outputs):
         return outputs[-1]
