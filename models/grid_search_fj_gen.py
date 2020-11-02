@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--gpus", type=int, default=0)
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--TRAIN", default="True")
-    parser.add_argument("--subsample", type=int, default=1000)
+    parser.add_argument("--subsample", type=int, default=10000)
     parser.add_argument("--EVAL", default="False")
     parser.add_argument("--ft_type", type=str, default='fs')
     parser.add_argument("--DEBUG", type=bool, default=False)
