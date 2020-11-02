@@ -1,7 +1,6 @@
 import pytorch_lightning as pl
 import torch
 import ipdb
-from line_profiler import LineProfiler
 import numpy as np
 from utils.model import classes_to_one_hot, test_for_ind, test_for_skills
 from models.classes.SkillsPredictor import SkillsPredictor
