@@ -83,7 +83,8 @@ def load_datasets(hparams, splits):
         "max_seq_length": None,
         "datadir": CFG["gpudatadir"],
         "ft_type": hparams.ft_type,
-        "load": (hparams.load_dataset == "True")
+        "load": (hparams.load_dataset == "True"),
+        "subsample" : hparams.subsample
     }
     for split in splits:
         datasets.append(TextGenerationDataset(**common_hparams, split=split))
@@ -135,6 +136,7 @@ if __name__ == "__main__":
     parser.add_argument("--gpus", type=int, default=0)
     parser.add_argument("--b_size", type=int, default=16)
     parser.add_argument("--hidden_size", type=int, default=100)
+    parser.add_argument("--subsample", type=int, default=1000)
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
     parser.add_argument("--load_from_checkpoint", default=False)

@@ -10,10 +10,10 @@ from utils.pre_processing import word_seq_into_list, word_list_to_indices, handl
 
 
 class TextGenerationDataset(Dataset):
-    def __init__(self, datadir, input_file, index, split, ft_type, max_seq_length, embedder, load):
+    def __init__(self, datadir, input_file, index, split, ft_type, max_seq_length, embedder, subsample, load):
         if load:
             self.datadir = datadir
-            self.load_dataset(split, ft_type)
+            self.load_dataset(split, ft_type, subsample)
         else:
             self.max_seq_length = max_seq_length
             self.index = index
@@ -43,16 +43,18 @@ class TextGenerationDataset(Dataset):
         with open(os.path.join(self.datadir, "text_gen_dataset_" + ft_type + split + ".pkl"), 'wb') as f:
             pkl.dump(dico, f)
 
-    def load_dataset(self, split, ft_type):
+    def load_dataset(self, split, ft_type, subsample):
         with open(os.path.join(self.datadir, "text_gen_dataset_" + ft_type + "_" + split + ".pkl"), 'rb') as f:
             dico = pkl.load(f)
         self.ft_type = dico["ft_type"]
         self.datadir = dico["datadir"]
-        ##################
-        np.random.shuffle(dico["tuples"])
-        # self.tuples = dico["tuples"][:1000]
-        self.tuples = dico["tuples"]
         self.index = dico["index"]
+        ##################
+        if subsample > 0:
+            np.random.shuffle(dico["tuples"])
+            self.tuples = dico["tuples"][:subsample]
+        else:
+            self.tuples = dico["tuples"]
         ###########
         print("Data length: " + str(len(self.tuples)))
 
