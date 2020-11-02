@@ -1,5 +1,6 @@
 import glob
 import os
+from allennlp.modules.elmo import Elmo
 import pickle as pkl
 import ipdb
 import argparse
@@ -48,7 +49,13 @@ def main(hparams):
     arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_train.index,
                  "datadir": CFG["gpudatadir"],
-                 "hparams": hparams}
+                 "hparams": hparams,
+                 "elmo": None}
+    if hparams.ft_type == "elmo":
+        options_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json"
+        weight_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5"
+        elmo = Elmo(options_file, weight_file, 2, dropout=0)
+        arguments["elmo"] = elmo.cuda()
 
     model = FirstJobPredictor(**arguments)
 
@@ -84,7 +91,7 @@ def load_datasets(hparams, splits):
         "datadir": CFG["gpudatadir"],
         "ft_type": hparams.ft_type,
         "load": (hparams.load_dataset == "True"),
-        "subsample" : hparams.subsample
+        "subsample": hparams.subsample
     }
     for split in splits:
         datasets.append(TextGenerationDataset(**common_hparams, split=split))

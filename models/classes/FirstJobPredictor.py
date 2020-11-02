@@ -7,7 +7,7 @@ from models.classes import DecoderLSTM, DecoderWithElmo
 
 
 class FirstJobPredictor(pl.LightningModule):
-    def __init__(self, dim, datadir, index, hparams):
+    def __init__(self, dim, datadir, index, elmo, hparams):
         super().__init__()
         self.datadir = datadir
         self.hp = hparams
@@ -16,7 +16,11 @@ class FirstJobPredictor(pl.LightningModule):
         if self.hp.ft_type != "elmo":
             self.dec = DecoderLSTM(dim, self.hp.hidden_size, len(index))
         else:
-            self.dec = DecoderWithElmo(self.hp)
+            self.dec = DecoderWithElmo(elmo,
+                                       emb_dimension=1024,
+                                       hidden_size=self.hp.hidden_size,
+                                       num_layer=1,
+                                       output_size=len(index))
         self.decoded_tokens = []
         self.decoded_tokens_test = []
         self.label_tokens_test = []
