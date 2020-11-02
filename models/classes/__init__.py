@@ -3,7 +3,5 @@ from .IndustryClassifier import IndustryClassifier
 from .SkillsPredictor import SkillsPredictor
 from .EvalModels import EvalModels
 from .DecoderLSTM import DecoderLSTM
-from .EncoderBiLSTM import EncoderBiLSTM
-from .FirstJobPredictor import FirstJobPredictor
-from .EncoderWithElmo import EncoderWithElmo
 from .DecoderWithElmo import DecoderWithElmo
+from .FirstJobPredictor import FirstJobPredictor

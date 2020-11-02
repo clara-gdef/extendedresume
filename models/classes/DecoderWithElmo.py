@@ -7,7 +7,6 @@ from allennlp.modules.elmo import batch_to_ids
 class DecoderWithElmo(pl.LightningModule):
     def __init__(self, elmo, emb_dimension, hidden_size, num_layer, output_size):
         super().__init__()
-        ipdb.set_trace()
         self.elmo = elmo
         self.hidden_size = hidden_size
         self.num_layer = num_layer
