@@ -1,7 +1,6 @@
 import pytorch_lightning as pl
 import torch
 import ipdb
-from line_profiler import LineProfiler
 import numpy as np
 import pickle as pkl
 import os
