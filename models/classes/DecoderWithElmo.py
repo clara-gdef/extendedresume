@@ -1,5 +1,4 @@
 import torch
-from torch.nn import functional as F
 import pytorch_lightning as pl
 import ipdb
 from allennlp.modules.elmo import batch_to_ids
