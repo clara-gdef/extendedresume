@@ -42,11 +42,12 @@ class FirstJobPredictor(pl.LightningModule):
         tensorboard_logs = {'val_CE': val_loss}
         return {'val_loss': val_loss, 'log': tensorboard_logs}
 
-    def validation_end(self, outputs):
+    def validation_epoch_end(self, outputs):
         ipdb.set_trace()
         return outputs[-1]
 
     def training_epoch_end(self, outputs):
+
         ipdb.set_trace()
 
 
