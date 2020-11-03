@@ -32,20 +32,23 @@ class FirstJobPredictor(pl.LightningModule):
 
     def training_step(self, mini_batch, batch_nb):
         dec_outputs = []
+        loss = 0
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            for num_tokens in range(fj.shape[1]):
+            for num_tokens in range(fj.shape[1] - 1):
                 dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
                 dec_outputs.append(dec_output)
+                loss += torch.nn.functional.cross_entropy(dec_output.transpose(1, 0), fj[:, num_tokens])
+                ipdb.set_trace()
             fj_lab = fj[:, 1:]
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
-
-        loss = torch.nn.functional.cross_entropy(dec_outputs.transpose(2, 1), fj_lab)
+        reshaped_outputs =  torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
+        loss = torch.nn.functional.cross_entropy(reshaped_outputs, fj_lab)
         tensorboard_logs = {'loss_CE': loss}
         return {'loss': loss, 'log': tensorboard_logs}
 
