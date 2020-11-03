@@ -35,7 +35,7 @@ def main(args):
 
         for split in ["_TEST", "_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
-            TextGenerationDataset(CFG["gpudatadir"], input_file, index, split, args.ft_type, args.max_seq_length, embedder, load)
+            TextGenerationDataset(CFG["gpudatadir"], input_file, index, split, args.ft_type, args.max_seq_length, embedder, 0, load)
 
 
 if __name__ == "__main__":
