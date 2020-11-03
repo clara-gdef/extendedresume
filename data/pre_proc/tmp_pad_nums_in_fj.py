@@ -1,8 +1,7 @@
 import argparse
 import os
 import pickle as pkl
-from allennlp.modules.elmo import Elmo
-import fastText
+
 from tqdm import tqdm
 import yaml
 import ipdb
