@@ -31,7 +31,6 @@ class FirstJobPredictor(pl.LightningModule):
         return decoder_output
 
     def training_step(self, mini_batch, batch_nb):
-        ipdb.set_trace()
         dec_outputs = []
         loss = 0
         if self.hp.ft_type != "elmo":
