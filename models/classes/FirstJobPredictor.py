@@ -90,15 +90,17 @@ class FirstJobPredictor(pl.LightningModule):
         ipdb.set_trace()
         rev_index = {v: k for k, v in self.index.items()}
 
-        pred_file = os.path.join(self.datadir, "pred_ft_" + self.ft_type + ".txt")
+        pred_file = os.path.join(self.datadir, "pred_ft_" + self.hp.ft_type + ".txt")
         with open(pred_file, 'a') as f:
             for w in self.decoded_tokens_test:
                 f.write(rev_index[w] + ' ')
             f.write("\n")
 
-        lab_file = os.path.join(self.datadir, "label_ft_" + self.ft_type + ".txt")
+        lab_file = os.path.join(self.datadir, "label_ft_" + self.hp.ft_type + ".txt")
         with open(lab_file, 'a') as f:
             for w in self.label_tokens_test[1:]:
                 f.write(rev_index[w] + ' ')
             f.write("\n")
         ipdb.set_trace()
+        cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ''
+        os.system(cmd_line)
