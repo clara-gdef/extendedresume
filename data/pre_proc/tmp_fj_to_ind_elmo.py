@@ -19,12 +19,10 @@ def main(args):
             index = pkl.load(f)
         print("index loaded.")
 
-
         for split in ["_TEST", "_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
             dataset = TextGenerationDataset(CFG["gpudatadir"], input_file, index, split, args.ft_type, args.max_seq_length, None, 0, True)
             dataset.fj_to_ind_for_elmo(split)
-            dataset.save()
 
 
 if __name__ == "__main__":
