@@ -47,7 +47,7 @@ class TextGenerationDataset(Dataset):
                 "index": self.index,
                 "ft_type": ft_type,
                 "tuples": self.tuples}
-        path = os.path.join(self.datadir, "text_gen_dataset_" + ft_type + split + ".pkl")
+        path = os.path.join(self.datadir, "text_gen_dataset_" + ft_type + "_" + split + ".pkl")
         print("dataset path: " + str(path))
         with open(path, 'wb') as f:
             pkl.dump(dico, f)
@@ -73,15 +73,14 @@ class TextGenerationDataset(Dataset):
         if self.ft_type == "elmo":
             for tup in tqdm(self.tuples, desc="Buidling FJ indices for elmo for split: " + split):
                 new_p = {}
-                for k in tup.keys():
-                    new_p[k] = tup[k]
+                new_p["id"] = tup["id"]
                 new_p["first_job"] = tup["first_jobs"]
                 new_p["edu_elmo"] = tup["edu"]
+                new_p["job_len"]: len(tup["first_jobs"])
                 fj_ind, _ = word_list_to_indices(tup["first_jobs"], self.index, self.max_seq_length)
                 new_p["fj_ind"] = fj_ind
                 new_tuples.append(new_p)
             self.tuples = new_tuples
-            ipdb.set_trace()
             print("Saving dataset...")
             self.save_dataset(split, self.ft_type)
             print("Dataset saved.")
