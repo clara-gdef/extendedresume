@@ -49,7 +49,7 @@ class FirstJobPredictor(pl.LightningModule):
         rev_index = {v: k for k, v in self.index.items()}
         ############
         outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
-        if batch_nb == 100:
+        if batch_nb == 10:
             print("PREDICTION")
             pred = ""
             for w in outputs[-1]:
