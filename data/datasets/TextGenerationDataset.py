@@ -47,7 +47,9 @@ class TextGenerationDataset(Dataset):
                 "index": self.index,
                 "ft_type": ft_type,
                 "tuples": self.tuples}
-        with open(os.path.join(self.datadir, "text_gen_dataset_" + ft_type + split + ".pkl"), 'wb') as f:
+        path = os.path.join(self.datadir, "text_gen_dataset_" + ft_type + split + ".pkl")
+        print("dataset path: " + str(path))
+        with open(path, 'wb') as f:
             pkl.dump(dico, f)
 
     def load_dataset(self, split, ft_type, subsample):
@@ -79,6 +81,7 @@ class TextGenerationDataset(Dataset):
                 new_p["fj_ind"] = fj_ind
                 new_tuples.append(new_p)
             self.tuples = new_tuples
+            ipdb.set_trace()
             print("Saving dataset...")
             self.save_dataset(split, self.ft_type)
             print("Dataset saved.")

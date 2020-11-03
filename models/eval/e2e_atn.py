@@ -9,7 +9,7 @@ import yaml
 import torch
 from data.datasets import FlatProfilesDataset
 from models.classes.End2EndProfileBuilder import End2EndProfileBuilder
-from utils.model import collate_for_flat_profiles, get_model_params
+from utils.model import collate_for_flat_profiles, get_model_params, get_latest_model
 
 
 def init(hparams):
@@ -47,9 +47,7 @@ def main(hparams):
     # print("Initiating model with params (" + str(in_size) + ", " + str(out_size) + ")")
     model = End2EndProfileBuilder(**arguments)
 
-    model_path = os.path.join(CFG['modeldir'], xp_title)
-    model_files = glob.glob(os.path.join(model_path, "*"))
-    latest_file = max(model_files, key=os.path.getctime)
+    latest_file = get_latest_model(CFG["modeldir"], xp_title)
     print("Evaluating model " + latest_file)
     model.load_state_dict(torch.load(latest_file)["state_dict"])
     print("Model Loaded.")

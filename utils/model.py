@@ -1,6 +1,9 @@
+import glob
+
 import numpy as np
 import torch
 from tqdm import tqdm
+import os
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, hamming_loss
 from utils.pre_processing import word_list_to_indices
 
@@ -117,3 +120,9 @@ def get_preds_wrt_threshold(pred, th):
     pred = torch.stack(preds).type(torch.FloatTensor)
     return pred
 
+
+def get_latest_model(modeldir, xp_title):
+    model_path = os.path.join(modeldir, xp_title)
+    model_files = glob.glob(os.path.join(model_path, "*"))
+    latest_file = max(model_files, key=os.path.getctime)
+    return latest_file

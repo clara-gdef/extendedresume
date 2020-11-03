@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 import yaml
 from data.datasets import AggregatedEduDataset
 from models.classes.EvalModels import EvalModels
-from utils.model import collate_for_edu, get_model_params
+from utils.model import collate_for_edu, get_model_params, get_latest_model
 
 
 def init(hparams):
@@ -47,11 +47,7 @@ def main(hparams):
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams}
     model = EvalModels(**arguments)
-    print("Model Loaded.")
-    model_name = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
-    model_path = os.path.join(CFG['modeldir'], model_name)
-    model_files = glob.glob(os.path.join(model_path, "*"))
-    latest_file = max(model_files, key=os.path.getctime)
+    latest_file = get_latest_model(CFG["modeldir"], xp_title)
     print("Evaluating model " + latest_file)
     model.load_state_dict(torch.load(latest_file)["state_dict"])
     print("Model Loaded.")
