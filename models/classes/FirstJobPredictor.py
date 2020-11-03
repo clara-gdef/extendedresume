@@ -38,7 +38,8 @@ class FirstJobPredictor(pl.LightningModule):
             fj_lab = fj[:, 1:]
         else:
             edu = mini_batch[1].unsqueeze(1)
-            fj_lab = mini_batch[2]
+            fj = mini_batch[2]
+            fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
 
         loss = torch.nn.functional.cross_entropy(dec_outputs.transpose(2, 1), fj_lab)
@@ -53,8 +54,9 @@ class FirstJobPredictor(pl.LightningModule):
             fj_lab = fj[:, 1:]
         else:
             edu = mini_batch[1].unsqueeze(1)
-            fj_lab = mini_batch[2]
-            dec_outputs = self.forward(edu, fj_lab)
+            fj = mini_batch[2]
+            fj_lab = mini_batch[-1][:, 1:]
+            dec_outputs = self.forward(edu, fj)
 
         val_loss = torch.nn.functional.cross_entropy(dec_outputs.transpose(2, 1), fj_lab)
         tensorboard_logs = {'val_CE': val_loss}

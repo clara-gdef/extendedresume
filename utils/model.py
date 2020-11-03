@@ -36,7 +36,7 @@ def collate_for_text_gen_elmo(batch):
     fj = [i[2] for i in batch]
     fj_len = [i[3] for i in batch]
     fj_indices = [i[4] for i in batch]
-    return ids, torch.stack(edu), fj, fj_len, fj_indices
+    return ids, torch.stack(edu), fj, fj_len, torch.stack(fj_indices)
 
 
 def get_model_params(args, dataset):
