@@ -26,7 +26,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.label_tokens_test = []
 
     def forward(self, profile, fj):
-        decoder_output, decoder_hidden = self.dec.forward(profile, fj[:, :-1])
+        decoder_output, decoder_hidden = self.dec.forward(profile, fj)
         self.decoded_tokens.append(decoder_output.argmax(-1))
         return decoder_output
 
@@ -34,7 +34,7 @@ class FirstJobPredictor(pl.LightningModule):
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            dec_outputs = self.forward(edu, fj)
+            dec_outputs = self.forward(edu, fj[:, :-1])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
@@ -47,7 +47,7 @@ class FirstJobPredictor(pl.LightningModule):
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            dec_outputs = self.forward(edu, fj)
+            dec_outputs = self.forward(edu, fj[:, :-1])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
