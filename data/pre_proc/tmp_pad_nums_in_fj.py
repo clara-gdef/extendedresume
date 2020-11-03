@@ -19,13 +19,21 @@ def main(args):
             index = pkl.load(f)
         print("index loaded.")
 
+        len_fj = []
+        for split in ["TEST", "VALID", "TRAIN"]:
+            input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
+            dataset = TextGenerationDataset(CFG["gpudatadir"], input_file, None, split, args.ft_type, args.max_seq_length, None, 0, True)
+            for tup in tqdm(dataset, desc="Parsing dataset for split " + split):
+                len_fj.append(tup[-1])
+
+
         for split in ["TEST", "VALID", "TRAIN"]:
             num_tokens = 0
             num_pad = 0
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
             dataset = TextGenerationDataset(CFG["gpudatadir"], input_file, None, split, args.ft_type, args.max_seq_length, None, 0, True)
             for tup in tqdm(dataset, desc="Parsing dataset for split " + split):
-                for tok in tup["first_job"]:
+                for tok in tup[-2]:
                     if tok == index["PAD"]:
                         num_pad += 1
                     num_tokens += 1
