@@ -74,6 +74,7 @@ class TextGenerationDataset(Dataset):
                 for k in tup.keys():
                     new_p[k] = tup[k]
                 new_p["first_job"] = tup["first_jobs"]
+                new_p["edu_elmo"] = tup["edu"]
                 fj_ind, _ = word_list_to_indices(tup["first_jobs"], self.index, self.max_seq_length)
                 new_p["fj_ind"] = fj_ind
                 new_tuples.append(new_p)
