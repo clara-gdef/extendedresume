@@ -2,7 +2,6 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, hamming_loss
-import ipdb
 
 
 def collate_for_flat_profiles(batch):
@@ -34,8 +33,7 @@ def collate_for_text_gen_elmo(batch):
     ids = [i[0] for i in batch]
     edu = [i[1] for i in batch]
     fj = [i[2] for i in batch]
-    ipdb.set_trace()
-    return ids, edu, fj
+    return ids, torch.stack(edu), fj
 
 
 def get_model_params(args, dataset):
