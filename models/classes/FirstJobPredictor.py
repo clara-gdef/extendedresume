@@ -45,6 +45,12 @@ class FirstJobPredictor(pl.LightningModule):
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
+        rev_index = {v: k for k, v in self.index.items()}
+        ############
+        for w in dec_outputs[-1]:
+            print(rev_index(w))
+        print(fj)
+        ############
         tensorboard_logs = {'loss_CE': loss}
         return {'loss': loss, 'log': tensorboard_logs}
 
