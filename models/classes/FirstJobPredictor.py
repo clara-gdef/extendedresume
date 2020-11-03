@@ -31,10 +31,13 @@ class FirstJobPredictor(pl.LightningModule):
         return decoder_output
 
     def training_step(self, mini_batch, batch_nb):
+        dec_outputs = []
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            dec_outputs = self.forward(edu, fj[:, :-1])
+            for num_tokens in range(fj.shape[1]):
+                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
+                dec_outputs.append(dec_output)
             fj_lab = fj[:, 1:]
         else:
             edu = mini_batch[1].unsqueeze(1)
