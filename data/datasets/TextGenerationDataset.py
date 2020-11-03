@@ -49,6 +49,7 @@ class TextGenerationDataset(Dataset):
         self.ft_type = dico["ft_type"]
         self.datadir = dico["datadir"]
         self.index = dico["index"]
+        self.max_seq_length = dico["max_seq_length"]
         ##################
         if subsample > 0:
             np.random.shuffle(dico["tuples"])
@@ -57,6 +58,21 @@ class TextGenerationDataset(Dataset):
             self.tuples = dico["tuples"]
         ###########
         print("Data length: " + str(len(self.tuples)))
+
+    def fj_to_ind_for_elmo(self, split):
+        new_tuples = []
+        if self.ft_type == "elmo":
+            for tup in tqdm(self.tuples, desc="Buidling FJ indices for elmo for split: " + split):
+                new_p = {}
+                for k in tup.keys():
+                    new_p[k] = tup[k]
+                fj_ind, _ = word_list_to_indices(tup["first_job"], self.index, self.max_seq_length)
+                new_p["fj_ind"] = fj_ind
+                new_tuples.append(new_p)
+            self.tuples = new_tuples
+            print("Saving dataset...")
+            self.save_dataset(split, self.ft_type)
+            print("Dataset saved.")
 
     def build_tuples(self, json_file, index, max_seq_length, embedder, split):
         with open(json_file, 'r') as f:
