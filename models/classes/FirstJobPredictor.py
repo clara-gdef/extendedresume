@@ -93,7 +93,7 @@ class FirstJobPredictor(pl.LightningModule):
             lab.append(fj[0][i].item())
             token = dec_word
         self.decoded_tokens_test.append(dec)
-        self.labels_tokens_test.append(lab)
+        self.label_tokens_test.append(lab)
 
     def test_epoch_end(self, outputs):
         rev_index = {v: k for k, v in self.index.items()}
