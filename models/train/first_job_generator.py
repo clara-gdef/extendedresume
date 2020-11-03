@@ -33,8 +33,13 @@ def main(hparams):
                          callbacks=[checkpoint_callback, early_stop_callback],
                          logger=logger
                          )
-    datasets = load_datasets(hparams, ["TRAIN", "VALID"])
+    ### TODO remove double train to replace with valid
+    datasets = load_datasets(hparams, ["TRAIN", "TRAIN"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
+
+    tmp = dataset_train.tuples
+    for i in range(10):
+        dataset_train.tuples.extend(tmp)
 
     if hparams.ft_type != 'elmo':
         collate = collate_for_text_gen
