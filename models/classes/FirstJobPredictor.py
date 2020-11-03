@@ -32,14 +32,15 @@ class FirstJobPredictor(pl.LightningModule):
 
     def training_step(self, mini_batch, batch_nb):
         dec_outputs = []
-        loss = 0
+        tmp = 0
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
                 dec_outputs.append(dec_output)
-                loss += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
+            loss = tmp / (fj.shape[0] + fj.shape[1])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
@@ -66,14 +67,15 @@ class FirstJobPredictor(pl.LightningModule):
 
     def validation_step(self, mini_batch, batch_nb):
         dec_outputs = []
-        val_loss = 0
+        tmp = 0
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
                 dec_outputs.append(dec_output)
-                val_loss += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
+            val_loss = tmp / (fj.shape[0] + fj.shape[1])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
