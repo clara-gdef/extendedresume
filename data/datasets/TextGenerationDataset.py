@@ -113,7 +113,6 @@ class TextGenerationDataset(Dataset):
                     if self.ft_type == "elmo":
                         fj_ind, _ = word_list_to_indices(first_job, self.index, self.max_seq_length)
                         new_p["fj_ind"] = fj_ind
-                    ipdb.set_trace()
                     self.tuples.append(new_p)
                 pbar.update(1)
 
