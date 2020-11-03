@@ -69,8 +69,14 @@ class FirstJobPredictor(pl.LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hp.lr, weight_decay=self.hp.wd)
 
     def test_step(self, mini_batch, batch_idx):
-        edu = mini_batch[1].unsqueeze(1)
-        fj = mini_batch[-2]
+        ipdb.set_trace()
+        if self.hp.ft_type != "elmo":
+            edu = mini_batch[1].unsqueeze(1)
+            fj = mini_batch[-2]
+        else:
+            edu = mini_batch[1].unsqueeze(1)
+            fj = mini_batch[2]
+
         token = self.index["SOD"]
         for i in range(len(fj[0])):
             tok_tensor = torch.LongTensor(1, 1)
@@ -78,9 +84,8 @@ class FirstJobPredictor(pl.LightningModule):
             output, decoder_hidden = self.dec(edu, tok_tensor)
             dec_word = output.argmax(-1).item()
             self.decoded_tokens_test.append(dec_word)
-            self.label_tokens_test.append(fj[0][i])
+            self.label_tokens_test.append(fj[0][i].item())
             token = dec_word
-        ipdb.set_trace()
 
     def test_epoch_end(self, outputs):
         ipdb.set_trace()
