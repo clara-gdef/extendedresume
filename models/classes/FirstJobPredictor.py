@@ -50,6 +50,7 @@ class FirstJobPredictor(pl.LightningModule):
         else:
             edu = torch.stack(mini_batch[1]).unsqueeze(1)
             fj = mini_batch[-2]
+            dec_outputs = self.forward(edu, fj)
 
         val_loss = torch.nn.functional.cross_entropy(dec_outputs.transpose(2, 1), fj[:, :-1])
         tensorboard_logs = {'val_CE': val_loss}
