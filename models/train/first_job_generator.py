@@ -38,7 +38,7 @@ def main(hparams):
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     tmp = dataset_train.tuples
-    for i in range(10):
+    for i in range(5):
         dataset_train.tuples.extend(tmp)
 
     if hparams.ft_type != 'elmo':

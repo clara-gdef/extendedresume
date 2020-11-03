@@ -31,6 +31,7 @@ class FirstJobPredictor(pl.LightningModule):
         return decoder_output
 
     def training_step(self, mini_batch, batch_nb):
+        ipdb.set_trace()
         dec_outputs = []
         loss = 0
         if self.hp.ft_type != "elmo":
@@ -54,11 +55,11 @@ class FirstJobPredictor(pl.LightningModule):
             word = torch.argmax(w)
             pred += rev_index[word.item()] + " "
         print(pred)
-        print("LABEL")
-        lab = ""
-        for w in fj[0]:
-            lab += rev_index[w.item()] + " "
-        print(lab)
+        # print("LABEL")
+        # lab = ""
+        # for w in fj[0]:
+        #     lab += rev_index[w.item()] + " "
+        # print(lab)
         ############
         tensorboard_logs = {'loss_CE': loss}
         return {'loss': loss, 'log': tensorboard_logs}
