@@ -52,7 +52,7 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             for num_tokens in range(fj.shape[1]):
-                dec_output = self.forward(edu, fj[:, num_tokens])
+                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
                 dec_outputs.append(dec_output)
             fj_lab = fj[:, 1:]
         else:
