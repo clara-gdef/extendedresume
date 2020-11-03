@@ -83,6 +83,7 @@ class FirstJobPredictor(pl.LightningModule):
         ipdb.set_trace()
 
     def test_epoch_end(self, outputs):
+        ipdb.set_trace()
         rev_index = {v: k for k, v in self.index.items()}
 
         pred_file = os.path.join(self.datadir, "pred_ft_" + self.ft_type + ".txt")
