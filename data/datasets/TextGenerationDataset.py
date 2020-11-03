@@ -54,6 +54,7 @@ class TextGenerationDataset(Dataset):
 
     def load_dataset(self, split, ft_type, subsample):
         path = os.path.join(self.datadir, "text_gen_dataset_" + ft_type + "_" + split + ".pkl")
+        print("loading dataset at path : " + path)
         with open(path, 'rb') as f:
             dico = pkl.load(f)
         self.ft_type = dico["ft_type"]
