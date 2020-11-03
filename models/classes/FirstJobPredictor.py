@@ -40,36 +40,30 @@ class FirstJobPredictor(pl.LightningModule):
                 dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
                 dec_outputs.append(dec_output)
                 loss += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
-            fj_lab = fj[:, 1:]
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
-        reshaped_outputs =  torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
-        loss = torch.nn.functional.cross_entropy(reshaped_outputs, fj_lab)
         tensorboard_logs = {'loss_CE': loss}
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
         dec_outputs = []
-        loss = 0
+        val_loss = 0
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            for num_tokens in range(fj.shape[1]):
+            for num_tokens in range(fj.shape[1] - 1):
                 dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
                 dec_outputs.append(dec_output)
-                loss += torch.nn.functional.cross_entropy(dec_output.transpose(1, 0), fj[:, num_tokens])
-                ipdb.set_trace()
-            fj_lab = fj[:, 1:]
+                val_loss += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj)
 
-        val_loss = torch.nn.functional.cross_entropy(torch.stack(dec_outputs).transpose(2, 1), fj_lab)
         tensorboard_logs = {'val_CE': val_loss}
         return {'val_loss': val_loss, 'log': tensorboard_logs}
 
