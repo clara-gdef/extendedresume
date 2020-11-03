@@ -92,6 +92,7 @@ class TextGenerationDataset(Dataset):
         with open(json_file, 'r') as f:
             pbar = tqdm(f, total=num_lines, desc="Building text_gen dataset for split " + split + " & " + self.ft_type + " ...")
             for line in f:
+
                 data = json.loads(line)
                 job_list = sorted(data[1], key=lambda k: k["from_ts"], reverse=True)
                 tokenized_first_job = word_seq_into_list(job_list[-1]["position"], job_list[-1]["description"], index)
@@ -103,12 +104,16 @@ class TextGenerationDataset(Dataset):
                         new_edu = torch.mean(torch.from_numpy(to_elmo_emb(data[-2], embedder)), dim=0)
                         first_job = tokenized_first_job
                         job_len = len(first_job)
-                    self.tuples.append({
+                    new_p = {
                         "id": data[0],
                         "edu_" + self.ft_type: new_edu,
                         "first_job": first_job,
                         "job_len": job_len
-                    })
+                    }
+                    if self.ft_type == "elmo":
+                        fj_ind, _ = word_list_to_indices(first_job, self.index, self.max_seq_length)
+                        new_p["fj_ind"] = fj_ind
+                    self.tuples.append(new_p)
                 pbar.update(1)
 
     def handle_skills(self, skill_list):
