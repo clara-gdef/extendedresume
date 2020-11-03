@@ -47,10 +47,13 @@ class FirstJobPredictor(pl.LightningModule):
         return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
+        dec_outputs = []
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            dec_outputs = self.forward(edu, fj[:, :-1])
+            for num_tokens in range(fj.shape[1]):
+                dec_output = self.forward(edu, fj[:, num_tokens])
+                dec_outputs.append(dec_output)
             fj_lab = fj[:, 1:]
         else:
             edu = mini_batch[1].unsqueeze(1)
@@ -58,7 +61,7 @@ class FirstJobPredictor(pl.LightningModule):
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj)
 
-        val_loss = torch.nn.functional.cross_entropy(dec_outputs.transpose(2, 1), fj_lab)
+        val_loss = torch.nn.functional.cross_entropy(torch.stack(dec_outputs).transpose(2, 1), fj_lab)
         tensorboard_logs = {'val_CE': val_loss}
         return {'val_loss': val_loss, 'log': tensorboard_logs}
 
