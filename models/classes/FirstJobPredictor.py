@@ -82,29 +82,35 @@ class FirstJobPredictor(pl.LightningModule):
             fj = mini_batch[2]
 
         token = self.index["SOD"]
+        dec = []
+        lab = []
         for i in range(len(fj[0])):
             tok_tensor = torch.LongTensor(1, 1)
             tok_tensor[:, 0] = token
             output, decoder_hidden = self.dec(edu, tok_tensor)
             dec_word = output.argmax(-1).item()
-            self.decoded_tokens_test.append(dec_word)
-            self.label_tokens_test.append(fj[0][i].item())
+            dec.append(dec_word)
+            lab.append(fj[0][i].item())
             token = dec_word
+        self.decoded_tokens_test.append(dec)
+        self.labels_tokens_test.append(lab)
 
     def test_epoch_end(self, outputs):
         rev_index = {v: k for k, v in self.index.items()}
 
         pred_file = os.path.join(self.datadir, "pred_ft_" + self.hp.ft_type + ".txt")
         with open(pred_file, 'a') as f:
-            for w in self.decoded_tokens_test:
-                f.write(rev_index[w] + ' ')
-            f.write("\n")
+            for sentence in self.decoded_tokens_test:
+                for w in sentence:
+                    f.write(rev_index[w] + ' ')
+                f.write("\n")
 
         lab_file = os.path.join(self.datadir, "label_ft_" + self.hp.ft_type + ".txt")
         with open(lab_file, 'a') as f:
-            for w in self.label_tokens_test[1:]:
-                f.write(rev_index[w] + ' ')
-            f.write("\n")
+            for sentence in self.label_tokens_test[1:]:
+                for w in sentence:
+                    f.write(rev_index[w] + ' ')
+                f.write("\n")
         ipdb.set_trace()
         cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ''
         os.system(cmd_line)
