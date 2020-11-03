@@ -29,10 +29,17 @@ class TextGenerationDataset(Dataset):
         return len(self.tuples)
 
     def __getitem__(self, idx):
-        return self.tuples[idx]["id"],  \
-               self.tuples[idx]["edu_" + self.ft_type], \
-               self.tuples[idx]["first_job"], \
-               self.tuples[idx]["job_len"]
+        if self.ft_type != "elmo":
+            return self.tuples[idx]["id"],  \
+                   self.tuples[idx]["edu_" + self.ft_type], \
+                   self.tuples[idx]["first_job"], \
+                   self.tuples[idx]["job_len"]
+        else:
+            return self.tuples[idx]["id"],  \
+                   self.tuples[idx]["edu_" + self.ft_type], \
+                   self.tuples[idx]["first_job"], \
+                   self.tuples[idx]["job_len"], \
+                   self.tuples[idx]["fj_ind"]
 
     def save_dataset(self, split, ft_type):
         dico = {"datadir": self.datadir,
