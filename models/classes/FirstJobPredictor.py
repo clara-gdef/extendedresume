@@ -12,7 +12,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.datadir = datadir
         self.hp = hparams
         self.index = index
-        self.class_weight = torch.ones(1, len(self.index))
+        self.class_weight = torch.ones(1, len(self.index)).cuda()
         self.class_weight[0, 4] = 0.01
 
         if self.hp.ft_type != "elmo":
@@ -76,8 +76,6 @@ class FirstJobPredictor(pl.LightningModule):
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
                 dec_outputs.append(dec_output)
-                ipdb.set_trace()
-
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, weight=self.class_weight)
             val_loss = tmp / (fj.shape[0] + fj.shape[1])
         else:
