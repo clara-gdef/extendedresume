@@ -26,7 +26,7 @@ def init(hparams):
 
 
 def main(hparams):
-    xp_title = hparams.model_type + "_" + hparams.ft_type + "_" + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
+    xp_title = hparams.model_type + "_" + hparams.ft_type + "_" + str(hparams.b_size) + "_" + str(hparams.lr) + "_" + str(hparams.hidden_size) + '_' + str(hparams.wd)
     logger, checkpoint_callback, early_stop_callback = init_lightning(hparams, xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
                          max_epochs=hparams.epochs,
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("--ft_type", type=str, default='fs')
     parser.add_argument("--gpus", type=int, default=0)
     parser.add_argument("--b_size", type=int, default=16)
-    parser.add_argument("--hidden_size", type=int, default=100)
+    parser.add_argument("--hidden_size", type=int, default=50)
     parser.add_argument("--subsample", type=int, default=0)
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
