@@ -1,7 +1,8 @@
 import os
 import itertools
 import pickle as pkl
-
+from collections import Counter
+from tqdm import tqdm
 import ipdb
 import numpy as np
 from nltk.tokenize import word_tokenize
@@ -108,3 +109,31 @@ def to_elmo_emb(edu_list, elmo):
             new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0)
     return new_ed_tensor
 
+
+def build_word_set(input_file, data_dir, max_voc_len):
+    word_count = Counter()
+    number_regex = re.compile(r'\d+(,\d+)?')
+    with open(input_file, 'r') as f:
+        num_lines = sum(1 for line in f)
+    with open(input_file, 'r') as f:
+        pbar = tqdm(f, total=num_lines, desc="Building vocab from Train split...")
+        for line in f:
+            data = json.loads(line)
+            sorted_edu = sorted(data[-2], key=lambda k: k['to'], reverse=True)
+            for edu in sorted_edu:
+                tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], None)
+                for word in tokenized_edu:
+                    if re.match(number_regex, word):
+                        word_count["NUM"] += 1
+                    else:
+                        word_count[word] += 1
+            pbar.update(1)
+
+    word_list = [x[0] for x in word_count.most_common(max_voc_len)]
+
+    with open(os.path.join(data_dir, "vocab_40k.pkl"), "wb") as f:
+        pkl.dump(word_list, f)
+
+    ipdb.set_trace()
+
+    return word_list

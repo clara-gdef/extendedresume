@@ -7,7 +7,7 @@ import yaml
 from tqdm import tqdm
 from allennlp.modules.elmo import Elmo
 import fastText
-from utils import word_seq_into_list
+from utils.pre_processing import build_word_set
 import ipdb
 from allennlp.modules.elmo import batch_to_ids
 from collections import Counter
@@ -22,7 +22,7 @@ def main(args):
         input_file = os.path.join(CFG["gpudatadir"], args.base_file + "_TRAIN.json")
 
         if args.build_vocab == "True":
-            word_list = build_word_set(input_file, args)
+            word_list = build_word_set(input_file, CFG["gpudatadir"], args.max_voc_len)
         else:
             with open(os.path.join(CFG["gpudatadir"], "vocab_40k.pkl"), "rb") as f:
                 word_list = pkl.load(f)
@@ -39,31 +39,6 @@ def main(args):
 
         build_index_and_tensor(word_list, embedder, args)
 
-
-def build_word_set(input_file, args):
-    word_count = Counter()
-    number_regex = re.compile(r'\d+(,\d+)?')
-    with open(input_file, 'r') as f:
-        num_lines = sum(1 for line in f)
-    with open(input_file, 'r') as f:
-        pbar = tqdm(f, total=num_lines, desc="Building vocab from Train split...")
-        for line in f:
-            data = json.loads(line)
-            sorted_edu = sorted(data[-2], key=lambda k: k['to'], reverse=True)
-            for edu in sorted_edu:
-                tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], None)
-                for word in tokenized_edu:
-                    if re.match(number_regex, word):
-                        word_count["NUM"] += 1
-                    else:
-                        word_count[word] += 1
-            pbar.update(1)
-
-    word_list = [x[0] for x in word_count.most_common(args.max_voc_len)]
-
-    with open(os.path.join(CFG["gpudatadir"], "vocab_40k.pkl"), "wb") as f:
-        pkl.dump(word_list, f)
-    return word_list
 
 
 def build_index_and_tensor(word_list, embedder, args):
