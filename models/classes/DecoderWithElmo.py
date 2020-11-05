@@ -18,7 +18,7 @@ class DecoderWithElmo(pl.LightningModule):
 
         emb = self.elmo(character_ids.cuda())
         emb_tensor = emb["elmo_representations"][-1]
-
+        ipdb.set_trace()
         enc_rep = encoder_representation.expand(encoder_representation.shape[0],
                                                 emb_tensor.shape[1], -1)
 
