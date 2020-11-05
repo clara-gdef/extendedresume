@@ -13,6 +13,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.hp = hparams
         self.index = index
         self.class_weight = class_weights.cuda()
+        ipdb.set_trace()
 
         if self.hp.ft_type != "elmo":
             self.dec = DecoderLSTM(dim, self.hp.hidden_size, len(index))
