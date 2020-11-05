@@ -25,13 +25,14 @@ def main(args):
             for tok in fj_ind:
                 token_count[tok] += 1
         all_tokens = sum(token_count.values()) - token_count[index["PAD"]]
-        frequencies = torch.zeros(1, len(index))
-        for num, tok in enumerate(token_count.keys()):
-            if tok != index["PAD"]:
-                frequencies[:, num] = token_count[tok] / all_tokens
+        frequencies = torch.zeros(len(index))
+        for tok in token_count.keys():
+            frequencies[tok] = all_tokens / token_count[tok]
+        freq = 1e-10 + frequencies / all_tokens
+        rev_index = {v: k for k, v in index.items()}
         ipdb.set_trace()
         with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "wb") as f:
-            pkl.dump(frequencies, f)
+            pkl.dump(freq, f)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
