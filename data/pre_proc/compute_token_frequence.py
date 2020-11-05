@@ -29,6 +29,7 @@ def main(args):
         for num, tok in enumerate(token_count.keys()):
             if tok != index["PAD"]:
                 frequencies[:, num] = token_count[tok] / all_tokens
+        ipdb.set_trace()
         with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "wb") as f:
             pkl.dump(frequencies, f)
 
