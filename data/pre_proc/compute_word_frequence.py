@@ -1,3 +1,4 @@
+import argparse
 import os
 import pickle as pkl
 import yaml
@@ -25,3 +26,13 @@ def main(args):
         word_list = build_word_set(input_file, CFG["gpudatadir"], args.max_voc_len)
 
     print("index loaded.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base_file", type=str, default="bp_3jobs_desc_edu_skills_industry_date_company_FR")
+    parser.add_argument("--ft_type", type=str, default="fs")
+    parser.add_argument("--build_vocab", type=str, default="False")
+    parser.add_argument("--max_voc_len", type=int, default=40000)
+    parser.add_argument("--min_occurence", type=int, default=5)
+    args = parser.parse_args()
+    main(args)
