@@ -130,10 +130,10 @@ def build_word_set(input_file, data_dir, max_voc_len):
             pbar.update(1)
 
     word_list = [x[0] for x in word_count.most_common(max_voc_len)]
+    ipdb.set_trace()
 
     with open(os.path.join(data_dir, "vocab_40k.pkl"), "wb") as f:
         pkl.dump(word_list, f)
 
-    ipdb.set_trace()
 
     return word_list

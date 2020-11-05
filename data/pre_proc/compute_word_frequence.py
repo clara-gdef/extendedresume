@@ -2,7 +2,7 @@ import os
 import pickle as pkl
 import yaml
 import ipdb
-
+from tqdm import tqdm
 from utils import build_word_set
 
 
@@ -13,7 +13,7 @@ def main(args):
 
     # small sanity check
     index = []
-    for ft_type in ["fs", "pt", "elmo"]:
+    for ft_type in tqdm(["fs", "pt", "elmo"]):
         index_file = os.path.join(CFG["gpudatadir"], "index_40k_" + ft_type + ".pkl")
         with open(index_file, 'rb') as f:
             index.append(pkl.load(f))
