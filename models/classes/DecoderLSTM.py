@@ -12,8 +12,7 @@ class DecoderLSTM(pl.LightningModule):
     def forward(self, encoder_representation, token):
         #enc_rep = encoder_representation.expand(token.shape[0], token.shape[1], encoder_representation.shape[-1]).transpose(1, 0)
         enc_rep = encoder_representation
-        ipdb.set_trace()
-        inputs = torch.cat([enc_rep.type(torch.float32).transpose(1, 0), token.type(torch.float32).unsqueeze(-1).transpose(1, 0).cuda()], dim=2)
+        inputs = torch.cat([enc_rep.type(torch.float32), token.type(torch.float32).unsqueeze(-1).cuda()], dim=2)
 
         out, hidden = self.lstm(inputs)
         results = self.lin_out(out)
