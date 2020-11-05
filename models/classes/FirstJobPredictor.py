@@ -7,13 +7,12 @@ from models.classes import DecoderLSTM, DecoderWithElmo
 
 
 class FirstJobPredictor(pl.LightningModule):
-    def __init__(self, dim, datadir, index, elmo, hparams):
+    def __init__(self, dim, datadir, index, elmo, class_weights, hparams):
         super().__init__()
         self.datadir = datadir
         self.hp = hparams
         self.index = index
-        self.class_weight = torch.ones(1, len(self.index)).cuda()
-        self.class_weight[0, 4] = 0.01
+        self.class_weight = class_weights
 
         if self.hp.ft_type != "elmo":
             self.dec = DecoderLSTM(dim, self.hp.hidden_size, len(index))

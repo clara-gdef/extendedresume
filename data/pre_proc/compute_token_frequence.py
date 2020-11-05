@@ -21,16 +21,16 @@ def main(args):
         ds_train = TextGenerationDataset(CFG["gpudatadir"], None, None, "TRAIN", args.ft_type, None, None, 0, True)
         token_count = Counter()
         for prof in tqdm(ds_train.tuples, desc="Parsong dataset..."):
-            fj_ind = prof[2]
+            fj_ind = prof["first_job"]
             for tok in fj_ind:
-                if tok != index["PAD"]:
-                    token_count[tok] += 1
-        ipdb.set_trace()
-        all_tokens = sum(token_count.values())
+                token_count[tok] += 1
+        all_tokens = sum(token_count.values()) - token_count[index["PAD"]]
         frequencies = torch.zeros(1, len(index))
         for num, tok in enumerate(token_count.keys()):
-            frequencies[:, num] = token_count[tok] / all_tokens
-
+            if tok != index["PAD"]:
+                frequencies[:, num] = token_count[tok] / all_tokens
+        with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "wb") as f:
+            pkl.dump(frequencies, f)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

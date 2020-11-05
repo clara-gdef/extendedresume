@@ -37,6 +37,9 @@ def main(hparams):
     datasets = load_datasets(hparams, ["TRAIN", "TRAIN"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
+    with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "rb") as f:
+        frqc = pkl.load(f)
+
     tmp = dataset_train.tuples
     for i in range(3):
         dataset_train.tuples.extend(tmp)
@@ -53,6 +56,7 @@ def main(hparams):
     print("Dataloaders initiated.")
     arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_train.index,
+                 "class_weights": frqc,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams,
                  "elmo": None}
