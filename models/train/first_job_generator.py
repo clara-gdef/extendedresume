@@ -41,7 +41,7 @@ def main(hparams):
         frqc = pkl.load(f)
 
     tmp = dataset_train.tuples
-    for i in range(3):
+    for i in range(1):
         dataset_train.tuples.extend(tmp)
 
     if hparams.ft_type != 'elmo':
