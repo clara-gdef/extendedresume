@@ -12,6 +12,9 @@ class FirstJobPredictor(pl.LightningModule):
         self.datadir = datadir
         self.hp = hparams
         self.index = index
+        # dirty trick : under weigh the "UNK" token class
+        class_weights = torch.ones(300)
+        class_weights[4] = .01
         self.class_weight = class_weights.cuda()
 
         if self.hp.ft_type != "elmo":
