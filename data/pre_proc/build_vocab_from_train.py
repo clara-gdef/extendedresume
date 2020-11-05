@@ -7,7 +7,7 @@ import yaml
 from tqdm import tqdm
 from allennlp.modules.elmo import Elmo
 import fastText
-from utils.pre_processing import build_word_set
+from utils.pre_processing import build_word_count
 import ipdb
 from allennlp.modules.elmo import batch_to_ids
 from collections import Counter
@@ -22,7 +22,10 @@ def main(args):
         input_file = os.path.join(CFG["gpudatadir"], args.base_file + "_TRAIN.json")
 
         if args.build_vocab == "True":
-            word_list = build_word_set(input_file, CFG["gpudatadir"], args.max_voc_len)
+            word_count = build_word_count(input_file)
+            word_list = [x[0] for x in word_count.most_common(CFG["max_voc_len"])]
+            with open(os.path.join(CFG["gpudatadir"], "vocab_40k.pkl"), "wb") as f:
+                pkl.dump(word_list, f)
         else:
             with open(os.path.join(CFG["gpudatadir"], "vocab_40k.pkl"), "rb") as f:
                 word_list = pkl.load(f)
@@ -37,8 +40,9 @@ def main(args):
             elmo = Elmo(options_file, weight_file, 2, dropout=0)
             embedder = elmo.cuda()
 
-        build_index_and_tensor(word_list, embedder, args)
-
+        w2i_updated = build_index_and_tensor(word_list, embedder, args)
+        with open(os.path.join(CFG["gpudatadir"], "index_40k.pkl"), "wb") as f:
+            pkl.dump(w2i_updated, f)
 
 
 def build_index_and_tensor(word_list, embedder, args):
@@ -62,8 +66,7 @@ def build_index_and_tensor(word_list, embedder, args):
     print(len(word_to_index))
     with open(os.path.join(CFG["gpudatadir"], "tensor_40k_" + args.ft_type + ".pkl"), "wb") as f:
         pkl.dump(tensor_updated, f)
-    with open(os.path.join(CFG["gpudatadir"], "index_40k_" + args.ft_type + ".pkl"), "wb") as f:
-        pkl.dump(w2i_updated, f)
+    return w2i_updated
 
 
 def build_special_tokens(word_to_index, dim):
@@ -98,7 +101,6 @@ if __name__ == '__main__':
     parser.add_argument("--base_file", type=str, default="bp_3jobs_desc_edu_skills_industry_date_company_FR")
     parser.add_argument("--ft_type", type=str, default="fs")
     parser.add_argument("--build_vocab", type=str, default="False")
-    parser.add_argument("--max_voc_len", type=int, default=40000)
     parser.add_argument("--min_occurence", type=int, default=5)
     args = parser.parse_args()
     main(args)

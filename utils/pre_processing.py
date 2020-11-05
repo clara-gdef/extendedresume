@@ -110,7 +110,7 @@ def to_elmo_emb(edu_list, elmo):
     return new_ed_tensor
 
 
-def build_word_set(input_file, data_dir, max_voc_len):
+def build_word_count(input_file):
     word_count = Counter()
     number_regex = re.compile(r'\d+(,\d+)?')
     with open(input_file, 'r') as f:
@@ -129,11 +129,4 @@ def build_word_set(input_file, data_dir, max_voc_len):
                         word_count[word] += 1
             pbar.update(1)
 
-    word_list = [x[0] for x in word_count.most_common(max_voc_len)]
-    ipdb.set_trace()
-
-    with open(os.path.join(data_dir, "vocab_40k.pkl"), "wb") as f:
-        pkl.dump(word_list, f)
-
-
-    return word_list
+    return word_count
