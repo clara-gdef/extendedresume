@@ -1,5 +1,7 @@
 import glob
 import os
+
+import torch
 from allennlp.modules.elmo import Elmo
 import pickle as pkl
 import ipdb
@@ -53,12 +55,15 @@ def main(hparams):
                               num_workers=0, shuffle=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0)
+    hidden_state = (torch.zeros(1, hparams.b_size, hparams.hidden_size),
+                torch.zeros(1, hparams.b_size, hparams.hidden_size))
     print("Dataloaders initiated.")
     arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_train.index,
                  "class_weights": frqc,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams,
+                 "hidden_state": hidden_state,
                  "elmo": None}
     if hparams.ft_type == "elmo":
         options_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json"

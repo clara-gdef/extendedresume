@@ -7,11 +7,12 @@ from models.classes import DecoderLSTM, DecoderWithElmo
 
 
 class FirstJobPredictor(pl.LightningModule):
-    def __init__(self, dim, datadir, index, elmo, class_weights, hparams):
+    def __init__(self, dim, datadir, index, elmo, class_weights, hidden_state, hparams):
         super().__init__()
         self.datadir = datadir
         self.hp = hparams
         self.index = index
+        self.hidden_state = hidden_state
         # # dirty trick : under weigh the "UNK" token class
         # class_weights = torch.ones(40005)
         # class_weights[4] = 10
@@ -41,7 +42,8 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
+                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
+                self.hidden_state = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             loss = tmp / (fj.shape[0] + fj.shape[1])
@@ -76,7 +78,8 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
+                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
+                self.hidden_state = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             val_loss = tmp / (fj.shape[0] + fj.shape[1])
