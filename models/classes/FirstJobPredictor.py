@@ -39,7 +39,7 @@ class FirstJobPredictor(pl.LightningModule):
         dec_outputs = []
         tmp = 0
         num_words = 0
-        ipdb.set_trace()
+        # ipdb.set_trace()
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
@@ -55,16 +55,17 @@ class FirstJobPredictor(pl.LightningModule):
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
         ############
-        rev_index = {v: k for k, v in self.index.items()}
-        ipdb.set_trace()
-        outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
-        if batch_nb == 0:
-            print("PREDICTION")
-            pred = ""
-            for w in outputs[-1]:
-                word = torch.argmax(w)
-                pred += rev_index[word.item()] + " "
-            print(pred)
+        # rev_index = {v: k for k, v in self.index.items()}
+        # ipdb.set_trace()
+        # outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
+        # if batch_nb == 0:
+        #     print("PREDICTION")
+        #     pred = ""
+        #     for w in outputs[-1]:
+        #         word = torch.argmax(w, dim=-1)
+        #         pred += rev_index[word.item()] + " "
+        #     print(pred)
+        #############
         loss = tmp / num_words
         self.log('loss_CE', loss)
         return {'loss': loss}
