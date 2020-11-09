@@ -82,9 +82,6 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
-            edu = mini_batch[1].unsqueeze(1)
-            fj = mini_batch[-2]
-            num_words += sum(mini_batch[-1])
             dec_output, hs = self.forward(edu, fj[:, 1:].unsqueeze(1), self.hidden_state)
             self.hidden_state = hs
             dec_outputs.append(dec_output)
