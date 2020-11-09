@@ -45,14 +45,13 @@ class FirstJobPredictor(pl.LightningModule):
                 self.hidden_state = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
-            loss = tmp / (fj.shape[0] + fj.shape[1])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
-        rev_index = {v: k for k, v in self.index.items()}
         ############
+        rev_index = {v: k for k, v in self.index.items()}
         outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
         if batch_nb == 0:
             print("PREDICTION")
@@ -61,14 +60,8 @@ class FirstJobPredictor(pl.LightningModule):
                 word = torch.argmax(w)
                 pred += rev_index[word.item()] + " "
             print(pred)
-        # print("LABEL")
-        # lab = ""
-        # for w in fj[0]:
-        #     lab += rev_index[w.item()] + " "
-        # print(lab)
-        ############
-        tensorboard_logs = {'loss_CE': loss}
-        return {'loss': loss, 'log': tensorboard_logs}
+        tensorboard_logs = {'loss_CE': tmp / (fj.shape[0] + fj.shape[1])}
+        return {'loss': tmp / (fj.shape[0] + fj.shape[1]), 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
         dec_outputs = []
