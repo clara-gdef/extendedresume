@@ -35,6 +35,7 @@ class FirstJobPredictor(pl.LightningModule):
         return decoder_output, decoder_hidden
 
     def training_step(self, mini_batch, batch_nb):
+        print("BATCH NUM : " + str(batch_nb))
         dec_outputs = []
         tmp = 0
         num_words = 0
@@ -64,8 +65,8 @@ class FirstJobPredictor(pl.LightningModule):
                 pred += rev_index[word.item()] + " "
             print(pred)
         loss = tmp / num_words
-        tensorboard_logs = {'loss_CE': loss}
-        return {'loss': loss, 'log': tensorboard_logs}
+        self.log('loss_CE', loss)
+        return {'loss': loss}
 
     def validation_step(self, mini_batch, batch_nb):
         dec_outputs = []
@@ -87,8 +88,8 @@ class FirstJobPredictor(pl.LightningModule):
             dec_outputs = self.forward(edu, fj)
 
         val_loss = tmp / num_words
-        tensorboard_logs = {'val_CE': val_loss}
-        return {'val_loss': val_loss, 'log': tensorboard_logs}
+        self.log('val_loss_CE', val_loss)
+        return {'val_loss': val_loss}
 
     def validation_epoch_end(self, outputs):
         return outputs[-1]
