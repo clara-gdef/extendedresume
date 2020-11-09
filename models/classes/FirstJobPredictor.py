@@ -56,6 +56,7 @@ class FirstJobPredictor(pl.LightningModule):
             dec_outputs = self.forward(edu, fj_lab)
         ############
         rev_index = {v: k for k, v in self.index.items()}
+        ipdb.set_trace()
         outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
         if batch_nb == 0:
             print("PREDICTION")
