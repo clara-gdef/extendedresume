@@ -37,15 +37,17 @@ class FirstJobPredictor(pl.LightningModule):
     def training_step(self, mini_batch, batch_nb):
         dec_outputs = []
         tmp = 0
+        num_words = 0
         ipdb.set_trace()
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
+            num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
                 self.hidden_state = hs
                 dec_outputs.append(dec_output)
-                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
@@ -61,27 +63,30 @@ class FirstJobPredictor(pl.LightningModule):
                 word = torch.argmax(w)
                 pred += rev_index[word.item()] + " "
             print(pred)
-        tensorboard_logs = {'loss_CE': tmp / (fj.shape[0] + fj.shape[1])}
-        return {'loss': tmp / (fj.shape[0] + fj.shape[1]), 'log': tensorboard_logs}
+        loss = tmp / num_words
+        tensorboard_logs = {'loss_CE': loss}
+        return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
         dec_outputs = []
         tmp = 0
+        num_words = 0
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
+            num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
                 self.hidden_state = hs
                 dec_outputs.append(dec_output)
-                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
-            val_loss = tmp / (fj.shape[0] + fj.shape[1])
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj)
 
+        val_loss = tmp / num_words
         tensorboard_logs = {'val_CE': val_loss}
         return {'val_loss': val_loss, 'log': tensorboard_logs}
 
