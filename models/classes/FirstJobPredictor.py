@@ -39,16 +39,20 @@ class FirstJobPredictor(pl.LightningModule):
         dec_outputs = []
         tmp = 0
         num_words = 0
-        # ipdb.set_trace()
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
-            for num_tokens in range(fj.shape[1] - 1):
-                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
-                self.hidden_state = hs
-                dec_outputs.append(dec_output)
-                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
+            dec_output, hs = self.forward(edu, fj[:, 1:].unsqueeze(1), self.hidden_state)
+            self.hidden_state = hs
+            dec_outputs.append(dec_output)
+            tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, 1:], ignore_index=0,
+                                                     reduction="sum")
+            # for num_tokens in range(fj.shape[1] - 1):
+            #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
+            #     self.hidden_state = hs
+            #     dec_outputs.append(dec_output)
+            #     tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
@@ -78,11 +82,18 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
-            for num_tokens in range(fj.shape[1] - 1):
-                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
-                self.hidden_state = hs
-                dec_outputs.append(dec_output)
-                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
+            edu = mini_batch[1].unsqueeze(1)
+            fj = mini_batch[-2]
+            num_words += sum(mini_batch[-1])
+            dec_output, hs = self.forward(edu, fj[:, 1:].unsqueeze(1), self.hidden_state)
+            self.hidden_state = hs
+            dec_outputs.append(dec_output)
+            tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, 1:], ignore_index=0,
+            # for num_tokens in range(fj.shape[1] - 1):
+            #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
+            #     self.hidden_state = hs
+            #     dec_outputs.append(dec_output)
+            #     tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
