@@ -137,9 +137,8 @@ class FirstJobPredictor(pl.LightningModule):
 
         with open(lab_file, 'a') as f:
             for sentence in self.label_tokens_test:
-                for w in sentence[1:]:
-                    if w != 'PAD':
-                        f.write(rev_index[w] + ' ')
+                for w in sentence:
+                    f.write(rev_index[w] + ' ')
                 f.write("\n")
         ipdb.set_trace()
         cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ''
