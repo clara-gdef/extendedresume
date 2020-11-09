@@ -7,12 +7,11 @@ from models.classes import DecoderLSTM, DecoderWithElmo
 
 
 class FirstJobPredictor(pl.LightningModule):
-    def __init__(self, dim, datadir, index, elmo, class_weights, hidden_state, hparams):
+    def __init__(self, dim, datadir, index, elmo, class_weights, hparams):
         super().__init__()
         self.datadir = datadir
         self.hp = hparams
         self.index = index
-        self.hidden_state = hidden_state
         # # dirty trick : under weigh the "UNK" token class
         # class_weights = torch.ones(40005)
         # class_weights[4] = 10
@@ -30,80 +29,65 @@ class FirstJobPredictor(pl.LightningModule):
         self.decoded_tokens_test = []
         self.label_tokens_test = []
 
-    def forward(self, profile, fj, hs):
-        decoder_output, decoder_hidden = self.dec.forward(profile, fj, hs)
-        return decoder_output, decoder_hidden
+    def forward(self, profile, fj):
+        decoder_output, decoder_hidden = self.dec.forward(profile, fj)
+        self.decoded_tokens.append(decoder_output.argmax(-1))
+        return decoder_output
 
     def training_step(self, mini_batch, batch_nb):
-        print("BATCH NUM : " + str(batch_nb))
         dec_outputs = []
         tmp = 0
-        num_words = 0
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            num_words += sum(mini_batch[-1])
-            dec_output, hs = self.forward(edu, fj[:, 1:].unsqueeze(1), self.hidden_state)
-            self.hidden_state = hs
-            dec_outputs.append(dec_output)
-            transformed_outs = dec_output.view(-1, len(self.index))
-            tmp += torch.nn.functional.cross_entropy(transformed_outs,
-                                                     fj[:, 1:].view(transformed_outs.shape[0]), ignore_index=0, reduction="sum")
-            # for num_tokens in range(fj.shape[1] - 1):
-            #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
-            #     self.hidden_state = hs
-            #     dec_outputs.append(dec_output)
-            #     tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
+            for num_tokens in range(fj.shape[1] - 1):
+                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
+                dec_outputs.append(dec_output)
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
+            loss = tmp / (fj.shape[0] + fj.shape[1])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
+        rev_index = {v: k for k, v in self.index.items()}
         ############
-        # rev_index = {v: k for k, v in self.index.items()}
-        # ipdb.set_trace()
-        # outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
-        # if batch_nb == 0:
-        #     print("PREDICTION")
-        #     pred = ""
-        #     for w in outputs[-1]:
-        #         word = torch.argmax(w, dim=-1)
-        #         pred += rev_index[word.item()] + " "
-        #     print(pred)
-        #############
-        loss = tmp / num_words
-        self.log('loss_CE', loss)
-        return {'loss': loss}
+        outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
+        if batch_nb == 10:
+            print("PREDICTION")
+            pred = ""
+            for w in outputs[-1]:
+                word = torch.argmax(w)
+                pred += rev_index[word.item()] + " "
+            print(pred)
+        # print("LABEL")
+        # lab = ""
+        # for w in fj[0]:
+        #     lab += rev_index[w.item()] + " "
+        # print(lab)
+        ############
+        tensorboard_logs = {'loss_CE': loss}
+        return {'loss': loss, 'log': tensorboard_logs}
 
     def validation_step(self, mini_batch, batch_nb):
         dec_outputs = []
         tmp = 0
-        num_words = 0
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
-            num_words += sum(mini_batch[-1])
-            dec_output, hs = self.forward(edu, fj[:, 1:].unsqueeze(1), self.hidden_state)
-            self.hidden_state = hs
-            dec_outputs.append(dec_output)
-            transformed_outs = dec_output.view(-1, len(self.index))
-            tmp += torch.nn.functional.cross_entropy(transformed_outs,
-                                                     fj[:, 1:].view(transformed_outs.shape[0]), ignore_index=0, reduction="sum")
-            # for num_tokens in range(fj.shape[1] - 1):
-            #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
-            #     self.hidden_state = hs
-            #     dec_outputs.append(dec_output)
-            #     tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0, reduction="sum")
+            for num_tokens in range(fj.shape[1] - 1):
+                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
+                dec_outputs.append(dec_output)
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
+            val_loss = tmp / (fj.shape[0] + fj.shape[1])
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj)
 
-        val_loss = tmp / num_words
-        self.log('val_loss_CE', val_loss)
-        return {'val_loss': val_loss}
-
+        tensorboard_logs = {'val_CE': val_loss}
+        return {'val_loss': val_loss, 'log': tensorboard_logs}
 
     def validation_epoch_end(self, outputs):
         return outputs[-1]
@@ -126,7 +110,7 @@ class FirstJobPredictor(pl.LightningModule):
             tok_tensor = torch.LongTensor(1, 1)
             tok_tensor[:, 0] = token
             output, decoder_hidden = self.dec(edu, tok_tensor)
-            dec_word = torch.argmax(output, dim=-1).item()
+            dec_word = output.argmax(-1).item()
             dec.append(dec_word)
             lab.append(fj[0][i].item())
             token = dec_word
@@ -134,25 +118,18 @@ class FirstJobPredictor(pl.LightningModule):
         self.label_tokens_test.append(lab)
 
     def test_epoch_end(self, outputs):
-        pred_file = os.path.join(self.datadir, "pred_ft_" + self.hp.ft_type + ".txt")
-        lab_file = os.path.join(self.datadir, "label_ft_" + self.hp.ft_type + ".txt")
-        if os.path.isfile(pred_file):
-            os.system("rm " + pred_file)
-            print("Removed previous pred file.")
-        if os.path.isfile(lab_file):
-            os.system("rm " + lab_file)
-            print("Removed previous lable file.")
-
         rev_index = {v: k for k, v in self.index.items()}
 
+        pred_file = os.path.join(self.datadir, "pred_ft_" + self.hp.ft_type + ".txt")
         with open(pred_file, 'a') as f:
             for sentence in self.decoded_tokens_test:
                 for w in sentence:
                     f.write(rev_index[w] + ' ')
                 f.write("\n")
 
+        lab_file = os.path.join(self.datadir, "label_ft_" + self.hp.ft_type + ".txt")
         with open(lab_file, 'a') as f:
-            for sentence in self.label_tokens_test:
+            for sentence in self.label_tokens_test[1:]:
                 for w in sentence:
                     f.write(rev_index[w] + ' ')
                 f.write("\n")
