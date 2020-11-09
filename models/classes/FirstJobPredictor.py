@@ -46,8 +46,9 @@ class FirstJobPredictor(pl.LightningModule):
             dec_output, hs = self.forward(edu, fj[:, 1:].unsqueeze(1), self.hidden_state)
             self.hidden_state = hs
             dec_outputs.append(dec_output)
-            tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, 1:], ignore_index=0,
-                                                     reduction="sum")
+            transformed_outs = dec_output.view(-1, len(self.index))
+            tmp += torch.nn.functional.cross_entropy(transformed_outs,
+                                                     fj[:, 1:].view(transformed_outs.shape[0]), ignore_index=0, reduction="sum")
             # for num_tokens in range(fj.shape[1] - 1):
             #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
             #     self.hidden_state = hs
@@ -85,7 +86,9 @@ class FirstJobPredictor(pl.LightningModule):
             dec_output, hs = self.forward(edu, fj[:, 1:].unsqueeze(1), self.hidden_state)
             self.hidden_state = hs
             dec_outputs.append(dec_output)
-            tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, 1:], ignore_index=0, reduction="sum")
+            transformed_outs = dec_output.view(-1, len(self.index))
+            tmp += torch.nn.functional.cross_entropy(transformed_outs,
+                                                     fj[:, 1:].view(transformed_outs.shape[0]), ignore_index=0, reduction="sum")
             # for num_tokens in range(fj.shape[1] - 1):
             #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hidden_state)
             #     self.hidden_state = hs
