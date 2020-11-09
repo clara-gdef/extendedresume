@@ -63,7 +63,7 @@ class TextGenerationDataset(Dataset):
         self.max_seq_length = dico["max_seq_length"]
         ##################
         if subsample > 0:
-            np.random.shuffle(dico["tuples"])
+            #np.random.shuffle(dico["tuples"])
             self.tuples = dico["tuples"][:subsample]
         else:
             self.tuples = dico["tuples"]

@@ -32,7 +32,7 @@ def main(hparams):
                          max_epochs=hparams.epochs,
                          logger=logger
                          )
-    datasets = load_datasets(hparams, ["TEST"])
+    datasets = load_datasets(hparams, ["TRAIN"])
     dataset_test = datasets[0]
 
     if hparams.ft_type != 'elmo':
@@ -40,8 +40,7 @@ def main(hparams):
     else:
         collate = collate_for_text_gen_elmo
 
-    test_loader = DataLoader(dataset_test, batch_size=1, collate_fn=collate,
-                              num_workers=0, shuffle=True)
+    test_loader = DataLoader(dataset_test, batch_size=1, collate_fn=collate, num_workers=0)
     print("Dataloaders initiated.")
     arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_test.index,
