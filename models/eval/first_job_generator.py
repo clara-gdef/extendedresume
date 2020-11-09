@@ -47,6 +47,7 @@ def main(hparams):
                  "index": dataset_test.index,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams,
+                 "class_weights": None,
                  "elmo": None}
     if hparams.ft_type == "elmo":
         options_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json"

@@ -33,7 +33,6 @@ def main(hparams):
                          logger=logger,
                          auto_lr_find=False
                          )
-    #TODO : replace by TRAIN
     datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
@@ -65,7 +64,7 @@ def load_datasets(hparams, splits):
         "load": (hparams.load_dataset == "True")
     }
     for split in splits:
-        if hparams.ft_type !=  "elmo":
+        if hparams.ft_type != "elmo":
             common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_" + split + ".pkl")
         else:
             common_hparams["input_file"] = os.path.join(CFG["gpudatadir"], "flat_profiles_dataset_elmo_" + split + ".pkl")
@@ -108,7 +107,7 @@ def init_lightning(hparams, xp_title):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ft_type", type=str, default='fs')
-    parser.add_argument("--gpus", type=int, default=1)
+    parser.add_argument("--gpus", type=int, default=0)
     parser.add_argument("--b_size", type=int, default=16)
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--load_dataset", default="True")
