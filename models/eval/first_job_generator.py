@@ -26,7 +26,7 @@ def init(hparams):
 
 
 def main(hparams):
-    xp_title = hparams.model_type + "_" + hparams.ft_type + "_" + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
+    xp_title = hparams.model_type + "_" + hparams.ft_type + "_" + str(hparams.b_size) + "_" + str(hparams.lr) + "_" + str(hparams.hidden_size) + '_' + str(hparams.wd)
     logger = init_lightning(hparams, xp_title)
     trainer = pl.Trainer(gpus=[hparams.gpus],
                          max_epochs=hparams.epochs,
