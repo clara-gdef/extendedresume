@@ -91,6 +91,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.log('val_loss_CE', val_loss)
         return {'val_loss': val_loss}
 
+
     def validation_epoch_end(self, outputs):
         return outputs[-1]
 
