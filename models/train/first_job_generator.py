@@ -1,7 +1,5 @@
 import glob
 import os
-
-import torch
 from allennlp.modules.elmo import Elmo
 import pickle as pkl
 import ipdb
@@ -42,9 +40,9 @@ def main(hparams):
     with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "rb") as f:
         frqc = pkl.load(f)
 
-    # tmp = dataset_train.tuples
-    # for i in range(1):
-    #     dataset_train.tuples.extend(tmp)
+    tmp = dataset_train.tuples
+    for i in range(1):
+        dataset_train.tuples.extend(tmp)
 
     if hparams.ft_type != 'elmo':
         collate = collate_for_text_gen
@@ -55,15 +53,12 @@ def main(hparams):
                               num_workers=0, shuffle=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
                               num_workers=0)
-    hidden_state = (torch.zeros(1, hparams.b_size, hparams.hidden_size).cuda(),
-                torch.zeros(1, hparams.b_size, hparams.hidden_size).cuda())
     print("Dataloaders initiated.")
     arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_train.index,
                  "class_weights": frqc,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams,
-                 "hidden_state": hidden_state,
                  "elmo": None}
     if hparams.ft_type == "elmo":
         options_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json"
