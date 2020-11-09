@@ -53,7 +53,7 @@ class FirstJobPredictor(pl.LightningModule):
         rev_index = {v: k for k, v in self.index.items()}
         ############
         outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
-        if batch_nb == 10:
+        if batch_nb == 0:
             print("PREDICTION")
             pred = ""
             for w in outputs[-1]:
@@ -110,7 +110,7 @@ class FirstJobPredictor(pl.LightningModule):
             tok_tensor = torch.LongTensor(1, 1)
             tok_tensor[:, 0] = token
             output, decoder_hidden = self.dec(edu, tok_tensor)
-            dec_word = output.argmax(-1).item()
+            dec_word = torch.argmax(output, dim=-1).item()
             dec.append(dec_word)
             lab.append(fj[0][i].item())
             token = dec_word
@@ -118,20 +118,28 @@ class FirstJobPredictor(pl.LightningModule):
         self.label_tokens_test.append(lab)
 
     def test_epoch_end(self, outputs):
+        pred_file = os.path.join(self.datadir, "pred_ft_" + self.hp.ft_type + ".txt")
+        lab_file = os.path.join(self.datadir, "label_ft_" + self.hp.ft_type + ".txt")
+        if os.path.isfile(pred_file):
+            os.system("rm " + pred_file)
+            print("Removed previous pred file.")
+        if os.path.isfile(lab_file):
+            os.system("rm " + lab_file)
+            print("Removed previous lable file.")
+
         rev_index = {v: k for k, v in self.index.items()}
 
-        pred_file = os.path.join(self.datadir, "pred_ft_" + self.hp.ft_type + ".txt")
         with open(pred_file, 'a') as f:
             for sentence in self.decoded_tokens_test:
                 for w in sentence:
                     f.write(rev_index[w] + ' ')
                 f.write("\n")
 
-        lab_file = os.path.join(self.datadir, "label_ft_" + self.hp.ft_type + ".txt")
         with open(lab_file, 'a') as f:
-            for sentence in self.label_tokens_test[1:]:
-                for w in sentence:
-                    f.write(rev_index[w] + ' ')
+            for sentence in self.label_tokens_test:
+                for w in sentence[:1]:
+                    if w != 'PAD':
+                        f.write(rev_index[w] + ' ')
                 f.write("\n")
         ipdb.set_trace()
         cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ''
