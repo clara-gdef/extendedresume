@@ -71,6 +71,8 @@ def word_seq_into_list(position, description, index):
     for tok in job:
         if re.match(number_regex, tok):
             new_tup.append("NUM")
+        elif tok == "SOI":
+            new_tup.append(tok)
         else:
             new_tup.append(tok.lower())
     if index is not None:
