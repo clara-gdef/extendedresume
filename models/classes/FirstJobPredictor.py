@@ -47,7 +47,6 @@ class FirstJobPredictor(pl.LightningModule):
             num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
-                self.hs = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             loss = tmp / num_words
@@ -87,7 +86,6 @@ class FirstJobPredictor(pl.LightningModule):
             num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
-                self.hs = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             val_loss = tmp / num_words
@@ -104,7 +102,7 @@ class FirstJobPredictor(pl.LightningModule):
         return outputs[-1]
 
     def configure_optimizers(self):
-        return torch.optim.SGD(self.parameters(), lr=self.hp.lr, weight_decay=self.hp.wd)
+        return torch.optim.Adam(self.parameters(), lr=self.hp.lr, weight_decay=self.hp.wd)
 
     def test_step(self, mini_batch, batch_idx):
         if self.hp.ft_type != "elmo":
