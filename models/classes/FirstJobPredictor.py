@@ -12,6 +12,8 @@ class FirstJobPredictor(pl.LightningModule):
         self.datadir = datadir
         self.hp = hparams
         self.index = index
+        self.hs = (torch.zeros(self.hp.hidden_size), torch.zeros(self.hp.hidden_size))
+
         # # dirty trick : under weigh the "UNK" token class
         # class_weights = torch.ones(40005)
         # class_weights[4] = 10
@@ -29,10 +31,10 @@ class FirstJobPredictor(pl.LightningModule):
         self.decoded_tokens_test = []
         self.label_tokens_test = []
 
-    def forward(self, profile, fj):
-        decoder_output, decoder_hidden = self.dec.forward(profile, fj)
+    def forward(self, profile, fj, hidden):
+        decoder_output, decoder_hidden = self.dec.forward(profile, fj, hidden)
         self.decoded_tokens.append(decoder_output.argmax(-1))
-        return decoder_output
+        return decoder_output, decoder_hidden
 
     def training_step(self, mini_batch, batch_nb):
         dec_outputs = []
@@ -43,7 +45,8 @@ class FirstJobPredictor(pl.LightningModule):
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
+                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hs)
+                self.hs = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             loss = tmp / num_words
@@ -80,7 +83,8 @@ class FirstJobPredictor(pl.LightningModule):
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output = self.forward(edu, fj[:, num_tokens].unsqueeze(1))
+                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hs)
+                self.hs = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             val_loss = tmp / num_words
