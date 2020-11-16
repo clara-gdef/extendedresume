@@ -46,7 +46,6 @@ def main(hparams):
                  "index": dataset_test.index,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams,
-                 "hidden_state": None,
                  "class_weights": None,
                  "elmo": None}
     if hparams.ft_type == "elmo":
