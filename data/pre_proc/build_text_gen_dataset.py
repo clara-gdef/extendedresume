@@ -33,7 +33,7 @@ def main(args):
             embedder = fastText.load_model(os.path.join(CFG["modeldir"], "ft_pre_trained.bin"))
         print("Word vectors loaded.")
 
-        for split in ["_TEST", "_VALID", "_TRAIN"]:
+        for split in ["_VALID", "_TRAIN"]:
             input_file = os.path.join(CFG["gpudatadir"], args.base_file + split + ".json")
             TextGenerationDataset(CFG["gpudatadir"], input_file, index, split, args.ft_type, args.max_seq_length, embedder, 0, load)
 
