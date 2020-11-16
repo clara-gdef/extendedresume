@@ -34,7 +34,7 @@ def main(hparams):
                          logger=logger
                          )
     ### TODO remove double train to replace with valid
-    datasets = load_datasets(hparams, ["TRAIN", "TRAIN"])
+    datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "rb") as f:
@@ -129,7 +129,7 @@ def init_lightning(hparams, xp_title):
     early_stop_callback = EarlyStopping(
         monitor='val_loss',
         min_delta=0.00000,
-        patience=10,
+        patience=hparams.epochs / 5,
         verbose=False,
         mode='min'
     )
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", type=int, default=45)
     parser.add_argument("--DEBUG", type=bool, default=False)
     parser.add_argument("--model_type", type=str, default="fj_gen")
-    parser.add_argument("--lr", type=float, default=1e-1)
+    parser.add_argument("--lr", type=float, default=1e-2)
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--dpo", type=float, default=0.2)
     parser.add_argument("--epochs", type=int, default=50)
