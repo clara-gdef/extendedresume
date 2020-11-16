@@ -12,7 +12,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.datadir = datadir
         self.hp = hparams
         self.index = index
-        self.hs = (torch.zeros(self.hp.hidden_size), torch.zeros(self.hp.hidden_size))
+        self.hs = (torch.zeros(1,self.hp.hidden_size), torch.zeros(1,self.hp.hidden_size))
 
         # # dirty trick : under weigh the "UNK" token class
         # class_weights = torch.ones(40005)
