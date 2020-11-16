@@ -71,9 +71,9 @@ class FirstJobPredictor(pl.LightningModule):
         # for w in fj[0]:
         #     lab += rev_index[w.item()] + " "
         # print(lab)
-        ############
-        tensorboard_logs = {'loss_CE': loss}
-        return {'loss': loss, 'log': tensorboard_logs}
+        ###########
+        self.log('loss_CE', loss)
+        return {'loss': loss}
 
     def validation_step(self, mini_batch, batch_nb):
         dec_outputs = []
@@ -97,8 +97,8 @@ class FirstJobPredictor(pl.LightningModule):
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj)
 
-        tensorboard_logs = {'val_CE': val_loss}
-        return {'val_loss': val_loss, 'log': tensorboard_logs}
+        self.log('val_CE', val_loss)
+        return {'val_loss': val_loss}
 
     def validation_epoch_end(self, outputs):
         return outputs[-1]
