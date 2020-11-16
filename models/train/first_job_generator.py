@@ -33,7 +33,6 @@ def main(hparams):
                          callbacks=[checkpoint_callback, early_stop_callback],
                          logger=logger
                          )
-    ### TODO remove double train to replace with valid
     datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
@@ -50,9 +49,9 @@ def main(hparams):
         collate = collate_for_text_gen_elmo
 
     train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
-                              num_workers=0, shuffle=True)
+                              num_workers=0, shuffle=True, drop_last=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
-                              num_workers=0)
+                              num_workers=0, drop_last=True)
     print("Dataloaders initiated.")
     arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_train.index,
