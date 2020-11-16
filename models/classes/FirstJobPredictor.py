@@ -12,6 +12,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.datadir = datadir
         self.hp = hparams
         self.index = index
+        ipdb.set_trace()
 
         # # dirty trick : under weigh the "UNK" token class
         # class_weights = torch.ones(40005)
