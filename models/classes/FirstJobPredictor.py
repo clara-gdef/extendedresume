@@ -12,8 +12,6 @@ class FirstJobPredictor(pl.LightningModule):
         self.datadir = datadir
         self.hp = hparams
         self.index = index
-        self.hs = (torch.zeros(1, self.hp.b_size, self.hp.hidden_size).cuda(),
-                   torch.zeros(1, self.hp.b_size, self.hp.hidden_size).cuda())
 
         # # dirty trick : under weigh the "UNK" token class
         # class_weights = torch.ones(40005)
@@ -41,12 +39,14 @@ class FirstJobPredictor(pl.LightningModule):
         dec_outputs = []
         tmp = 0
         num_words = 0
+        hs = (torch.zeros(1, self.hp.b_size, self.hp.hidden_size).cuda(),
+              torch.zeros(1, self.hp.b_size, self.hp.hidden_size).cuda())
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hs)
+                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
                 self.hs = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
@@ -79,12 +79,14 @@ class FirstJobPredictor(pl.LightningModule):
         dec_outputs = []
         tmp = 0
         num_words = 0
+        hs = (torch.zeros(1, self.hp.b_size, self.hp.hidden_size).cuda(),
+              torch.zeros(1, self.hp.b_size, self.hp.hidden_size).cuda())
         if self.hp.ft_type != "elmo":
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), self.hs)
+                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
                 self.hs = hs
                 dec_outputs.append(dec_output)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
