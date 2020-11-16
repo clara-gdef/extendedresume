@@ -98,6 +98,7 @@ class TextGenerationDataset(Dataset):
                 tokenized_first_job = word_seq_into_list(job_list[-1]["position"], job_list[-1]["description"], index)
                 if len(data[-2]) > 0:
                     if self.ft_type != "elmo":
+                        ipdb.set_trace()
                         new_edu = torch.mean(torch.from_numpy(handle_education_ft(data[-2], embedder)), dim=0)
                         first_job, job_len = word_list_to_indices(tokenized_first_job, index, max_seq_length)
                     else:
