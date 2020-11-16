@@ -59,7 +59,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_type", type=str, default="fj_gen")
     parser.add_argument("--hidden_size", type=int, default=50)
     parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument("--b_size", nargs='+', default=[16, 64, 128])
+    parser.add_argument("--b_size", nargs='+', default=[64, 128, 256])
     parser.add_argument("--lr", nargs='+', default=[1e-2, 1e-3, 1e-4])
     hparams = parser.parse_args()
     grid_search(hparams)
