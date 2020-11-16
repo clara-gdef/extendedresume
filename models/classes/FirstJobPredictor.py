@@ -111,14 +111,15 @@ class FirstJobPredictor(pl.LightningModule):
         else:
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[2]
-
+        hs = (torch.zeros(1, 1, self.hp.hidden_size).cuda(),
+              torch.zeros(1, 1, self.hp.hidden_size).cuda())
         token = self.index["SOD"]
         dec = []
         lab = []
         for i in range(len(fj[0])):
             tok_tensor = torch.LongTensor(1, 1)
             tok_tensor[:, 0] = token
-            output, decoder_hidden = self.dec(edu, tok_tensor)
+            output, hs = self.dec(edu, tok_tensor, hs)
             dec_word = output.argmax(-1).item()
             dec.append(dec_word)
             lab.append(fj[0][i].item())
