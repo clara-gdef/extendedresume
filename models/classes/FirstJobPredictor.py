@@ -130,14 +130,21 @@ class FirstJobPredictor(pl.LightningModule):
     def test_epoch_end(self, outputs):
         rev_index = {v: k for k, v in self.index.items()}
 
-        pred_file = os.path.join(self.datadir, "pred_ft_" + self.hp.ft_type + ".txt")
+        desc = self.hp.ft_type + '_' + str(self.hp.lr) + '_' + str(self.hp.b_size)
+        pred_file = os.path.join(self.datadir, "pred_ft_" + desc + ".txt")
+        lab_file = os.path.join(self.datadir, "label_ft_" + desc + ".txt")
+
+        if os.path.isfile(lab_file):
+            os.system('rm ' + lab_file)
+        if os.path.isfile(pred_file):
+            os.system('rm ' + pred_file)
+
         with open(pred_file, 'a') as f:
             for sentence in self.decoded_tokens_test:
                 for w in sentence:
                     f.write(rev_index[w] + ' ')
                 f.write("\n")
 
-        lab_file = os.path.join(self.datadir, "label_ft_" + self.hp.ft_type + ".txt")
         with open(lab_file, 'a') as f:
             for sentence in self.label_tokens_test[1:]:
                 for w in sentence:

@@ -58,7 +58,7 @@ def main(hparams):
 
     latest_file = get_latest_model(CFG["modeldir"], xp_title)
     print("Evaluating model " + latest_file)
-    trainer.test(model.cuda(), test_loader)
+    return trainer.test(model.cuda(), test_loader)
 
 
 def load_datasets(hparams, splits):
