@@ -151,6 +151,5 @@ class FirstJobPredictor(pl.LightningModule):
                     if rev_index[w] != "PAD":
                         f.write(rev_index[w] + ' ')
                 f.write("\n")
-        ipdb.set_trace()
-        cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ''
+        cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ' >> bleu_scores.txt'
         os.system(cmd_line)
