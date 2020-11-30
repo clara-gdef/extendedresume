@@ -56,21 +56,21 @@ class FirstJobPredictor(pl.LightningModule):
             fj_lab = mini_batch[-1][:, 1:]
             dec_outputs = self.forward(edu, fj_lab)
         rev_index = {v: k for k, v in self.index.items()}
-        ############
-        # outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
-        # if batch_nb == 0:
-        #     print("PREDICTION")
-        #     pred = ""
-        #     for w in outputs[-1]:
-        #         word = torch.argmax(w)
-        #         pred += rev_index[word.item()] + " "
-        #     print(pred)
-        # print("LABEL")
-        # lab = ""
-        # for w in fj[0]:
-        #     lab += rev_index[w.item()] + " "
-        # print(lab)
         ###########
+        outputs = torch.stack(dec_outputs).squeeze(2).transpose(1, 0)
+        if batch_nb == 0:
+            print("PREDICTION")
+            pred = ""
+            for w in outputs[-1]:
+                word = torch.argmax(w)
+                pred += rev_index[word.item()] + " "
+            print(pred)
+        print("LABEL")
+        lab = ""
+        for w in fj[0]:
+            lab += rev_index[w.item()] + " "
+        print(lab)
+        ##########
         self.log('loss_CE', loss)
         return {'loss': loss}
 
