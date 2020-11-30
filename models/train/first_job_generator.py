@@ -67,22 +67,22 @@ def main(hparams):
 
     model = FirstJobPredictor(**arguments)
 
-    # # Run learning rate finder
-    # lr_finder = trainer.tuner.lr_find(model, train_dataloader=train_loader, val_dataloaders=valid_loader)
-    #
-    # # Results can be found in
-    # print(lr_finder.results)
-    #
-    # # Plot with
-    # #fig = lr_finder.plot(suggest=True)
-    # #fig.show()
-    #
-    # # Pick point based on plot, or get suggestion
-    # new_lr = lr_finder.suggestion()
-    #
-    # # update hparams of the model
-    # model.hparams.lr = new_lr
-    # ipdb.set_trace()
+    # Run learning rate finder
+    lr_finder = trainer.tuner.lr_find(model, train_dataloader=train_loader, val_dataloaders=valid_loader)
+
+    # Results can be found in
+    print(lr_finder.results)
+
+    # Plot with
+    #fig = lr_finder.plot(suggest=True)
+    #fig.show()
+
+    # Pick point based on plot, or get suggestion
+    new_lr = lr_finder.suggestion()
+
+    # update hparams of the model
+    model.hparams.lr = new_lr
+    ipdb.set_trace()
 
     print("Model Loaded.")
     print("Starting training for model " + xp_title)
