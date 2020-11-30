@@ -51,7 +51,7 @@ def word_list_to_indices(word_list, index, max_seq_length):
             else:
                 indices.append(index["UNK"])
         else:
-            indices.append(index["EOI"])
+            indices.append(index["EOD"])
             break
     actual_len = len(indices)
     while len(indices) < max_seq_length:
@@ -63,20 +63,20 @@ def word_seq_into_list(position, description, index):
     number_regex = re.compile(r'\d+(,\d+)?')
     new_tup = []
     if index is not None:
-        new_tup.append("SOD")
-        whole_job = position.lower() + " SOI" + ' ' + description.lower()
+        new_tup.append("SOT")
+        whole_job = position.lower() + " SOD" + ' ' + description.lower()
     else:
         whole_job = position.lower() + ' ' + description.lower()
     job = word_tokenize(whole_job)
     for tok in job:
         if re.match(number_regex, tok):
             new_tup.append("NUM")
-        elif tok == "SOI":
+        elif tok == "SOD":
             new_tup.append(tok)
         else:
             new_tup.append(tok.lower())
     if index is not None:
-        new_tup.append("EOI")
+        new_tup.append("EOD")
     cleaned_tup = [item for item in new_tup if item != ""]
     return cleaned_tup
 
