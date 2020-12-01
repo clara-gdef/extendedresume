@@ -102,6 +102,7 @@ class FirstJobPredictor(pl.LightningModule):
         return outputs[-1]
 
     def configure_optimizers(self):
+        ipdb.set_trace()
         return torch.optim.Adam(self.parameters(), lr=self.hp.lr, weight_decay=self.hp.wd)
 
     def test_step(self, mini_batch, batch_idx):
