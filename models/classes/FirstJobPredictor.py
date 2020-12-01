@@ -98,11 +98,7 @@ class FirstJobPredictor(pl.LightningModule):
         self.log('val_CE', val_loss)
         return {'val_loss': val_loss}
 
-    def validation_epoch_end(self, outputs):
-        return outputs[-1]
-
     def configure_optimizers(self):
-        ipdb.set_trace()
         return torch.optim.Adam(self.parameters(), lr=self.hp.lr, weight_decay=self.hp.wd)
 
     def test_step(self, mini_batch, batch_idx):
