@@ -16,14 +16,17 @@ def grid_search(hparams):
             test_results[lr] = {}
             for b_size in hparams.b_size:
                 test_results[lr][int(b_size)] = {}
-                print("Grid Search for (lr=" + str(lr) + ", b_size=" + str(b_size) + ")")
-                dico['lr'] = lr
-                dico["b_size"] = b_size
-                arg = DotDict(dico)
-                if hparams.TRAIN == "True":
-                    train.first_job_generator.init(arg)
-                if hparams.EVAL == "True":
-                    test_results[lr][b_size] = eval.first_job_generator.init(arg)
+                for hs in hparams.hidden_size:
+                    test_results[lr][int(b_size)][int(hs)] = {}
+                    print("Grid Search for (lr=" + str(lr) + ", b_size=" + str(b_size) + ")")
+                    dico['lr'] = lr
+                    dico["b_size"] = b_size
+                    dico["hidden_size"] = hs
+                    arg = DotDict(dico)
+                    if hparams.TRAIN == "True":
+                        train.first_job_generator.init(arg)
+                    if hparams.EVAL == "True":
+                        test_results[lr][b_size] = eval.first_job_generator.init(arg)
         if hparams.EVAL == "True":
             res_path = os.path.join(CFG["gpudatadir"], "EVAL_gs_" + hparams.model_type + "_topK.pkl")
             with open(res_path, "wb") as f:
@@ -38,7 +41,6 @@ def init_args(hparams):
             "wd": 0.0,
             "DEBUG": hparams.DEBUG,
             "model_type": hparams.model_type,
-            "hidden_size": hparams.hidden_size,
             "subsample": hparams.subsample
             }
     return dico
@@ -52,14 +54,14 @@ if __name__ == "__main__":
     parser.add_argument("--gpus", type=int, default=0)
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--TRAIN", default="True")
-    parser.add_argument("--subsample", type=int, default=0)
+    parser.add_argument("--subsample", type=int, default=100)
     parser.add_argument("--EVAL", default="False")
     parser.add_argument("--ft_type", type=str, default='fs')
     parser.add_argument("--DEBUG", type=bool, default=False)
     parser.add_argument("--model_type", type=str, default="fj_gen")
-    parser.add_argument("--hidden_size", type=int, default=50)
+    parser.add_argument("--hidden_size", nargs='+', default=[50, 100, 200])
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--b_size", nargs='+', default=[64, 128, 256])
-    parser.add_argument("--lr", nargs='+', default=[1e-2, 1e-3, 1e-4])
+    parser.add_argument("--lr", nargs='+', default=[1e-6, 1e-7, 1e-8])
     hparams = parser.parse_args()
     grid_search(hparams)
