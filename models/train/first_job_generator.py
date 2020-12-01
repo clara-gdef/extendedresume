@@ -36,8 +36,9 @@ def main(hparams):
     datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
-    with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "rb") as f:
-        frqc = pkl.load(f)
+    print("dataset length: " +  str(len(dataset_train)))
+    # with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "rb") as f:
+    #     frqc = pkl.load(f)
 
     if hparams.ft_type != 'elmo':
         collate = collate_for_text_gen
@@ -51,7 +52,7 @@ def main(hparams):
     print("Dataloaders initiated.")
     arguments = {"dim": get_emb_dim(hparams),
                  "index": dataset_train.index,
-                 "class_weights": frqc,
+                 "class_weights": None,
                  "datadir": CFG["gpudatadir"],
                  "hparams": hparams,
                  "elmo": None}
