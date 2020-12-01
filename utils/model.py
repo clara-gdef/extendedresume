@@ -93,10 +93,10 @@ def get_metrics_for_skills(preds, labels, num_classes, handle):
     num_c = range(num_classes)
     res_dict = {
         "hamming_" + handle: hamming_loss(labels, preds) * 100,
-        "precision_" + handle: precision_score(labels, preds, average='micro',
+        "precision_" + handle: precision_score(labels, preds, average='weighted',
                                                labels=num_c, zero_division=0) * 100,
-        "recall_" + handle: recall_score(labels, preds, average='micro', labels=num_c, zero_division=0) * 100,
-        "f1_" + handle: f1_score(labels, preds, average='micro', labels=num_c, zero_division=0) * 100}
+        "recall_" + handle: recall_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100,
+        "f1_" + handle: f1_score(labels, preds, average='weighted', labels=num_c, zero_division=0) * 100}
     return res_dict
 
 
