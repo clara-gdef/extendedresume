@@ -39,10 +39,6 @@ def main(hparams):
     with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "rb") as f:
         frqc = pkl.load(f)
 
-    tmp = dataset_train.tuples
-    for i in range(1):
-        dataset_train.tuples.extend(tmp)
-
     if hparams.ft_type != 'elmo':
         collate = collate_for_text_gen
     else:
