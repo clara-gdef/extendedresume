@@ -65,12 +65,12 @@ class FirstJobPredictor(pl.LightningModule):
                 word = torch.argmax(w)
                 pred += rev_index[word.item()] + " "
             print(pred)
-        print("LABEL")
-        lab = ""
-        for w in fj[0]:
-            lab += rev_index[w.item()] + " "
-        print(lab)
-        ##########
+            print("LABEL")
+            lab = ""
+            for w in fj[0]:
+                lab += rev_index[w.item()] + " "
+            print(lab)
+            ##########
         self.log('loss_CE', loss)
         return {'loss': loss}
 
