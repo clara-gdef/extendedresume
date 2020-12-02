@@ -33,7 +33,7 @@ def main(hparams):
                          callbacks=[checkpoint_callback, early_stop_callback],
                          logger=logger
                          )
-    datasets = load_datasets(hparams, ["TRAIN", "TRAIN"])
+    datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
 
     print("dataset length: " +  str(len(dataset_train)))
