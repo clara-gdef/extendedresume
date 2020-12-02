@@ -19,7 +19,7 @@ def main(args):
                                     args.b_size) + "_" + str(args.lr) + ".pkl")
         with open(tgt_file, "rb") as f:
             res_dict = pkl.load(f)
-
+        print("Data loaded.")
         sk_preds = torch.stack(res_dict["sk"]["preds"])
         sk_labels = torch.stack(res_dict["sk"]["labels"])
         res = {}
@@ -31,7 +31,9 @@ def main(args):
         #     new_preds = get_preds_wrt_threshold(sk_preds, threshold)
         #     res[threshold] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), sk_labels.squeeze(1).cpu().numpy(), 523, "skills")
         th = 0.000227824674059067
+        print("Computing pred wrt threshold...")
         new_preds = get_preds_wrt_threshold(sk_preds, th)
+        print("Computing metrics wrt threshold...")
         res[th] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), sk_labels.squeeze(1).cpu().numpy(), 523, "skills")
         print(res)
         ipdb.set_trace()
