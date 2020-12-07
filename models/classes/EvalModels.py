@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 import pickle as pkl
 import os
-from utils.model import classes_to_one_hot, test_for_ind, test_for_skills
+from utils.model import classes_to_one_hot, test_for_ind, test_for_skills, get_preds_wrt_threshold
 from models.classes.SkillsPredictor import SkillsPredictor
 from models.classes.IndustryClassifier import IndustryClassifier
 
@@ -113,12 +113,13 @@ class EvalModels(pl.LightningModule):
         print("Outputs saved at: " + tgt_file)
 
     def get_outputs(self, test_loader):
+        th = 0.000227824674059067
         outputs = {}
         for ids, edu, sk_label, ind_label in tqdm(test_loader):
             skills_pred, ind_pred = self.forward(edu.cuda())
             outputs[ids] = {"id": ids,
                             "sk_lab": sk_label,
                             "ind_lab": ind_label,
-                            "sk_pred": skills_pred,
-                            "ind_pred": ind_pred}
+                            "sk_pred":  get_preds_wrt_threshold(skills_pred, th),
+                            "ind_pred": ind_pred.argmax(-1).item()}
         return outputs
