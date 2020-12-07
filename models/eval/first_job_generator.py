@@ -32,7 +32,7 @@ def main(hparams):
                          max_epochs=hparams.epochs,
                          logger=logger
                          )
-    datasets = load_datasets(hparams, ["TEST"])
+    datasets = load_datasets(hparams, ["TRAIN"])
     dataset_test = datasets[0]
 
     if hparams.ft_type != 'elmo':
