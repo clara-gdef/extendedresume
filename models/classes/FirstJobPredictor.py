@@ -117,7 +117,8 @@ class FirstJobPredictor(pl.LightningModule):
         dec = []
         lab = []
         tok_tensor = torch.LongTensor(1, 1)
-        for i in range(1, len(fj[0])):
+        ipdb.set_trace()
+        for i in range(fj.shape[1] - 1):
             tok_tensor[0, 0] = token
             output, hs = self.dec(edu, tok_tensor, hs)
             dec_word = output.argmax(-1).item()
@@ -148,9 +149,10 @@ class FirstJobPredictor(pl.LightningModule):
         with open(lab_file, 'a') as f:
             for sentence in self.label_tokens_test[1:]:
                 for w in sentence:
-                    if rev_index[w] != "PAD":
-                        f.write(rev_index[w] + ' ')
+                    # if rev_index[w] != "PAD":
+                    f.write(rev_index[w] + ' ')
                 f.write("\n")
-        cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ' >> bleu_scores_' + desc +  '.txt'
+        #cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ' >> bleu_scores_' + desc +  '.txt'
+        cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file
         ipdb.set_trace()
         os.system(cmd_line)
