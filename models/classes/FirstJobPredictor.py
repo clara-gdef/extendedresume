@@ -50,7 +50,7 @@ class FirstJobPredictor(pl.LightningModule):
             tokens = torch.LongTensor([self.index["SOT"]]).expand(self.hp.b_size).unsqueeze(1)
             for num_tokens in range(fj.shape[1] - 1):
                 # get pred
-                dec_output, hs = self.forward(edu, tokens.unsqueeze(1), hs)
+                dec_output, hs = self.forward(edu, tokens, hs)
                 dec_outputs.append(dec_output)
                 # if within teacher forcing range, next tokens will be the label ones
                 if random.random() <= self.hp.tf:
@@ -101,12 +101,7 @@ class FirstJobPredictor(pl.LightningModule):
                 # get pred
                 dec_output, hs = self.forward(edu, tokens, hs)
                 dec_outputs.append(dec_output)
-                # if within teacher forcing range, next tokens will be the label ones
-                if random.random() <= self.hp.tf:
-                    tokens = fj[:, num_tokens]
-                # else, next tokens will be the predicted ones
-                else:
-                    tokens = dec_output.argmax(-1)
+                tokens = dec_output.argmax(-1)
             # for num_tokens in range(fj.shape[1] - 1):
             #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
             #     tmp.append(dec_output.argmax(-1).item())
