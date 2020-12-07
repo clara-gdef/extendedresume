@@ -44,11 +44,17 @@ def main(hparams):
     model.load_state_dict(torch.load(latest_file)["state_dict"])
     model = model.cuda()
     print("Model Loaded.")
-    predictions = model.get_outputs(test_loader)
+    #predictions = model.get_outputs(test_loader)
     tgt_dir = os.path.join(CFG["gpudatadir"], "edu_preds.pkl")
-    with open(tgt_dir, 'wb') as f:
-        pkl.dump(predictions, f)
+    with open(tgt_dir, 'rb') as f:
+        predictions = pkl.load(f)
+    # with open(tgt_dir, 'wb') as f:
+    #     pkl.dump(predictions, f)
     ipdb.set_trace()
+
+    for tup in dataset_test.tuples:
+        ids = tup[0]
+        predictions[ids]["edu"] = dataset_test.tuples[ids]["edu"]
 
 
 def load_datasets(hparams, splits):
