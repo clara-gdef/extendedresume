@@ -117,9 +117,9 @@ class EvalModels(pl.LightningModule):
         outputs = {}
         for ids, edu, sk_label, ind_label in tqdm(test_loader):
             skills_pred, ind_pred = self.forward(edu.cuda())
-            outputs[ids] = {"id": ids,
-                            "sk_lab": sk_label,
-                            "ind_lab": ind_label,
+            outputs[ids] = {"id": ids[0],
+                            "sk_lab": sk_label[0],
+                            "ind_lab": ind_label[0],
                             "sk_pred":  get_preds_wrt_threshold(skills_pred, th),
                             "ind_pred": ind_pred.argmax(-1).item()}
         return outputs
