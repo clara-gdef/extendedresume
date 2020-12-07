@@ -57,7 +57,7 @@ class FirstJobPredictor(pl.LightningModule):
                 # else, next tokens will be the predicted ones
                 else:
                     tokens = dec_output.argmax(-1)
-                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             loss = tmp / num_words
         else:
             edu = mini_batch[1].unsqueeze(1)
@@ -100,7 +100,7 @@ class FirstJobPredictor(pl.LightningModule):
                 dec_output, hs = self.forward(edu, tokens, hs)
                 dec_outputs.append(dec_output)
                 tokens = dec_output.argmax(-1)
-                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
+                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens], ignore_index=0)
             # for num_tokens in range(fj.shape[1] - 1):
             #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
             #     tmp.append(dec_output.argmax(-1).item())
