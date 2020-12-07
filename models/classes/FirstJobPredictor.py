@@ -116,9 +116,9 @@ class FirstJobPredictor(pl.LightningModule):
         token = self.index["SOT"]
         dec = []
         lab = []
-        for i in range(len(fj[0])):
-            tok_tensor = torch.LongTensor(1, 1)
-            tok_tensor[:, 0] = token
+        tok_tensor = torch.LongTensor(1, 1)
+        for i in range(1, len(fj[0])):
+            tok_tensor[0, 0] = token
             output, hs = self.dec(edu, tok_tensor, hs)
             dec_word = output.argmax(-1).item()
             dec.append(dec_word)
