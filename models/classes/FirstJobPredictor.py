@@ -1,5 +1,5 @@
 import os
-
+import random
 import torch
 import ipdb
 import pytorch_lightning as pl
@@ -45,12 +45,19 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
-            # for cnt, num_tokens in enumerate(range(fj.shape[1] - 1)):
-            #     if cnt > 0:
-            #         if self.hp.tf
+            ipdb.set_trace()
+            # init first tokens
+            tokens = torch.LongTensor(self.index["SOT"]).expand(self.hp.b_size)
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
+                # get pred
+                dec_output, hs = self.forward(edu, tokens.unsqueeze(1), hs)
                 dec_outputs.append(dec_output)
+                # if within teacher forcing range, next tokens will be the label ones
+                if random.random() <= self.hp.tf:
+                    tokens = fj[:, num_tokens]
+                # else, next tokens will be the predicted ones
+                else:
+                    tokens = dec_output.argmax(-1)
                 tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
             loss = tmp / num_words
         else:
@@ -87,10 +94,24 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
+            ipdb.set_trace()
+            # init first tokens
+            tokens = torch.LongTensor(self.index["SOT"]).expand(self.hp.b_size)
             for num_tokens in range(fj.shape[1] - 1):
-                dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
+                # get pred
+                dec_output, hs = self.forward(edu, tokens.unsqueeze(1), hs)
                 dec_outputs.append(dec_output)
-                tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
+                # if within teacher forcing range, next tokens will be the label ones
+                if random.random() <= self.hp.tf:
+                    tokens = fj[:, num_tokens]
+                # else, next tokens will be the predicted ones
+                else:
+                    tokens = dec_output.argmax(-1)
+            # for num_tokens in range(fj.shape[1] - 1):
+            #     dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
+            #     tmp.append(dec_output.argmax(-1).item())
+            #     dec_outputs.append(dec_output)
+            #     tmp += torch.nn.functional.cross_entropy(dec_output.squeeze(1), fj[:, num_tokens])
             val_loss = tmp / num_words
         else:
             edu = mini_batch[1].unsqueeze(1)
@@ -117,7 +138,7 @@ class FirstJobPredictor(pl.LightningModule):
         dec = []
         lab = []
         tok_tensor = torch.LongTensor(1, 1)
-        ipdb.set_trace()
+        # ipdb.set_trace()
         for i in range(fj.shape[1] - 1):
             tok_tensor[0, 0] = token
             output, hs = self.dec(edu, tok_tensor, hs)
