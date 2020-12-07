@@ -113,7 +113,7 @@ class FirstJobPredictor(pl.LightningModule):
             fj = mini_batch[2]
         hs = (torch.zeros(1, 1, self.hp.hidden_size).cuda(),
               torch.zeros(1, 1, self.hp.hidden_size).cuda())
-        token = self.index["SOD"]
+        token = self.index["SOT"]
         dec = []
         lab = []
         for i in range(len(fj[0])):
@@ -151,6 +151,6 @@ class FirstJobPredictor(pl.LightningModule):
                     if rev_index[w] != "PAD":
                         f.write(rev_index[w] + ' ')
                 f.write("\n")
-        cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ' >> bleu_scores.txt'
+        cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ' >> bleu_scores_' + desc +  '.txt'
         ipdb.set_trace()
         os.system(cmd_line)
