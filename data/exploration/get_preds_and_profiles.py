@@ -45,6 +45,7 @@ def main(hparams):
     latest_file = get_latest_model(CFG["modeldir"], xp_title)
     print("Evaluating model " + latest_file)
     model.load_state_dict(torch.load(latest_file)["state_dict"])
+    model = model.cuda()
     print("Model Loaded.")
     predictions = model.get_outputs(test_loader)
 

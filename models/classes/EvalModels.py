@@ -115,7 +115,7 @@ class EvalModels(pl.LightningModule):
     def get_outputs(self, test_loader):
         outputs = {}
         for ids, edu, sk_label, ind_label in tqdm(test_loader):
-            skills_pred, ind_pred = self.forward(edu)
+            skills_pred, ind_pred = self.forward(edu.cuda())
             outputs[ids] = {"id": ids,
                             "sk_lab": sk_label,
                             "ind_lab": ind_label,
