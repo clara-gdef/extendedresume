@@ -45,7 +45,6 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
-            ipdb.set_trace()
             # init first tokens
             tokens = torch.LongTensor([self.index["SOT"]]).expand(self.hp.b_size).unsqueeze(1)
             for num_tokens in range(fj.shape[1] - 1):
@@ -54,7 +53,7 @@ class FirstJobPredictor(pl.LightningModule):
                 dec_outputs.append(dec_output)
                 # if within teacher forcing range, next tokens will be the label ones
                 if random.random() <= self.hp.tf:
-                    tokens = fj[:, num_tokens]
+                    tokens = fj[:, num_tokens].unsqueeze(1)
                 # else, next tokens will be the predicted ones
                 else:
                     tokens = dec_output.argmax(-1)
@@ -94,7 +93,6 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
-            ipdb.set_trace()
             # init first tokens
             tokens = torch.LongTensor([self.index["SOT"]]).expand(self.hp.b_size).unsqueeze(1)
             for num_tokens in range(fj.shape[1] - 1):
