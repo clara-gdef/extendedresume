@@ -2,10 +2,8 @@ import glob
 import os
 import ipdb
 import argparse
-import pytorch_lightning as pl
+import pickle as pkl
 import torch
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 import yaml
 from data.datasets import AggregatedEduDataset
@@ -25,7 +23,6 @@ def init(hparams):
 
 
 def main(hparams):
-
     xp_title = hparams.model_type + "_" + hparams.ft_type + str(hparams.b_size) + "_" + str(hparams.lr) + '_' + str(hparams.wd)
     datasets = load_datasets(hparams, ["TEST"])
     dataset_test = datasets[0]
@@ -48,7 +45,9 @@ def main(hparams):
     model = model.cuda()
     print("Model Loaded.")
     predictions = model.get_outputs(test_loader)
-
+    tgt_dir = os.path.join(CFG["gpudatadir"], "edu_preds.pkl")
+    with open(tgt_dir, 'wb') as f:
+        pkl.dump(predictions, f)
     ipdb.set_trace()
 
 
@@ -67,15 +66,6 @@ def load_datasets(hparams, splits):
         datasets.append(AggregatedEduDataset(**common_hparams, split=split))
 
     return datasets
-
-
-def init_lightning(xp_title):
-    logger = TensorBoardLogger(
-        save_dir='./models/logs',
-        name=xp_title)
-    print("Logger initiated.")
-
-    return logger
 
 
 if __name__ == "__main__":
