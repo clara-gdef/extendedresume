@@ -45,6 +45,9 @@ class FirstJobPredictor(pl.LightningModule):
             edu = mini_batch[1].unsqueeze(1)
             fj = mini_batch[-2]
             num_words += sum(mini_batch[-1])
+            # for cnt, num_tokens in enumerate(range(fj.shape[1] - 1)):
+            #     if cnt > 0:
+            #         if self.hp.tf
             for num_tokens in range(fj.shape[1] - 1):
                 dec_output, hs = self.forward(edu, fj[:, num_tokens].unsqueeze(1), hs)
                 dec_outputs.append(dec_output)
@@ -149,4 +152,5 @@ class FirstJobPredictor(pl.LightningModule):
                         f.write(rev_index[w] + ' ')
                 f.write("\n")
         cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ' >> bleu_scores.txt'
+        ipdb.set_trace()
         os.system(cmd_line)
