@@ -2,6 +2,7 @@ import pytorch_lightning as pl
 import torch
 import ipdb
 import numpy as np
+from tqdm import tqdm
 import pickle as pkl
 import os
 from utils.model import classes_to_one_hot, test_for_ind, test_for_skills
@@ -110,3 +111,14 @@ class EvalModels(pl.LightningModule):
         with open(tgt_file, "wb") as f:
             pkl.dump(outputs, f)
         print("Outputs saved at: " + tgt_file)
+
+    def get_outputs(self, test_loader):
+        outputs = {}
+        for ids, edu, sk_label, ind_label in tqdm(test_loader):
+            skills_pred, ind_pred = self.forward(edu)
+            outputs[ids] = {"id": ids,
+                            "sk_lab": sk_label,
+                            "ind_lab": ind_label,
+                            "sk_pred": skills_pred,
+                            "ind_pred": ind_pred}
+        return outputs

@@ -158,14 +158,19 @@ class FirstJobPredictor(pl.LightningModule):
         with open(pred_file, 'a') as f:
             for sentence in self.decoded_tokens_test:
                 for w in sentence:
-                    f.write(rev_index[w] + ' ')
+                    if rev_index[w] != "EOD":
+                        f.write(rev_index[w] + ' ')
+                    else:
+                        break
                 f.write("\n")
 
         with open(lab_file, 'a') as f:
             for sentence in self.label_tokens_test[1:]:
                 for w in sentence:
-                    # if rev_index[w] != "PAD":
-                    f.write(rev_index[w] + ' ')
+                    if rev_index[w] != "EOD":
+                        f.write(rev_index[w] + ' ')
+                    else:
+                        break
                 f.write("\n")
         #cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file + ' >> bleu_scores_' + desc +  '.txt'
         cmd_line = './multi-bleu.perl ' + lab_file + ' < ' + pred_file
