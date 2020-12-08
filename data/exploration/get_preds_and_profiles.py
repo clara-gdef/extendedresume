@@ -3,6 +3,8 @@ import os
 import ipdb
 import argparse
 import pickle as pkl
+
+import re
 from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader
@@ -10,7 +12,7 @@ import json
 import yaml
 from data.datasets import AggregatedEduDataset
 from models.classes.EvalModels import EvalModels
-from utils import get_ind_class_dict, word_seq_into_list
+from utils import get_ind_class_dict
 from utils.model import collate_for_edu, get_model_params, get_latest_model
 
 
@@ -46,18 +48,18 @@ def main(hparams):
                     if id_p in right_ind.keys():
                         ipdb.set_trace()
                         rpf.write("ID " + str(id_p) + "===============================================================\n")
-                        rpf.write("INDUSTRY " + str(right_ind[id_p]["ind_pred"]))
+                        rpf.write("INDUSTRY " + str(right_ind[id_p]["pred"]))
                         rpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
                             rpf.write("(" + num + ")" + item + "\n")
                     elif id_p in wrong_ind.keys():
                         ipdb.set_trace()
                         wpf.write("ID " + str(id_p) + "===============================================================\n")
-                        wpf.write("INDUSTRY " + str(wrong_ind[id_p]["ind_lab"]))
-                        wpf.write("PREDICTION " + str(wrong_ind[id_p]["ind_pred"]))
+                        wpf.write("INDUSTRY " + str(wrong_ind[id_p]["lab"]))
+                        wpf.write("PREDICTION " + str(wrong_ind[id_p]["pred"]))
                         wpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
-                            wpf.write("(" + num + ")" + item + "\n")
+                            wpf.write("(" + str(num) + ") : " + " ".join(item) + "\n")
                     else:
                         continue
                     pbar.update(1)
@@ -67,7 +69,7 @@ def format_profile(edu_list):
     formated_edu = []
     sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
     for num, edu in enumerate(sorted_edu_list):
-        formated_edu.append(word_seq_into_list(edu["degree"], edu["institution"], None))
+        formated_edu.append(word_seq_into_list(edu["degree"], edu["institution"]))
     return formated_edu
 
 def get_predictions(load):
@@ -132,6 +134,21 @@ def load_datasets(hparams, splits):
         datasets.append(AggregatedEduDataset(**common_hparams, split=split))
 
     return datasets
+
+
+def word_seq_into_list(position, description):
+    number_regex = re.compile(r'\d+(,\d+)?')
+    new_tup = []
+    whole_job = "DEGREE: " + position.lower() + ', INSTITUTION: ' + description.lower()
+    for tok in whole_job:
+        if re.match(number_regex, tok):
+            new_tup.append("NUM")
+        elif tok == "SOD":
+            new_tup.append(tok)
+        else:
+            new_tup.append(tok.lower())
+    cleaned_tup = [item for item in new_tup if item != ""]
+    return cleaned_tup
 
 
 if __name__ == "__main__":
