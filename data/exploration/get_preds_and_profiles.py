@@ -49,14 +49,14 @@ def main(hparams):
                     edu = format_profile(raw_p[3])
                     if id_p in right_ind.keys():
                         rpf.write("ID " + str(id_p) + "===============================================================\n")
-                        rpf.write("INDUSTRY " + str(ind_classes[right_ind[id_p]]))
+                        rpf.write("INDUSTRY " + str(ind_classes[right_ind[id_p]]) + "\n")
                         rpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
                             rpf.write("(" + str(num) + ")" + " ".join(item) + "\n")
                     elif id_p in wrong_ind.keys():
                         wpf.write("ID " + str(id_p) + "===============================================================\n")
-                        wpf.write("INDUSTRY " + str(ind_classes[wrong_ind[id_p]["lab"]]))
-                        wpf.write("PREDICTION " + str(ind_classes[wrong_ind[id_p]["pred"]]))
+                        wpf.write("INDUSTRY " + str(ind_classes[wrong_ind[id_p]["lab"]]) + "\n")
+                        wpf.write("PREDICTION " + str(ind_classes[wrong_ind[id_p]["pred"]]) + "\n")
                         wpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
                             wpf.write("(" + str(num) + ") : " + " ".join(item) + "\n")
