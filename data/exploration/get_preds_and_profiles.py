@@ -52,7 +52,7 @@ def main(hparams):
                         rpf.write("INDUSTRY " + str(ind_classes[right_ind[id_p]]))
                         rpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
-                            rpf.write("(" + num + ")" + item + "\n")
+                            rpf.write("(" + str(num) + ")" + " ".join(item) + "\n")
                     elif id_p in wrong_ind.keys():
                         wpf.write("ID " + str(id_p) + "===============================================================\n")
                         wpf.write("INDUSTRY " + str(ind_classes[wrong_ind[id_p]["lab"]]))
