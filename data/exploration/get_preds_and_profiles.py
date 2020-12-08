@@ -32,8 +32,10 @@ def main(hparams):
     ind_classes = get_ind_class_dict(False, CFG)
     rev_ind_class = {v:k for k, v in ind_classes.items()}
     right_ind, wrong_ind = get_right_wrong_pred(predictions, "ind")
-    right_pred_file =  os.path.join(CFG["gpudatadir"],"ind_right_pred_edu.txt")
-    wrong_pred_file =  os.path.join(CFG["gpudatadir"],"ind_wrong_pred_edu.txt")
+    right_pred_file = "ind_right_pred_edu.txt"
+    wrong_pred_file = "ind_wrong_pred_edu.txt"
+    # right_pred_file =  os.path.join(CFG["gpudatadir"],"ind_right_pred_edu.txt")
+    # wrong_pred_file =  os.path.join(CFG["gpudatadir"],"ind_wrong_pred_edu.txt")
     base_file = os.path.join(CFG["gpudatadir"], "bp_3jobs_desc_edu_skills_industry_date_company_FR_TEST.json")
     with open(right_pred_file, 'a+') as rpf:
         with open(wrong_pred_file, 'a+') as wpf:
@@ -46,20 +48,18 @@ def main(hparams):
                     id_p = raw_p[0]
                     edu = format_profile(raw_p[3])
                     if id_p in right_ind.keys():
-                        ipdb.set_trace()
                         rpf.write("ID " + str(id_p) + "===============================================================\n")
                         rpf.write("INDUSTRY " + str(ind_classes[right_ind[id_p]["pred"]]))
                         rpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
                             rpf.write("(" + num + ")" + item + "\n")
                     elif id_p in wrong_ind.keys():
-                        ipdb.set_trace()
                         wpf.write("ID " + str(id_p) + "===============================================================\n")
                         wpf.write("INDUSTRY " + str(ind_classes[wrong_ind[id_p]["lab"]]))
                         wpf.write("PREDICTION " + str(ind_classes[wrong_ind[id_p]["pred"]]))
                         wpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
-                            wpf.write("(" + str(num) + ") : " + item + "\n")
+                            wpf.write("(" + str(num) + ") : " + " ".join(item) + "\n")
                     else:
                         continue
                     pbar.update(1)
@@ -143,7 +143,7 @@ def word_seq_into_list(position, description):
     for tok in whole_job.split(" "):
         if re.match(number_regex, tok):
             new_tup.append("NUM")
-        elif tok == "DEGREE" or tok == "INSTITUTION":
+        elif tok == "DEGREE:" or tok == "INSTITUTION:":
             new_tup.append(tok)
         else:
             new_tup.append(tok.lower())
