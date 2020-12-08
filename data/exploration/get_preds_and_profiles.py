@@ -49,7 +49,7 @@ def main(hparams):
                     edu = format_profile(raw_p[3])
                     if id_p in right_ind.keys():
                         rpf.write("ID " + str(id_p) + "===============================================================\n")
-                        rpf.write("INDUSTRY " + str(ind_classes[right_ind[id_p]["pred"]]))
+                        rpf.write("INDUSTRY " + str(ind_classes[right_ind[id_p]]))
                         rpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
                             rpf.write("(" + num + ")" + item + "\n")
