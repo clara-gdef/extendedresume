@@ -48,18 +48,18 @@ def main(hparams):
                     if id_p in right_ind.keys():
                         ipdb.set_trace()
                         rpf.write("ID " + str(id_p) + "===============================================================\n")
-                        rpf.write("INDUSTRY " + str(right_ind[id_p]["pred"]))
+                        rpf.write("INDUSTRY " + str(ind_classes[right_ind[id_p]["pred"]]))
                         rpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
                             rpf.write("(" + num + ")" + item + "\n")
                     elif id_p in wrong_ind.keys():
                         ipdb.set_trace()
                         wpf.write("ID " + str(id_p) + "===============================================================\n")
-                        wpf.write("INDUSTRY " + str(wrong_ind[id_p]["lab"]))
-                        wpf.write("PREDICTION " + str(wrong_ind[id_p]["pred"]))
+                        wpf.write("INDUSTRY " + str(ind_classes[wrong_ind[id_p]["lab"]]))
+                        wpf.write("PREDICTION " + str(ind_classes[wrong_ind[id_p]["pred"]]))
                         wpf.write("EDUCATION \n")
                         for num, item in enumerate(edu):
-                            wpf.write("(" + str(num) + ") : " + " ".join(item) + "\n")
+                            wpf.write("(" + str(num) + ") : " + item + "\n")
                     else:
                         continue
                     pbar.update(1)
@@ -140,10 +140,10 @@ def word_seq_into_list(position, description):
     number_regex = re.compile(r'\d+(,\d+)?')
     new_tup = []
     whole_job = "DEGREE: " + position.lower() + ', INSTITUTION: ' + description.lower()
-    for tok in whole_job:
+    for tok in whole_job.split(" "):
         if re.match(number_regex, tok):
             new_tup.append("NUM")
-        elif tok == "SOD":
+        elif tok == "DEGREE" or tok == "INSTITUTION":
             new_tup.append(tok)
         else:
             new_tup.append(tok.lower())
