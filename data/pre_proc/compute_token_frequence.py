@@ -25,8 +25,8 @@ def main(args):
             for tok in fj_ind:
                 token_count[tok] += 1
         all_tokens = sum(token_count.values())
-        frequencies = torch.ones(len(index))
-        for tok in token_count.keys():
+        frequencies = torch.zeros(len(index))
+        for tok in sorted(token_count.keys()):
              frequencies[tok] =  token_count[tok] / all_tokens
         ipdb.set_trace()
         # freq = 1e-10 + frequencies / all_tokens
