@@ -28,7 +28,6 @@ def main(args):
         frequencies = torch.zeros(len(index))
         for tok in sorted(token_count.keys()):
              frequencies[tok] =  token_count[tok] / all_tokens
-        ipdb.set_trace()
         # freq = 1e-10 + frequencies / all_tokens
         # frequencies[4] = 0.2
         with open(os.path.join(CFG["gpudatadir"], "token_frequencies.pkl"), "wb") as f:
