@@ -16,7 +16,7 @@ class FirstJobPredictor(pl.LightningModule):
         # # dirty trick : under weigh the "UNK" token class
         # class_weights = torch.ones(40005)
         # class_weights[4] = 10
-        # self.class_weight = class_weights.cuda()
+        self.class_weight = class_weights.cuda()
 
         if self.hp.ft_type != "elmo":
             self.dec = DecoderLSTM(dim, self.hp.hidden_size, len(index))
