@@ -47,10 +47,6 @@ def main(args):
                                 skills_classes, ind_classes, False)
 
 
-
-
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--base_file", type=str, default="bp_3jobs_desc_edu_skills_industry_date_company_FR")

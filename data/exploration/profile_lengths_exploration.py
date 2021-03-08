@@ -35,8 +35,10 @@ def main(args):
                 counter_edu[len(raw_p[3])] += 1
                 all_edu.append(len(raw_p[3]))
                 pbar.update(1)
+        ipdb.set_trace()
         print(str(np.percentile(all_edu, 90))) # 4
         print(str(np.percentile(all_jobs, 90))) # 8
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

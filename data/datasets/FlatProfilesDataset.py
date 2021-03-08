@@ -124,7 +124,6 @@ def handle_jobs(job_list, ft_model):
     return new_job_tensor
 
 
-
 def job_to_emb(job, ft_model):
     tokenized_jobs = word_seq_into_list(job["position"], job["description"], None)
     word_count = 0
