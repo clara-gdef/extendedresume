@@ -22,8 +22,9 @@ def main(args):
         # counter_jobs = Counter()
         all_edu, all_jobs, len_edu, len_jobs = [], [], [], []
         total_edu = 0; total_job = 0
-    
+        total_profiles = {}
         for item in ["TRAIN", "VALID", "TEST"]:
+            total_profiles[item] = 0
             if args.load_dataset == "False":
                 input_file = os.path.join(CFG["gpudatadir"], f"{args.base_file}_{item}.json")
                 with open(input_file, 'r') as f:
@@ -78,9 +79,10 @@ def main(args):
                 }
                 edu_len = []
                 dataset = TextGenerationDataset(**common_hparams, split=item)
-                for person in dataset["tuples"]:
+                for person in dataset.tuples:
+                    total_profiles[item] += 1
                     edu_len.append(person["job_len"])
-                ipdb.set_trace()
+        ipdb.set_trace()
 
 
 if __name__ == "__main__":
