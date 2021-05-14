@@ -115,6 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("--subsample", type=int, default=100)
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--load_dataset", default="False")
+    parser.add_argument("--build_ind_dict", default="False")
     parser.add_argument("--optim", type=str, default="adam")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
     parser.add_argument("--load_from_checkpoint", default=False)
