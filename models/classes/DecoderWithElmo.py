@@ -1,7 +1,7 @@
 import torch
 import pytorch_lightning as pl
 import ipdb
-from allennlp.modules.elmo import batch_to_ids
+# from allennlp.modules.elmo import batch_to_ids
 
 
 class DecoderWithElmo(pl.LightningModule):
