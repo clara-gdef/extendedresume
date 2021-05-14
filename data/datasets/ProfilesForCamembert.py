@@ -59,6 +59,7 @@ class ProfilesForCamembert(Dataset):
         print("Dataset load from : " + tgt_file)
 
     def build_tuples(self, input_file, split):
+        self.tuples = []
         with open(input_file, 'r') as f:
             num_lines = sum(1 for line in f)
         with open(input_file, 'r') as f:
