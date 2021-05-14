@@ -63,7 +63,7 @@ def load_datasets(hparams, splits):
                  "ind_classes": ind_classes,
                  "load": hparams.load_dataset == "True"}
     for split in splits:
-        ipt_file = os.path.join(CFG["gpudatadir"], f"bp_3jobs_desc_edu_skills_industry_date_company_FR_{split}_.json")
+        ipt_file = os.path.join(CFG["gpudatadir"], f"bp_3jobs_desc_edu_skills_industry_date_company_FR_{split}.json")
         tmp = ProfilesForCamembert(**arguments,
                                    input_file=ipt_file,
                                    split=split)
