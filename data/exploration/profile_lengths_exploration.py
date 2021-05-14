@@ -78,8 +78,8 @@ def main(args):
                 }
                 edu_len = []
                 dataset = TextGenerationDataset(**common_hparams, split=item)
-                for person in dataset["tuples"]:
-                    edu_len.append(person["job_len"])
+                for person in dataset:
+                    edu_len.append(person[-1])
                 ipdb.set_trace()
 
 
