@@ -115,6 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("--b_size", type=int, default=16)
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--load_dataset", default="False")
+    parser.add_argument("--optim", type=str, default="adam")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
     parser.add_argument("--load_from_checkpoint", default=False)
     parser.add_argument("--checkpoint", type=int, default=45)
