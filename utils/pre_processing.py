@@ -6,7 +6,7 @@ from tqdm import tqdm
 import ipdb
 import numpy as np
 from nltk.tokenize import word_tokenize
-from allennlp.modules.elmo import batch_to_ids
+# from allennlp.modules.elmo import batch_to_ids
 import re
 import json
 
