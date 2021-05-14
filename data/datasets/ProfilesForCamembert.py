@@ -18,6 +18,7 @@ class ProfilesForCamembert(Dataset):
         self.rev_sk_classes = {v: k for k, v in skills_classes.items()}
         self.ind_classes = ind_classes
         self.rev_ind_classes = {v: k for k, v in ind_classes.items()}
+        self.name = "ProfilesForCamembert"
         if load:
             self.load_dataset(subsample)
         else:
