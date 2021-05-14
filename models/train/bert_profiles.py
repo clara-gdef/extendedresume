@@ -110,9 +110,9 @@ def make_xp_title(hparams):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ft_type", type=str, default='fs')
-    parser.add_argument("--gpus", type=int, default=0)
+    parser.add_argument("--gpus", type=int, default=1)
     parser.add_argument("--b_size", type=int, default=16)
+    parser.add_argument("--subsample", type=int, default=100)
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--load_dataset", default="False")
     parser.add_argument("--optim", type=str, default="adam")
