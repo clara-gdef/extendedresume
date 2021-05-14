@@ -1,6 +1,6 @@
 import glob
 import os
-from allennlp.modules.elmo import Elmo
+# from allennlp.modules.elmo import Elmo
 import pickle as pkl
 import ipdb
 import argparse
