@@ -8,10 +8,12 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 import yaml
 import pickle as pkl
+import torch
 from data.datasets import ProfilesForCamembert
 from models.classes.EvalModels import EvalModels
+from models.classes.End2EndCamembert import End2EndCamembert
 from utils import get_ind_class_dict
-from utils.model import collate_for_edu, get_model_params
+from utils.model import collate_for_bert_edu, collate_for_bert_jobs
 
 
 def init(hparams):
@@ -23,6 +25,10 @@ def init(hparams):
             return main(hparams)
     else:
         return main(hparams)
+
+
+class CamembertRewriter(object):
+    pass
 
 
 def main(hparams):
@@ -43,12 +49,56 @@ def main(hparams):
                              max_epochs=hparams.epochs,
                              callbacks=call_back_list,
                              logger=logger,
-                             # gradient_clip_val=hparams.clip_val,
                              accelerator='ddp_spawn',
                              precision=16
                              )
     datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
+    if hparams.input_type == "jobs":
+        collate = collate_for_bert_jobs
+    elif hparams.input_type == "edu":
+        collate = collate_for_bert_edu
+    else:
+        raise Exception("wrong input type, can be either \"job\" or \"edu\", " + str(hparams.input_type) + " was given.")
+    train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
+                              num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True)
+    valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
+                              num_workers=num_workers, drop_last=True, pin_memory=True)
+    if hparams.end2end == "True":
+        print("Dataloaders initiated.")
+        arguments = {'emb_size': 768,
+                     'hp': hparams,
+                     'desc': xp_title,
+                     "vocab_size": 32005,
+                     "model_path": model_path,
+                     "datadir": CFG["gpudatadir"]}
+        print("Initiating model...")
+        model = End2EndCamembert(**arguments)
+        print("Model Loaded.")
+    else:
+        raise NotImplementedError("Not-fine tuned model has not been implemented yet.")
+    print("Model Loaded.")
+    if hparams.TRAIN == "True":
+        if hparams.load_from_checkpoint == "True":
+            print("Loading from previous checkpoint...")
+            model_path = os.path.join(CFG['modeldir'], model_name)
+            model_file = os.path.join(model_path, "epoch=" + str(hparams.checkpoint) + ".ckpt")
+            model.load_state_dict(torch.load(model_file)["state_dict"])
+            print("Resuming training from checkpoint : " + model_file + ".")
+        if hparams.auto_lr_find == "True":
+            print("looking for best lr...")
+            # Run learning rate finder
+            lr_finder = trainer.tuner.lr_find(model, train_dataloader=train_loader, val_dataloaders=valid_loader)
+            # Results can be found in
+            print(lr_finder.results)
+            # Pick point based on plot, or get suggestion
+            new_lr = lr_finder.suggestion()
+            # update hparams of the model
+            model.hp.lr = new_lr
+            print(f"NEW LR = {new_lr}")
+            ipdb.set_trace()
+        print("Starting training for " + xp_title + "...")
+        trainer.fit(model, train_loader, valid_loader)
 
 
 def load_datasets(hparams, splits):
@@ -101,7 +151,7 @@ def init_lightning(xp_title, model_name):
 
 
 def make_xp_title(hparams):
-    xp_title = f"{hparams.model_type}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
+    xp_title = f"{hparams.model_type}_{hparams.input_type}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
     if hparams.subsample != -1:
         xp_title += f"sub{hparams.subsample}"
     print("xp_title = " + xp_title)
@@ -116,12 +166,14 @@ if __name__ == "__main__":
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--load_dataset", default="False")
     parser.add_argument("--build_ind_dict", default="False")
+    parser.add_argument("--end2end", default="True")
     parser.add_argument("--optim", type=str, default="adam")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
     parser.add_argument("--load_from_checkpoint", default=False)
     parser.add_argument("--checkpoint", type=int, default=45)
     parser.add_argument("--DEBUG", type=bool, default=False)
-    parser.add_argument("--model_type", type=str, default="edu_mtl")
+    parser.add_argument("--model_type", type=str, default="bert_prof")
+    parser.add_argument("--input_type", type=str, default="jobs") # can be job or edu
     parser.add_argument("--lr", type=float, default=1e-1)
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--epochs", type=int, default=50)
