@@ -173,6 +173,7 @@ if __name__ == "__main__":
     parser.add_argument("--load_from_checkpoint", default=False)
     parser.add_argument("--checkpoint", type=int, default=45)
     parser.add_argument("--DEBUG", type=bool, default=False)
+    parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--model_type", type=str, default="bert_prof")
     parser.add_argument("--input_type", type=str, default="jobs") # can be job or edu
     parser.add_argument("--lr", type=float, default=1e-1)
