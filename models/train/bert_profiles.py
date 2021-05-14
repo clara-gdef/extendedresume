@@ -52,6 +52,7 @@ def main(hparams):
                              accelerator='ddp_spawn',
                              precision=16
                              )
+        num_workers = hparams.num_workers
     datasets = load_datasets(hparams, ["TRAIN", "VALID"])
     dataset_train, dataset_valid = datasets[0], datasets[1]
     if hparams.input_type == "jobs":
@@ -82,7 +83,7 @@ def main(hparams):
         if hparams.load_from_checkpoint == "True":
             print("Loading from previous checkpoint...")
             model_path = os.path.join(CFG['modeldir'], model_name)
-            model_file = os.path.join(model_path, "epoch=" + str(hparams.checkpoint) + ".ckpt")
+            model_file = os.path.join(model_path, f"epoch={hparams.checkpoint}.ckpt")
             model.load_state_dict(torch.load(model_file)["state_dict"])
             print("Resuming training from checkpoint : " + model_file + ".")
         if hparams.auto_lr_find == "True":
