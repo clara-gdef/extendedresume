@@ -91,42 +91,26 @@ class ProfilesForCamembert(Dataset):
 
 
 def handle_jobs(job_list):
-    ipdb.set_trace()
+    new_job_list = []
     # keeps 90% of the dataset without trimming experience
-    new_job_tensor = np.zeros((8, ft_model.get_dimension()))
+    max_jobs = 8
     # sort by date, most recent first,
     sorted_jobs = sorted(job_list, key=lambda k: k["from_ts"], reverse=True)
     for num, job in enumerate(sorted_jobs):
-        if num < 8:
-            new_job_tensor[num, :] = job_to_emb(job, ft_model)
-    return new_job_tensor
-
+        if num < max_jobs:
+            new_job_list.append(job["position"] + " " + job["description"])
+    return new_job_list
 
 
 def handle_education(edu_list):
+    new_edu_list = []
     sorted_edu_list = sorted(edu_list, key=lambda k: k["to"], reverse=True)
     # keeps 90% of the dataset without trimming experience
-    new_ed_tensor = np.zeros((4, ft_model.get_dimension()))
+    max_edu = 4
     for num, edu in enumerate(sorted_edu_list):
-        if num < 4:
-            tokenized_edu = word_seq_into_list(edu["degree"], edu["institution"], None)
-            word_count = 0
-            tmp = []
-            for token in tokenized_edu:
-                tmp.append(ft_model.get_word_vector(token))
-                word_count += 1
-            new_ed_tensor[num, :] = np.mean(np.stack(tmp), axis=0) / word_count
-    return new_ed_tensor
+        if num < max_edu:
+            new_edu_list.append(edu["degree"] + " " + edu["institution"])
+    return new_edu_list
 
 
-def job_to_emb(job, ft_model):
-    tokenized_jobs = word_seq_into_list(job["position"], job["description"], None)
-    word_count = 0
-    emb = np.zeros((1, ft_model.get_dimension()))
-    tmp = []
-    for token in tokenized_jobs:
-        tmp.append(ft_model.get_word_vector(token))
-        word_count += 1
-    emb[0, :] = np.mean(np.stack(tmp), axis=0) / word_count
-    return emb
 
