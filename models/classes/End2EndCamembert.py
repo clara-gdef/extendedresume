@@ -51,8 +51,23 @@ class End2EndCamembert(pl.LightningModule):
                                                            hparams=hp)
 
     def forward(self, sentences, ind_indices, skills_indices, batch_nb):
+        # build prof
+        inputs = self.tokenizer(sentences, truncation=True, padding="max_length", max_length=self.max_len,
+                                return_tensors="pt")
+        input_tokenized, mask = inputs["input_ids"].cuda(), inputs["attention_mask"].cuda()
+        encoder_outputs = self.encoder(input_tokenized, mask)['last_hidden_state']
+        ipdb.set_trace()
+
+        # avg
+        # pred skills & pred ind
+        loss_sk, loss_ind = EvalModels.forward()
+        # gen next job
+        loss_nj = FirstJobPredictorForCamembert.forward()
+        # return loss
 
         ipdb.set_trace()
+        loss_total = loss_sk + loss_ind + loss_nj
+        return loss_total
 
     def inference(self, jobs, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices):
         ipdb.set_trace()
