@@ -12,7 +12,7 @@ import joblib
 import fasttext
 import pandas as pd
 from models.classes.EvalModels import EvalModels
-from models.classes.FirstJobPredictorCamembert import FirstJobPredictorForCamembert
+from models.classes.FirstJobPredictorForCamembert import FirstJobPredictorForCamembert
 from transformers import CamembertTokenizer, CamembertModel, CamembertForCausalLM
 
 
@@ -51,7 +51,7 @@ class End2EndCamembert(pl.LightningModule):
                                                            hparams=hp)
 
     def forward(self, sentences, ind_indices, skills_indices, batch_nb):
-    
+
         ipdb.set_trace()
 
     def inference(self, jobs, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices):
