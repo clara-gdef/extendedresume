@@ -3,5 +3,7 @@ from .IndustryClassifier import IndustryClassifier
 from .SkillsPredictor import SkillsPredictor
 from .EvalModels import EvalModels
 from .DecoderLSTM import DecoderLSTM
+from .DecoderLSTMForCamembert import DecoderLSTMForCamembert
 from .DecoderWithElmo import DecoderWithElmo
 from .FirstJobPredictor import FirstJobPredictor
+from .FirstJobPredictorForCamembert import FirstJobPredictorForCamembert

@@ -12,19 +12,17 @@ import joblib
 import fasttext
 import pandas as pd
 from models.classes.EvalModels import EvalModels
-from models.classes.FirstJobPredictor import FirstJobPredictor
+from models.classes.FirstJobPredictorCamembert import FirstJobPredictorForCamembert
 from transformers import CamembertTokenizer, CamembertModel, CamembertForCausalLM
 
 
 class End2EndCamembert(pl.LightningModule):
-    def __init__(self, datadir, emb_size, desc, vocab_size, model_path, hp):
+    def __init__(self, datadir, desc, model_path, hp):
         super().__init__()
         self.datadir = datadir
         self.hp = hp
-        self.emb_dim = emb_size
         self.desc = desc
         self.model_path = model_path
-        self.voc_size = vocab_size
         self.max_len = hp.max_len
 
         with open(os.path.join(self.datadir, "good_skills.p"), 'rb') as f_name:
@@ -36,12 +34,24 @@ class End2EndCamembert(pl.LightningModule):
         self.num_skills = len(self.skill_dict)
 
         self.encoder = CamembertModel.from_pretrained('camembert-base')
-        self.tokenizer = CamembertTokenizer.from_pretrained("camembert-base")
-        self.classifiers = EvalModels(input_size, hidden_size, num_classes_skills, num_classes_ind, datadir, hparams)
-        self.job_generator = FirstJobPredictor(dim, datadir, index, elmo, class_weights, hparams)
 
+        self.emb_dim = self.encoder.embeddings.word_embeddings.embedding_dim
+        self.voc_size = self.encoder.embeddings.word_embeddings.num_embeddings
+
+        self.tokenizer = CamembertTokenizer.from_pretrained("camembert-base")
+        self.classifiers = EvalModels(input_size=self.emb_dim,
+                                      hidden_size=self.hp.hidden_size,
+                                      num_classes_skills=self.num_skills,
+                                      num_classes_ind=self.num_ind,
+                                      datadir=datadir,
+                                      hparams=hp)
+        self.job_generator = FirstJobPredictorForCamembert(dim=self.emb_dim,
+                                                           datadir=datadir,
+                                                           tokenizer=self.tokenizer,
+                                                           hparams=hp)
 
     def forward(self, sentences, ind_indices, skills_indices, batch_nb):
+    
         ipdb.set_trace()
 
     def inference(self, jobs, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices):

@@ -67,10 +67,8 @@ def main(hparams):
                               num_workers=num_workers, drop_last=True, pin_memory=True)
     if hparams.end2end == "True":
         print("Dataloaders initiated.")
-        arguments = {'emb_size': 768,
-                     'hp': hparams,
+        arguments = {'hp': hparams,
                      'desc': xp_title,
-                     "vocab_size": 32005,
                      "model_path": model_path,
                      "datadir": CFG["gpudatadir"]}
         print("Initiating model...")
