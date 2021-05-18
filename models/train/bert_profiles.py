@@ -10,7 +10,6 @@ import yaml
 import pickle as pkl
 import torch
 from data.datasets import ProfilesForCamembert
-from models.classes.EvalModels import EvalModels
 from models.classes.End2EndCamembert import End2EndCamembert
 from utils import get_ind_class_dict
 from utils.model import collate_for_bert_edu, collate_for_bert_jobs
@@ -25,10 +24,6 @@ def init(hparams):
             return main(hparams)
     else:
         return main(hparams)
-
-
-class CamembertRewriter(object):
-    pass
 
 
 def main(hparams):

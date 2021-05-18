@@ -30,7 +30,7 @@ def collate_for_bert_jobs(batch):
     jobs = [i[1] for i in batch]
     skills = [i[3] for i in batch]
     ind = [i[4] for i in batch]
-    return ids, torch.from_numpy(np.stack(jobs)), skills, ind
+    return ids, jobs, skills, ind
 
 
 def collate_for_edu(batch):
