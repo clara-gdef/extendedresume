@@ -52,13 +52,25 @@ class End2EndCamembert(pl.LightningModule):
 
     def forward(self, sentences, ind_indices, skills_indices, batch_nb):
         # build prof
-        inputs = self.tokenizer(sentences, truncation=True, padding="max_length", max_length=self.max_len,
+        exp_len = []
+        flattened_sentences = []
+        for prof in sentences:
+            for exp in prof:
+                flattened_sentences.append(exp)
+            exp_len.append(len(prof))
+        inputs = self.tokenizer(flattened_sentences, truncation=True, padding="max_length", max_length=self.max_len,
                                 return_tensors="pt")
         input_tokenized, mask = inputs["input_ids"].cuda(), inputs["attention_mask"].cuda()
         encoder_outputs = self.encoder(input_tokenized, mask)['last_hidden_state']
         ipdb.set_trace()
-
         # avg
+        reshaped_profiles = torch.zeros(self.hp.b_size, self.max_len, self.emb_dim)
+        start = 0
+        for num_prof, length in enumerate(exp_len):
+            end = start + length
+            reshaped_profiles[num_prof] = torch.mean(encoder_outputs[start:end], dim=0)
+            start = end
+        reshaped_profiles.requires_grad = True
         # pred skills & pred ind
         loss_sk, loss_ind = EvalModels.forward()
         # gen next job

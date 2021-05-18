@@ -57,9 +57,9 @@ def main(hparams):
     else:
         raise Exception("wrong input type, can be either \"job\" or \"edu\", " + str(hparams.input_type) + " was given.")
     train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
-                              num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True)
+                              num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True, persistent_workers=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
-                              num_workers=num_workers, drop_last=True, pin_memory=True)
+                              num_workers=num_workers, drop_last=True, pin_memory=True, persistent_workers=True)
     if hparams.end2end == "True":
         print("Dataloaders initiated.")
         arguments = {'hp': hparams,
@@ -155,7 +155,7 @@ def make_xp_title(hparams):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpus", type=int, default=1)
-    parser.add_argument("--b_size", type=int, default=16)
+    parser.add_argument("--b_size", type=int, default=2)
     parser.add_argument("--subsample", type=int, default=100)
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--max_len", type=int, default=64)
