@@ -62,7 +62,6 @@ class End2EndCamembert(pl.LightningModule):
                                 return_tensors="pt")
         input_tokenized, mask = inputs["input_ids"].cuda(), inputs["attention_mask"].cuda()
         encoder_outputs = self.encoder(input_tokenized, mask)['last_hidden_state']
-        ipdb.set_trace()
         # avg
         reshaped_profiles = torch.zeros(self.hp.b_size, self.max_len, self.emb_dim)
         start = 0
@@ -72,12 +71,17 @@ class End2EndCamembert(pl.LightningModule):
             start = end
         reshaped_profiles.requires_grad = True
         # pred skills & pred ind
-        loss_sk, loss_ind = EvalModels.forward()
+        pred_sk, pred_ind = EvalModels(reshaped_profiles)
+        loss_sk = torch.nn.functional.binary_cross_entropy_with_logits(pred_sk,
+                                                    skills_indices, reduction="mean")
+        loss_ind = torch.nn.functional.cross_entropy(pred_ind,
+                                                    ind_indices, reduction="mean")
+        ipdb.set_trace()
+
         # gen next job
         loss_nj = FirstJobPredictorForCamembert.forward()
         # return loss
 
-        ipdb.set_trace()
         loss_total = loss_sk + loss_ind + loss_nj
         return loss_total
 
