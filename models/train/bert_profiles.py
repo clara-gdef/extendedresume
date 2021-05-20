@@ -57,9 +57,9 @@ def main(hparams):
     else:
         raise Exception("wrong input type, can be either \"job\" or \"edu\", " + str(hparams.input_type) + " was given.")
     train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
-                              num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True, persistent_workers=True)
+                              num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True)
     valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
-                              num_workers=num_workers, drop_last=True, pin_memory=True, persistent_workers=True)
+                              num_workers=num_workers, drop_last=True, pin_memory=True)
     if hparams.end2end == "True":
         print("Dataloaders initiated.")
         arguments = {'hp': hparams,
@@ -154,9 +154,9 @@ def make_xp_title(hparams):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gpus", type=int, default=1)
-    parser.add_argument("--b_size", type=int, default=2)
-    parser.add_argument("--subsample", type=int, default=100)
+    parser.add_argument("--gpus", type=int, default=3)
+    parser.add_argument("--b_size", type=int, default=64)
+    parser.add_argument("--subsample", type=int, default=-1)
     parser.add_argument("--hidden_size", type=int, default=300)
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--load_dataset", default="False")
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--model_type", type=str, default="bert_prof")
     parser.add_argument("--input_type", type=str, default="jobs") # can be job or edu
-    parser.add_argument("--lr", type=float, default=1e-1)
+    parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--epochs", type=int, default=50)
     hparams = parser.parse_args()

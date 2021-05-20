@@ -15,6 +15,8 @@ from models.classes.EvalModels import EvalModels
 from models.classes.FirstJobPredictorForCamembert import FirstJobPredictorForCamembert
 from transformers import CamembertTokenizer, CamembertModel, CamembertForCausalLM
 
+from utils import classes_to_one_hot
+
 
 class End2EndCamembert(pl.LightningModule):
     def __init__(self, datadir, desc, model_path, hp):
@@ -54,8 +56,11 @@ class End2EndCamembert(pl.LightningModule):
         # build prof
         exp_len = []
         flattened_sentences = []
+        jobs_to_generate = []
         for prof in sentences:
-            for exp in prof:
+            # we skip the first exp as it is the label for job prediction
+            jobs_to_generate.append(prof[0])
+            for exp in prof[1:]:
                 flattened_sentences.append(exp)
             exp_len.append(len(prof))
         inputs = self.tokenizer(flattened_sentences, truncation=True, padding="max_length", max_length=self.max_len,
@@ -69,20 +74,28 @@ class End2EndCamembert(pl.LightningModule):
             end = start + length
             reshaped_profiles[num_prof] = torch.mean(encoder_outputs[start:end], dim=0)
             start = end
-        reshaped_profiles.requires_grad = True
         # pred skills & pred ind
-        pred_sk, pred_ind = EvalModels(reshaped_profiles)
+        lab_sk_1_hot = classes_to_one_hot(skills_indices, self.num_skills)
+        # we use the encoder's last hidden state
+        pred_sk, pred_ind = self.classifiers(reshaped_profiles[:, -1, :])
         loss_sk = torch.nn.functional.binary_cross_entropy_with_logits(pred_sk,
-                                                    skills_indices, reduction="mean")
+                                                                       lab_sk_1_hot, reduction="mean")
         loss_ind = torch.nn.functional.cross_entropy(pred_ind,
-                                                    ind_indices, reduction="mean")
-        ipdb.set_trace()
+                                                    torch.LongTensor(ind_indices).cuda(), reduction="mean")
 
         # gen next job
-        loss_nj = FirstJobPredictorForCamembert.forward()
+        inputs = self.tokenizer(jobs_to_generate, truncation=True, padding="max_length", max_length=self.max_len,
+                                return_tensors="pt")
+        jobs_tokenized = inputs["input_ids"].cuda()
+        jobs_to_generate_embedded = self.encoder.embeddings(jobs_tokenized)
+        loss_nj, decoder_output, decoder_hidden= self.job_generator.forward(reshaped_profiles.cuda(), jobs_to_generate_embedded, jobs_tokenized)
         # return loss
 
-        loss_total = loss_sk + loss_ind + loss_nj
+        loss_total = loss_sk + loss_ind + (loss_nj / sum(sum(mask)))
+
+        if torch.isnan(loss_total) or torch.isinf(loss_total):
+            ipdb.set_trace()
+
         return loss_total
 
     def inference(self, jobs, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices):

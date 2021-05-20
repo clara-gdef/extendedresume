@@ -11,7 +11,7 @@ class DecoderLSTMForCamembert(pl.LightningModule):
 
     def forward(self, encoder_representation, emb_token, hidden_state):
         enc_rep = encoder_representation
-        inputs = torch.cat([enc_rep.type(torch.float32), emb_token.type(torch.float32).unsqueeze(-1).cuda()], dim=2)
+        inputs = torch.cat([enc_rep.type(torch.float32), emb_token.type(torch.float32).cuda()], dim=2)
 
         out, hidden = self.lstm(inputs, hidden_state)
         results = self.lin_out(out)

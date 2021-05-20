@@ -13,7 +13,7 @@ class FirstJobPredictorForCamembert(pl.LightningModule):
         self.hp = hparams
         self.tokenizer = tokenizer
 
-        self.dec = DecoderLSTMForCamembert(input_size=dim,
+        self.decoder = DecoderLSTMForCamembert(input_size=dim,
                                            hidden_size=self.hp.hidden_size,
                                            emb_dim=dim,
                                            out_size=tokenizer.vocab_size)
@@ -22,10 +22,15 @@ class FirstJobPredictorForCamembert(pl.LightningModule):
         self.decoded_tokens_test = []
         self.label_tokens_test = []
 
-    def forward(self, profile, fj, hidden):
-        decoder_output, decoder_hidden = self.dec.forward(profile, fj, hidden)
-        self.decoded_tokens.append(decoder_output.argmax(-1))
-        return decoder_output, decoder_hidden
+    def forward(self, encoder_outputs, jobs_embedded, input_tokenized):
+        h0 = (torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded),
+              torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded))
+        decoder_output, decoder_hidden = self.decoder.forward(encoder_outputs[:, :-1, :],
+                                                              jobs_embedded[:, :-1, :],
+                                                              h0)
+        loss = torch.nn.functional.cross_entropy(decoder_output.transpose(-1, 1),
+                                                 input_tokenized[:, 1:], reduction="sum", ignore_index=1)
+        return loss, decoder_output, decoder_hidden
 
     def training_step(self, mini_batch, batch_nb):
         dec_outputs = []

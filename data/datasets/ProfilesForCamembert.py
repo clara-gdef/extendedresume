@@ -67,13 +67,19 @@ class ProfilesForCamembert(Dataset):
             pbar = tqdm(f, total=num_lines, desc="Building tuple for split: " + split)
             for line in f:
                 raw_p = json.loads(line)
-                self.tuples.append({
+                new_p = {
                     "id": raw_p[0],
                     "jobs": handle_jobs(raw_p[1]),
                     "edu": handle_education(raw_p[3]),
                     "skills": self.handle_skills(raw_p[2]),
                     "ind": self.rev_ind_classes[raw_p[4]]
-                })
+                }
+                flag = True
+                for k in ["edu", "jobs", "skills"]:
+                    if len(new_p[k]) < 1:
+                        flag = False
+                if flag:
+                    self.tuples.append(new_p)
                 pbar.update(1)
 
     def handle_skills(self, skill_list):
