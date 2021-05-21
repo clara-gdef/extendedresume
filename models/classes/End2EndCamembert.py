@@ -93,9 +93,10 @@ class End2EndCamembert(pl.LightningModule):
 
         loss_total = loss_sk + loss_ind + (loss_nj / sum(sum(mask)))
 
-        if torch.isnan(loss_total) or torch.isinf(loss_total):
+        if torch.isnan(loss_total):
             ipdb.set_trace()
-
+        if torch.isinf(loss_total):
+            ipdb.set_trace()
         return loss_total
 
     def inference(self, jobs, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices):
