@@ -62,7 +62,7 @@ class End2EndCamembert(pl.LightningModule):
             jobs_to_generate.append(prof[0])
             for exp in prof[1:]:
                 flattened_sentences.append(exp)
-            exp_len.append(len(prof))
+            exp_len.append(len(prof)-1)
         inputs = self.tokenizer(flattened_sentences, truncation=True, padding="max_length", max_length=self.max_len,
                                 return_tensors="pt")
         input_tokenized, mask = inputs["input_ids"].cuda(), inputs["attention_mask"].cuda()
