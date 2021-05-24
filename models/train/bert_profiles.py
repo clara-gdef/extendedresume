@@ -39,6 +39,7 @@ def main(hparams):
                              precision=16
                              )
         num_workers = 0
+        persistent_workers = False
     else:
         trainer = pl.Trainer(gpus=hparams.gpus,
                              max_epochs=hparams.epochs,
@@ -48,6 +49,7 @@ def main(hparams):
                              precision=16
                              )
         num_workers = hparams.num_workers
+        persistent_workers = True
     print("Dataloaders initiated.")
     arguments = {'hp': hparams,
                  'desc': xp_title,
@@ -67,9 +69,11 @@ def main(hparams):
         datasets = load_datasets(hparams, ["TRAIN", "VALID"])
         dataset_train, dataset_valid = datasets[0], datasets[1]
         train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
-                                  num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True)
+                                  num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True,
+                                  persistent_workers=persistent_workers)
         valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
-                                  num_workers=num_workers, drop_last=True, pin_memory=True)
+                                  num_workers=num_workers, drop_last=True, pin_memory=True,
+                                  persistent_workers=persistent_workers)
         print("Model Loaded.")
         if hparams.load_from_checkpoint == "True":
             print("Loading from previous checkpoint...")
@@ -159,7 +163,7 @@ def make_xp_title(hparams):
     if hparams.subsample != -1:
         xp_title += f"sub{hparams.subsample}"
     if hparams.end2end == "True":
-        xp_title += f"fine_tuned"
+        xp_title += f"_fine_tuned"
     print("xp_title = " + xp_title)
     return xp_title
 
@@ -183,7 +187,7 @@ if __name__ == "__main__":
     parser.add_argument("--DEBUG", type=str, default="False")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--model_type", type=str, default="bert_prof")
-    parser.add_argument("--input_type", type=str, default="jobs") # can be job or edu
+    parser.add_argument("--input_type", type=str, default="jobs")  # can be job or edu
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--wd", type=float, default=0.0)
     parser.add_argument("--epochs", type=int, default=50)
