@@ -178,8 +178,8 @@ class End2EndCamembert(pl.LightningModule):
         res_skills = test_for_skills(skills_preds, skills_labels, self.num_skills)
         # get ind_metrics
         ind_preds = torch.stack(self.test_ind_pred)
-        ind_labels = torch.stack(self.test_ind_labs)
-        res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
+        lab_ind = torch.LongTensor(self.test_ind_labs)
+        res_ind = test_for_ind(ind_preds, lab_ind, self.num_ind)
         # get bleu score
         pred_jobs = [self.tokenizer.decode(i, skip_special_tokens=True) for i in self.test_nj_pred]
         actual_jobs = self.test_nj_labs
