@@ -36,6 +36,8 @@ class End2EndCamembert(pl.LightningModule):
         self.num_skills = len(self.skill_dict)
 
         self.encoder = CamembertModel.from_pretrained('camembert-base')
+        if self.hp.end2end != "True":
+            self.encoder.eval()
 
         self.emb_dim = self.encoder.embeddings.word_embeddings.embedding_dim
         self.voc_size = self.encoder.embeddings.word_embeddings.num_embeddings
@@ -74,6 +76,9 @@ class End2EndCamembert(pl.LightningModule):
             end = start + length
             reshaped_profiles[num_prof] = torch.mean(encoder_outputs[start:end], dim=0)
             start = end
+        if self.hp.end2end != "True":
+            reshaped_profiles.detach()
+
         # pred skills & pred ind
         lab_sk_1_hot = classes_to_one_hot(skills_indices, self.num_skills)
         # we use the encoder's last hidden state

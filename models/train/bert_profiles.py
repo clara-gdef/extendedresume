@@ -48,17 +48,14 @@ def main(hparams):
                              precision=16
                              )
         num_workers = hparams.num_workers
-    if hparams.end2end == "True":
-        print("Dataloaders initiated.")
-        arguments = {'hp': hparams,
-                     'desc': xp_title,
-                     "model_path": model_path,
-                     "datadir": CFG["gpudatadir"]}
-        print("Initiating model...")
-        model = End2EndCamembert(**arguments)
-        print("Model Loaded.")
-    else:
-        raise NotImplementedError("Not-fine tuned model has not been implemented yet.")
+    print("Dataloaders initiated.")
+    arguments = {'hp': hparams,
+                 'desc': xp_title,
+                 "model_path": model_path,
+                 "datadir": CFG["gpudatadir"]}
+    print("Initiating model...")
+    model = End2EndCamembert(**arguments)
+    print("Model Loaded.")
     if hparams.input_type == "jobs":
         collate = collate_for_bert_jobs
     elif hparams.input_type == "edu":
@@ -159,8 +156,10 @@ def init_lightning(xp_title, model_name):
 
 def make_xp_title(hparams):
     xp_title = f"{hparams.model_type}_{hparams.input_type}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
-    # if hparams.subsample != -1:
-    #     xp_title += f"sub{hparams.subsample}"
+    if hparams.subsample != -1:
+        xp_title += f"sub{hparams.subsample}"
+    if hparams.end2end == "True":
+        xp_title += f"fine_tuned"
     print("xp_title = " + xp_title)
     return xp_title
 
