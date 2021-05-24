@@ -97,13 +97,12 @@ def main(hparams):
         model_file = get_latest_model(CFG["modeldir"], model_name)
         if hparams.TRAIN == "False":
             print("Loading from previous run...")
-            model.load_state_dict(torch.load(model_file)["state_dict"])
+            model.load_state_dict(torch.load(model_file))
         print("Evaluating model : " + model_file + ".")
-        # TODO REMOVE TEST AND REPLACE BY RIGHT SPLITS
-        datasets = load_datasets(hparams, ["TEST"], hparams.load_dataset)
+        datasets = load_datasets(hparams, ["TEST"])
         dataset_test = datasets[0]
         test_loader = DataLoader(dataset_test, batch_size=1, collate_fn=collate,
-                                 num_workers=hparams.num_workers, drop_last=False)
+                                 num_workers=0, drop_last=False)
         # model.hp.b_size = 1
         return trainer.test(test_dataloaders=test_loader, model=model)
 
