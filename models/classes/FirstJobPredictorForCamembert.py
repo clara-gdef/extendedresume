@@ -39,8 +39,8 @@ class FirstJobPredictorForCamembert(pl.LightningModule):
                                 return_tensors="pt")
         input_tokenized, mask = tkized_sos["input_ids"].cuda(), tkized_sos["attention_mask"].cuda()
         previous_token = embedder(input_tokenized)
-        prev_hidden = (torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded),
-              torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded))
+        prev_hidden = (torch.zeros(1, 1, self.hp.hidden_size).type_as(jobs_embedded),
+              torch.zeros(1, 1, self.hp.hidden_size).type_as(jobs_embedded))
         for di in range(len(jobs_embedded[0]) - 1):
             decoder_output, decoder_hidden = self.decoder.forward(encoder_outputs[:, di, :].unsqueeze(1),
                                                               previous_token[:, di, :].unsqueeze(1),
