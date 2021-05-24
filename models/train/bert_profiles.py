@@ -12,7 +12,7 @@ import torch
 from data.datasets import ProfilesForCamembert
 from models.classes.End2EndCamembert import End2EndCamembert
 from utils import get_ind_class_dict
-from utils.model import collate_for_bert_edu, collate_for_bert_jobs
+from utils.model import collate_for_bert_edu, collate_for_bert_jobs, get_latest_model
 
 
 def init(hparams):
@@ -93,6 +93,19 @@ def main(hparams):
             ipdb.set_trace()
         print("Starting training for " + xp_title + "...")
         trainer.fit(model, train_loader, valid_loader)
+    if hparams.TEST == "True":
+        model_file = get_latest_model(CFG["modeldir"], model_name)
+        if hparams.TRAIN == "False":
+            print("Loading from previous run...")
+            model.load_state_dict(torch.load(model_file)["state_dict"])
+        print("Evaluating model : " + model_file + ".")
+        # TODO REMOVE TEST AND REPLACE BY RIGHT SPLITS
+        datasets = load_datasets(hparams, ["TEST"], hparams.load_dataset)
+        dataset_test = datasets[0]
+        test_loader = DataLoader(dataset_test, batch_size=1, collate_fn=collate,
+                                 num_workers=hparams.num_workers, drop_last=False)
+        # model.hp.b_size = 1
+        return trainer.test(test_dataloaders=test_loader, model=model)
 
 
 def load_datasets(hparams, splits):

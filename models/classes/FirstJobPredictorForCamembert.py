@@ -32,6 +32,23 @@ class FirstJobPredictorForCamembert(pl.LightningModule):
                                                  input_tokenized[:, 1:], reduction="sum", ignore_index=1)
         return loss, decoder_output, decoder_hidden
 
+    def inference(self, encoder_outputs, jobs_embedded, embedder):
+        decoded_tokens, posteriors = [], []
+        tmp = torch.zeros(1, 1, self.hp.hidden_size).type_as(jobs_embedded) + self.tokenizer("<s>")
+        previous_token = embedder(tmp)
+        prev_hidden = (torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded),
+              torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded))
+        for di in range(len(jobs_embedded) - 1):
+            decoder_output, decoder_hidden = self.decoder.forward(encoder_outputs[:, di, :],
+                                                              previous_token[:, di, :],
+                                                              prev_hidden)
+            posteriors.append(decoder_output)
+            decoder_tok = torch.argmax(decoder_output, dim=-1)
+            decoded_tokens.append(decoder_tok)
+            previous_token = embedder(decoder_tok)
+            prev_hidden = decoder_hidden
+        return decoded_tokens, posteriors
+
     def training_step(self, mini_batch, batch_nb):
         dec_outputs = []
         tmp = 0

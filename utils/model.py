@@ -142,3 +142,18 @@ def get_latest_model(modeldir, xp_title):
     model_files = glob.glob(os.path.join(model_path, "*"))
     latest_file = max(model_files, key=os.path.getctime)
     return latest_file
+
+def prettify_bleu_score(bbleu):
+    bleu_dict = {}
+    str_bleu = bbleu.decode()
+    bleu_dict["all"] = str_bleu
+    bleu_dict["bleu"] = float(str_bleu.split(" ")[2][:-1])
+    bleu_dict["bleu1"] = float(str_bleu.split("/")[0].split(',')[-1])
+    bleu_dict["bleu2"] = float(str_bleu.split("/")[1])
+    bleu_dict["bleu3"] = float(str_bleu.split("/")[2])
+    bleu_dict["bleu4"] = float(str_bleu.split("/")[3].split(" ")[0])
+    return bleu_dict
+
+def compute_bleu_score(pred, ref):
+    cmd_line = './multi-bleu.perl ' + ref + ' < ' + pred + ''
+    return subprocess.check_output(cmd_line, shell=True)

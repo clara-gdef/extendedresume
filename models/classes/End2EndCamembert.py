@@ -15,7 +15,7 @@ from models.classes.EvalModels import EvalModels
 from models.classes.FirstJobPredictorForCamembert import FirstJobPredictorForCamembert
 from transformers import CamembertTokenizer, CamembertModel, CamembertForCausalLM
 
-from utils import classes_to_one_hot
+from utils import classes_to_one_hot, prettify_bleu_score, compute_bleu_score
 
 
 class End2EndCamembert(pl.LightningModule):
@@ -88,7 +88,7 @@ class End2EndCamembert(pl.LightningModule):
                                 return_tensors="pt")
         jobs_tokenized = inputs["input_ids"].cuda()
         jobs_to_generate_embedded = self.encoder.embeddings(jobs_tokenized)
-        loss_nj, decoder_output, decoder_hidden= self.job_generator.forward(reshaped_profiles.cuda(), jobs_to_generate_embedded, jobs_tokenized)
+        loss_nj, decoder_output, decoder_hidden = self.job_generator.forward(reshaped_profiles.cuda(), jobs_to_generate_embedded, jobs_tokenized)
         # return loss
 
         loss_total = loss_sk + loss_ind + (loss_nj / sum(sum(mask)))
@@ -99,8 +99,38 @@ class End2EndCamembert(pl.LightningModule):
             ipdb.set_trace()
         return loss_total
 
-    def inference(self, jobs, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices):
-        ipdb.set_trace()
+    def inference(self, sentences):
+        # build prof
+        exp_len = []
+        flattened_sentences = []
+        jobs_to_generate = []
+        for prof in sentences:
+            # we skip the first exp as it is the label for job prediction
+            jobs_to_generate.append(prof[0])
+            for exp in prof[1:]:
+                flattened_sentences.append(exp)
+            exp_len.append(len(prof) - 1)
+        inputs = self.tokenizer(flattened_sentences, truncation=True, padding="max_length", max_length=self.max_len,
+                                return_tensors="pt")
+        input_tokenized, mask = inputs["input_ids"].cuda(), inputs["attention_mask"].cuda()
+        encoder_outputs = self.encoder(input_tokenized, mask)['last_hidden_state']
+        # avg
+        reshaped_profiles = torch.zeros(self.hp.b_size, self.max_len, self.emb_dim)
+        start = 0
+        for num_prof, length in enumerate(exp_len):
+            end = start + length
+            reshaped_profiles[num_prof] = torch.mean(encoder_outputs[start:end], dim=0)
+            start = end
+        # pred skills & pred ind
+        # we use the encoder's last hidden state
+        pred_sk, pred_ind = self.classifiers(reshaped_profiles[:, -1, :])
+        # gen next job
+        inputs = self.tokenizer(jobs_to_generate, truncation=True, padding="max_length", max_length=self.max_len,
+                                return_tensors="pt")
+        jobs_tokenized = inputs["input_ids"].cuda()
+        jobs_to_generate_embedded = self.encoder.embeddings(jobs_tokenized)
+        decoded_tokens, posteriors = self.job_generator.inference(reshaped_profiles.cuda(), jobs_to_generate_embedded, self.encoder.embeddings)
+        return pred_sk, pred_ind, posteriors
 
     def configure_optimizers(self):
         params = filter(lambda p: p.requires_grad, self.parameters())
@@ -123,55 +153,38 @@ class End2EndCamembert(pl.LightningModule):
         return {"val_loss": val_loss}
 
     def on_test_epoch_start(self):
-        self.test_decoded_outputs = []
-        self.test_decoded_labels = []
-        self.classifier_ind = fasttext.load_model(f"/data/gainondefor/dynamics/ft_att_classifier_ind_10.bin")
-        self.classifier_exp = fasttext.load_model(f"/data/gainondefor/dynamics/ft_att_classifier_delta_5_10.bin")
-        self.ppl_model = CausalLM(self.datadir, "causal_lm_bs100_lr1e-07_adam", self.voc_size, self.model_path,
-                                  self.hp).to(self.decoder.device)
-        self.ppl_model.is_decoder = True
-        self.ppl_model.load_state_dict(
-            torch.load("/data/gainondefor/dynamics/causal/lm/bs100/lr1e-07/adam/epoch=05.ckpt")["state_dict"])
-        with open(os.path.join(self.datadir, "ind_class_dict.pkl"), 'rb') as f_name:
-            self.industry_dict = pkl.load(f_name)
+        self.test_nj_pred = []
+        self.test_nj_labs = []
+        self.test_sk_pred = []
+        self.test_sk_labs = []
+        self.test_ind_pred = []
+        self.test_ind_labs = []
 
     def test_step(self, batch, batch_nb):
-        sentences, ind_indices, delta_indices = batch[0], batch[1], batch[2]
-        if self.hp.input_recopy == "True":
-            self.test_decoded_labels.append((sentences, delta_indices, ind_indices))
-        else:
-            delta_tilde_indices, ind_tilde_indices = sample_y_tilde(delta_indices, ind_indices, len(self.delta_dict),
-                                                                    len(self.industry_dict), self.hp.no_tilde)
-            decoded_outputs = self.inference(sentences, delta_indices, ind_indices, delta_tilde_indices,
-                                             ind_tilde_indices)
-            self.test_decoded_outputs.append(decoded_outputs)
-            self.test_decoded_labels.append(
-                (sentences, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices))
+        ids, sentences, skills_indices, ind_indices = batch[0], batch[1], batch[2], batch[3]
+        pred_sk, pred_ind, posteriors = self.inference(sentences)
+        self.test_nj_pred.append(posteriors)
+        self.test_nj_labs.append(sentences[0])
+        self.test_sk_pred.append(pred_sk)
+        self.test_sk_labs.append(skills_indices)
+        self.test_ind_pred.append(pred_ind)
+        self.test_ind_labs.append(ind_indices)
 
     def test_epoch_end(self, outputs):
         print("Inference on testset completed. Commencing evaluation...")
+        ipdb.set_trace()
         initial_jobs = [i[0] for i in self.test_decoded_labels]
         initial_exp = [i[2] for i in self.test_decoded_labels]
         initial_ind = [i[1] for i in self.test_decoded_labels]
-        if self.hp.input_recopy == "True":
-            str_list = [i[0] for i in initial_jobs]
-            tokenized = self.tokenizer(str_list, truncation=True, padding="max_length", max_length=self.max_len,
-                                       return_tensors="pt")
-            ppl = self.get_ppl(tokenized["input_ids"])
-            ind_metrics, delta_metrics, ind_preds, delta_preds = self.get_att_control_score(tokenized["input_ids"],
-                                                                                            initial_exp, initial_ind)
-            ipdb.set_trace()
-            bleu = self.get_bleu_score(tokenized["input_ids"], initial_jobs)
-        else:
-            expected_delta = [i[3] for i in self.test_decoded_labels]
-            expected_ind = [i[4] for i in self.test_decoded_labels]
-            ## NORMAL EVAL
-            ppl = self.get_ppl(self.test_decoded_outputs)
-            stacked_outs = torch.stack(self.test_decoded_outputs)
-            ind_metrics, delta_metrics, ind_preds, delta_preds = self.get_att_control_score(stacked_outs,
-                                                                                            expected_delta,
-                                                                                            expected_ind)
-            bleu = prettify_bleu_score((self.get_bleu_score(stacked_outs.squeeze(1), initial_jobs)))
+        expected_delta = [i[3] for i in self.test_decoded_labels]
+        expected_ind = [i[4] for i in self.test_decoded_labels]
+        ## NORMAL EVAL
+        ppl = self.get_ppl(self.test_decoded_outputs)
+        stacked_outs = torch.stack(self.test_decoded_outputs)
+        ind_metrics, delta_metrics, ind_preds, delta_preds = self.get_att_control_score(stacked_outs,
+                                                                                        expected_delta,
+                                                                                        expected_ind)
+        bleu = prettify_bleu_score((self.get_bleu_score(stacked_outs.squeeze(1), initial_jobs)))
             # ipdb.set_trace()
         if self.hp.print_to_csv == "True":
             csv_file = print_tilde_to_csv(initial_jobs, initial_exp, initial_ind, self.test_decoded_outputs,
@@ -182,30 +195,6 @@ class End2EndCamembert(pl.LightningModule):
         print({"Avg ppl": ppl, **bleu, **ind_metrics, **delta_metrics})
         return {"Avg ppl": ppl, **bleu, **ind_metrics, **delta_metrics}
 
-    def get_y_and_y_tilde(self, delta_indices, ind_indices, delta_tilde_indices, ind_tilde_indices):
-        atts_as_first_token = embed_and_avg_attributes(delta_indices,
-                                                       ind_indices,
-                                                       self.attribute_embedder_as_tokens_exp.weight.shape[-1],
-                                                       self.attribute_embedder_as_tokens_exp,
-                                                       self.attribute_embedder_as_tokens_ind)
-        atts_as_bias = embed_and_avg_attributes(delta_indices,
-                                                ind_indices,
-                                                self.voc_size,
-                                                self.attribute_embedder_as_bias_exp,
-                                                self.attribute_embedder_as_bias_ind)
-        atts_tilde_as_first_token = embed_and_avg_attributes(delta_tilde_indices,
-                                                             ind_tilde_indices,
-                                                             self.attribute_embedder_as_tokens_exp.weight.shape[
-                                                                 -1],
-                                                             self.attribute_embedder_as_tokens_exp,
-                                                             self.attribute_embedder_as_tokens_ind
-                                                             )
-        atts_tilde_as_bias = embed_and_avg_attributes(delta_tilde_indices,
-                                                      ind_tilde_indices,
-                                                      self.voc_size,
-                                                      self.attribute_embedder_as_bias_exp,
-                                                      self.attribute_embedder_as_bias_ind)
-        return atts_as_first_token, atts_as_bias, atts_tilde_as_first_token, atts_tilde_as_bias
 
     def save_at_step(self, batch_nb):
         if not os.path.isdir(self.model_path):
@@ -356,3 +345,4 @@ class End2EndCamembert(pl.LightningModule):
             if token.item() == 6:  # token for eos
                 eos_flag = True
         return mask.type(torch.cuda.LongTensor)
+
