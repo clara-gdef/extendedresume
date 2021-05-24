@@ -15,7 +15,7 @@ from models.classes.EvalModels import EvalModels
 from models.classes.FirstJobPredictorForCamembert import FirstJobPredictorForCamembert
 from transformers import CamembertTokenizer, CamembertModel, CamembertForCausalLM
 
-from utils import classes_to_one_hot, prettify_bleu_score, compute_bleu_score
+from utils import classes_to_one_hot, prettify_bleu_score, compute_bleu_score, test_for_skills, test_for_ind
 
 
 class End2EndCamembert(pl.LightningModule):
@@ -129,8 +129,8 @@ class End2EndCamembert(pl.LightningModule):
                                 return_tensors="pt")
         jobs_tokenized = inputs["input_ids"].cuda()
         jobs_to_generate_embedded = self.encoder.embeddings(jobs_tokenized)
-        decoded_tokens, posteriors = self.job_generator.inference(reshaped_profiles.cuda(), jobs_to_generate_embedded, self.encoder.embeddings)
-        return pred_sk, pred_ind, posteriors
+        decoded_tokens, _ = self.job_generator.inference(reshaped_profiles.cuda(), jobs_to_generate_embedded, self.encoder.embeddings)
+        return pred_sk, pred_ind, decoded_tokens
 
     def configure_optimizers(self):
         params = filter(lambda p: p.requires_grad, self.parameters())
@@ -172,28 +172,22 @@ class End2EndCamembert(pl.LightningModule):
 
     def test_epoch_end(self, outputs):
         print("Inference on testset completed. Commencing evaluation...")
+        # get skill metrics
+        skills_preds = torch.stack(self.test_sk_pred)
+        skills_labels = torch.stack(self.test_sk_labs)
+        res_skills = test_for_skills(skills_preds, skills_labels, self.num_classes_skills)
+        # get ind_metrics
+        ind_preds = torch.stack(self.test_ind_pred)
+        ind_labels = torch.stack(self.test_ind_labs)
+        res_ind = test_for_ind(ind_preds, ind_labels, self.num_classes_ind)
+        # get bleu score
+        pred_jobs = [self.tokenizer.decode(i, skip_special_tokens=True) for i in self.test_nj_pred]
+        actual_jobs = self.test_nj_labs
         ipdb.set_trace()
-        initial_jobs = [i[0] for i in self.test_decoded_labels]
-        initial_exp = [i[2] for i in self.test_decoded_labels]
-        initial_ind = [i[1] for i in self.test_decoded_labels]
-        expected_delta = [i[3] for i in self.test_decoded_labels]
-        expected_ind = [i[4] for i in self.test_decoded_labels]
-        ## NORMAL EVAL
-        ppl = self.get_ppl(self.test_decoded_outputs)
-        stacked_outs = torch.stack(self.test_decoded_outputs)
-        ind_metrics, delta_metrics, ind_preds, delta_preds = self.get_att_control_score(stacked_outs,
-                                                                                        expected_delta,
-                                                                                        expected_ind)
-        bleu = prettify_bleu_score((self.get_bleu_score(stacked_outs.squeeze(1), initial_jobs)))
-            # ipdb.set_trace()
-        if self.hp.print_to_csv == "True":
-            csv_file = print_tilde_to_csv(initial_jobs, initial_exp, initial_ind, self.test_decoded_outputs,
-                                          expected_delta, expected_ind, delta_preds, ind_preds, self.desc,
-                                          self.vocab_dict, self.industry_dict, self.delta_dict)
-            df = pd.read_csv(csv_file)
-            df.to_html(f'html/{self.desc}.html')
-        print({"Avg ppl": ppl, **bleu, **ind_metrics, **delta_metrics})
-        return {"Avg ppl": ppl, **bleu, **ind_metrics, **delta_metrics}
+
+        bleu = prettify_bleu_score((self.get_bleu_score(pred_jobs, actual_jobs)))
+        print({**bleu, **res_ind, **res_skills})
+        return {**bleu, **res_ind, **res_skills}
 
 
     def save_at_step(self, batch_nb):
