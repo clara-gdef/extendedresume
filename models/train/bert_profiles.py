@@ -59,15 +59,16 @@ def main(hparams):
         print("Model Loaded.")
     else:
         raise NotImplementedError("Not-fine tuned model has not been implemented yet.")
+    if hparams.input_type == "jobs":
+        collate = collate_for_bert_jobs
+    elif hparams.input_type == "edu":
+        collate = collate_for_bert_edu
+    else:
+        raise Exception(
+            "wrong input type, can be either \"job\" or \"edu\", " + str(hparams.input_type) + " was given.")
     if hparams.TRAIN == "TRUE":
         datasets = load_datasets(hparams, ["TRAIN", "VALID"])
         dataset_train, dataset_valid = datasets[0], datasets[1]
-        if hparams.input_type == "jobs":
-            collate = collate_for_bert_jobs
-        elif hparams.input_type == "edu":
-            collate = collate_for_bert_edu
-        else:
-            raise Exception("wrong input type, can be either \"job\" or \"edu\", " + str(hparams.input_type) + " was given.")
         train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
                                   num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True)
         valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
