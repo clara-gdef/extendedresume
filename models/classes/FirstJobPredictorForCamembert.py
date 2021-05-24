@@ -43,7 +43,7 @@ class FirstJobPredictorForCamembert(pl.LightningModule):
               torch.zeros(1, 1, self.hp.hidden_size).type_as(jobs_embedded))
         for di in range(len(jobs_embedded[0]) - 1):
             decoder_output, decoder_hidden = self.decoder.forward(encoder_outputs[:, di, :].unsqueeze(1),
-                                                              previous_token[:, di, :].unsqueeze(1),
+                                                              previous_token,
                                                               prev_hidden)
             posteriors.append(decoder_output)
             decoder_tok = torch.argmax(decoder_output, dim=-1)
