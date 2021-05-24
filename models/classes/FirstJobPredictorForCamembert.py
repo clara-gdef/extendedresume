@@ -35,8 +35,9 @@ class FirstJobPredictorForCamembert(pl.LightningModule):
     def inference(self, encoder_outputs, jobs_embedded, embedder):
         decoded_tokens, posteriors = [], []
         ipdb.set_trace()
-        tmp = torch.zeros(1, 1, self.hp.hidden_size).type_as(jobs_embedded) + self.tokenizer("<s>")
-        previous_token = embedder(tmp)
+        sos = self.tokenizer.special_tokens_map["bos_token"]
+        tkized_sos = self.tokenizer(sos)
+        previous_token = embedder(tkized_sos["input_ids"])
         prev_hidden = (torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded),
               torch.zeros(1, self.hp.b_size, self.hp.hidden_size).type_as(jobs_embedded))
         for di in range(len(jobs_embedded) - 1):
