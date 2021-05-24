@@ -38,8 +38,6 @@ class End2EndCamembert(pl.LightningModule):
         self.encoder = CamembertModel.from_pretrained('camembert-base')
         if self.hp.end2end != "True":
             self.encoder.requires_grad_ = False
-            ipdb.set_trace()
-            self.encoder.eval()
 
         self.emb_dim = self.encoder.embeddings.word_embeddings.embedding_dim
         self.voc_size = self.encoder.embeddings.word_embeddings.num_embeddings
