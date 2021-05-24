@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 import os
+import subprocess
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, hamming_loss
 from utils.pre_processing import word_list_to_indices
 
