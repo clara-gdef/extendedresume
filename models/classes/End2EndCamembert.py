@@ -215,9 +215,6 @@ class End2EndCamembert(pl.LightningModule):
             labels = self.tokenizer.decode(
                 self.tokenizer(test_labels[num][0], truncation=True, padding="max_length", max_length=self.max_len,
                                return_tensors="pt")["input_ids"][0], skip_special_tokens=True)
-            if self.hp.input_recopy == "True":
-                if str_preds != labels:
-                    ipdb.set_trace()
             if len(str_preds.split(" ")) < 1:
                 ipdb.set_trace()
             if len(labels.split(" ")) < 1:
