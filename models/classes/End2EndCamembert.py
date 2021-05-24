@@ -179,14 +179,13 @@ class End2EndCamembert(pl.LightningModule):
         # get ind_metrics
         ind_preds = torch.stack(self.test_ind_pred)
         lab_ind = torch.LongTensor(self.test_ind_labs)
-        res_ind = test_for_ind(ind_preds, lab_ind, self.num_ind)
+        res_ind = test_for_ind(ind_preds.unsqueeze(1), lab_ind.unsqueeze(1), self.num_ind)
         # get bleu score
-        pred_jobs = [self.tokenizer.decode(i, skip_special_tokens=True) for i in self.test_nj_pred]
+        pred_jobs = [self.tokenizer.decode(torch.stack(i).squeeze(-1).squeeze(-1), skip_special_tokens=True) for i in self.test_nj_pred]
         actual_jobs = self.test_nj_labs
-        ipdb.set_trace()
-
         bleu = prettify_bleu_score((self.get_bleu_score(pred_jobs, actual_jobs)))
         print({**bleu, **res_ind, **res_skills})
+        ipdb.set_trace()
         return {**bleu, **res_ind, **res_skills}
 
 
