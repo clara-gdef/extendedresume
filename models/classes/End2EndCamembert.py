@@ -166,9 +166,9 @@ class End2EndCamembert(pl.LightningModule):
         self.test_nj_pred.append(decoded_tokens)
         self.test_nj_labs.append(sentences[0])
         self.test_sk_pred.append(pred_sk[0])
-        self.test_sk_labs.append(skills_indices)
+        self.test_sk_labs.append(skills_indices[0])
         self.test_ind_pred.append(pred_ind[0])
-        self.test_ind_labs.append(ind_indices)
+        self.test_ind_labs.append(ind_indices[0])
 
     def test_epoch_end(self, outputs):
         print("Inference on testset completed. Commencing evaluation...")
