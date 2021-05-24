@@ -167,7 +167,7 @@ class End2EndCamembert(pl.LightningModule):
         self.test_nj_labs.append(sentences[0])
         self.test_sk_pred.append(pred_sk[0])
         self.test_sk_labs.append(skills_indices[0])
-        self.test_ind_pred.append(pred_ind[0].detach().cpu().numpy())
+        self.test_ind_pred.append(pred_ind[0])
         self.test_ind_labs.append(ind_indices[0])
 
     def test_epoch_end(self, outputs):
@@ -175,7 +175,7 @@ class End2EndCamembert(pl.LightningModule):
         # get skill metrics
         skills_preds = torch.stack(self.test_sk_pred)
         skills_labels = classes_to_one_hot(self.test_sk_labs, self.num_skills)
-        res_skills = test_for_skills(skills_preds, skills_labels, self.num_classes_skills)
+        res_skills = test_for_skills(skills_preds, skills_labels, self.num_skills)
         # get ind_metrics
         ind_preds = torch.stack(self.test_ind_pred)
         ind_labels = torch.stack(self.test_ind_labs)
