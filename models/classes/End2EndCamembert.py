@@ -115,7 +115,7 @@ class End2EndCamembert(pl.LightningModule):
         input_tokenized, mask = inputs["input_ids"].cuda(), inputs["attention_mask"].cuda()
         encoder_outputs = self.encoder(input_tokenized, mask)['last_hidden_state']
         # avg
-        reshaped_profiles = torch.zeros(self.hp.b_size, self.max_len, self.emb_dim)
+        reshaped_profiles = torch.zeros(1, self.max_len, self.emb_dim)
         start = 0
         for num_prof, length in enumerate(exp_len):
             end = start + length
