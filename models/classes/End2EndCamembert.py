@@ -162,12 +162,12 @@ class End2EndCamembert(pl.LightningModule):
 
     def test_step(self, batch, batch_nb):
         ids, sentences, skills_indices, ind_indices = batch[0], batch[1], batch[2], batch[3]
-        pred_sk, pred_ind, posteriors = self.inference(sentences)
-        self.test_nj_pred.append(posteriors)
+        pred_sk, pred_ind, decoded_tokens = self.inference(sentences)
+        self.test_nj_pred.append(decoded_tokens)
         self.test_nj_labs.append(sentences[0])
-        self.test_sk_pred.append(pred_sk)
+        self.test_sk_pred.append(pred_sk[0])
         self.test_sk_labs.append(skills_indices)
-        self.test_ind_pred.append(pred_ind)
+        self.test_ind_pred.append(pred_ind[0])
         self.test_ind_labs.append(ind_indices)
 
     def test_epoch_end(self, outputs):
