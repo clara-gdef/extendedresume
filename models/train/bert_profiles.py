@@ -160,8 +160,8 @@ def init_lightning(xp_title, model_name):
 
 def make_xp_title(hparams):
     xp_title = f"{hparams.model_type}_{hparams.input_type}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
-    if hparams.subsample != -1:
-        xp_title += f"sub{hparams.subsample}"
+    # if hparams.subsample != -1:
+    #     xp_title += f"sub{hparams.subsample}"
     if hparams.end2end == "True":
         xp_title += f"_fine_tuned"
     print("xp_title = " + xp_title)
