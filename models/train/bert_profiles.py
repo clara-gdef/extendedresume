@@ -49,7 +49,7 @@ def main(hparams):
                              precision=16
                              )
         num_workers = hparams.num_workers
-        persistent_workers = True
+        persistent_workers = False
     print("Dataloaders initiated.")
     arguments = {'hp': hparams,
                  'desc': xp_title,
