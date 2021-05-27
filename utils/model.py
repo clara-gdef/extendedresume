@@ -72,7 +72,7 @@ def test_for_skills(pred, labels, num_class):
     for threshold in tqdm(np.linspace(0, 1, 10)):
         print('Testing skills for threshold ' + str(round(threshold, 1)) + ' ...')
         new_preds = get_preds_wrt_threshold(pred, round(threshold, 1))
-        res[round(threshold, 1)] = get_metrics(new_preds.squeeze(1).cpu().numpy(), labels.squeeze(1).cpu().numpy(), num_class, "skills")
+        res[round(threshold, 1)] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), labels.squeeze(1).cpu().numpy(), num_class, "skills")
         # res[round(threshold, 1) + "_@10"] = get_metrics(new_preds.cpu().numpy(), labels.cpu().numpy(), num_class, "skills")
     return res
 

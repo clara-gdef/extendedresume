@@ -183,7 +183,7 @@ if __name__ == "__main__":
     parser.add_argument("--optim", type=str, default="adam")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
     parser.add_argument("--load_from_checkpoint", default=False)
-    parser.add_argument("--checkpoint", type=int, default=45)
+    parser.add_argument("--checkpoint", type=str, default="2-step=4565")
     parser.add_argument("--DEBUG", type=str, default="False")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--model_type", type=str, default="bert_prof")
