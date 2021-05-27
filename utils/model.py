@@ -69,10 +69,12 @@ def get_model_params(args, dataset):
 
 def test_for_skills(pred, labels, num_class):
     res = {}
-    for threshold in tqdm(np.linspace(0, 1, 10)):
-        print('Testing skills for threshold ' + str(round(threshold, 1)) + ' ...')
-        new_preds = get_preds_wrt_threshold(pred, round(threshold, 1))
-        res[round(threshold, 1)] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), labels.squeeze(1).cpu().numpy(), num_class, "skills")
+    lower_bound = torch.min(pred).item() / 2
+    higher_bound = torch.max(pred).item() + (torch.max(pred).item() / 2)
+    for threshold in tqdm(np.linspace(lower_bound, higher_bound, 10)):
+        print('Testing skills for threshold ' + str(threshold) + ' ...')
+        new_preds = get_preds_wrt_threshold(pred, threshold)
+        res[threshold] = get_metrics_for_skills(new_preds.squeeze(1).cpu().numpy(), labels.squeeze(1).cpu().numpy(), num_class, "skills")
         # res[round(threshold, 1) + "_@10"] = get_metrics(new_preds.cpu().numpy(), labels.cpu().numpy(), num_class, "skills")
     return res
 
