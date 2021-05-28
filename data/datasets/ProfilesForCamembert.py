@@ -90,7 +90,7 @@ class ProfilesForCamembert(Dataset):
         return skills_ind
 
     def get_tgt_file(self, subsample):
-        if subsample != -1:
+        if subsample != -1 and self.is_toy=="True":
             tgt_file = os.path.join(self.datadir, f"{self.name}_{self.split}_{subsample}.pkl")
         else:
             tgt_file = os.path.join(self.datadir, f"{self.name}_{self.split}.pkl")
