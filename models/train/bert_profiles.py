@@ -139,6 +139,7 @@ def init_lightning(xp_title, model_name):
 
     checkpoint_callback = ModelCheckpoint(
         dirpath=model_path,
+        filename='{epoch}-{val_loss:.2f}',
         save_top_k=1,
         verbose=True,
         monitor='val_loss',
@@ -159,7 +160,7 @@ def init_lightning(xp_title, model_name):
 
 
 def make_xp_title(hparams):
-    xp_title = f"{hparams.model_type}_{hparams.input_type}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
+    xp_title = f"{hparams.model_type}_{hparams.input_type}_{hparams.hidden_size}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
     # if hparams.subsample != -1:
     #     xp_title += f"sub{hparams.subsample}"
     if hparams.end2end == "True":
@@ -183,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument("--optim", type=str, default="adam")
     parser.add_argument("--auto_lr_find", type=bool, default=False)
     parser.add_argument("--load_from_checkpoint", default=False)
-    parser.add_argument("--checkpoint", type=str, default="2-step=4565")
+    parser.add_argument("--checkpoint", type=str, default="29-step=60899")
     parser.add_argument("--DEBUG", type=str, default="False")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--model_type", type=str, default="bert_prof")
