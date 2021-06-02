@@ -160,7 +160,10 @@ def init_lightning(xp_title, model_name):
 
 
 def make_xp_title(hparams):
-    xp_title = f"{hparams.model_type}_{hparams.input_type}_{hparams.hidden_size}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
+    if hparams.load_from_checkpoint == "True":
+        xp_title = f"{hparams.model_type}_{hparams.input_type}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
+    else:
+        xp_title = f"{hparams.model_type}_{hparams.input_type}_{hparams.hidden_size}_bs{hparams.b_size}_lr{hparams.lr}_{hparams.optim}"
     # if hparams.subsample != -1:
     #     xp_title += f"sub{hparams.subsample}"
     if hparams.end2end == "True":
