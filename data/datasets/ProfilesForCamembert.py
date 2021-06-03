@@ -11,9 +11,10 @@ from utils.pre_processing import word_seq_into_list
 
 
 class ProfilesForCamembert(Dataset):
-    def __init__(self, datadir, input_file, split, skills_classes, ind_classes, subsample, load):
+    def __init__(self, datadir, input_file, split, skills_classes, ind_classes, subsample, load, is_toy):
         self.datadir = datadir
         self.split = split
+        self.is_toy = is_toy
         self.skills_classes = skills_classes
         self.rev_sk_classes = {v: k for k, v in skills_classes.items()}
         self.ind_classes = ind_classes
@@ -36,11 +37,24 @@ class ProfilesForCamembert(Dataset):
                self.tuples[idx]["ind"]
 
     def save_dataset(self, subsample):
-        print("Subsampling dataset...")
-        np.random.shuffle(self.tuples)
-        retained_tuples = self.tuples[:subsample]
-        self.tuples = retained_tuples
-        print(f"len tuples in save_dataset: {len(self.tuples)}")
+        if self.is_toy == "True":
+            print("Subsampling dataset...")
+            new_tuples = []
+            np.random.shuffle(self.tuples)
+            retained_tuples = self.tuples[:subsample]
+            for i in range(100):
+                if len(retained_tuples) == 1:
+                    new_tuples.append(retained_tuples[0])
+                else:
+                    new_tuples.extend(retained_tuples)
+            self.tuples = new_tuples
+            print(f"len tuples in save_dataset: {len(self.tuples)}")
+        else:
+            print("Subsampling dataset...")
+            np.random.shuffle(self.tuples)
+            retained_tuples = self.tuples[:subsample]
+            self.tuples = retained_tuples
+            print(f"len tuples in save_dataset: {len(self.tuples)}")
         dico = {}
         for attribute in vars(self):
             if not str(attribute).startswith("__"):

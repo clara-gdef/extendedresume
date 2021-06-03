@@ -69,11 +69,9 @@ def main(hparams):
         datasets = load_datasets(hparams, ["TRAIN", "TRAIN"])
         dataset_train, dataset_valid = datasets[0], datasets[1]
         train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
-                                  num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True,
-                                  persistent_workers=persistent_workers)
+                                  num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True)
         valid_loader = DataLoader(dataset_valid, batch_size=hparams.b_size, collate_fn=collate,
-                                  num_workers=num_workers, drop_last=True, pin_memory=True,
-                                  persistent_workers=persistent_workers)
+                                  num_workers=num_workers, drop_last=True, pin_memory=True)
         print("Model Loaded.")
         if hparams.load_from_checkpoint == "True":
             print("Loading from previous checkpoint...")
@@ -119,6 +117,7 @@ def load_datasets(hparams, splits):
                  "subsample": hparams.subsample,
                  "skills_classes": skills_classes,
                  "ind_classes": ind_classes,
+                 "is_toy": hparams.toy_dataset,
                  "load": hparams.load_dataset == "True"}
     for split in splits:
         ipt_file = os.path.join(CFG["gpudatadir"], f"bp_3jobs_desc_edu_skills_industry_date_company_FR_{split}.json")
@@ -177,10 +176,11 @@ if __name__ == "__main__":
     parser.add_argument("--gpus", type=int, default=3)
     parser.add_argument("--b_size", type=int, default=64)
     parser.add_argument("--subsample", type=int, default=-1)
-    parser.add_argument("--hidden_size", type=int, default=300)
+    parser.add_argument("--hidden_size", type=int, default=768)
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--load_dataset", default="True")
     parser.add_argument("--build_ind_dict", default="False")
+    parser.add_argument("--print_preds", type=str, default="True")
     parser.add_argument("--end2end", default="True")
     parser.add_argument("--TEST", type=str, default="False")
     parser.add_argument("--TRAIN", type=str, default="True")
@@ -189,7 +189,8 @@ if __name__ == "__main__":
     parser.add_argument("--load_from_checkpoint", default=False)
     parser.add_argument("--checkpoint", type=str, default="29-step=60899")
     parser.add_argument("--DEBUG", type=str, default="False")
-    parser.add_argument("--num_workers", type=int, default=4)
+    parser.add_argument("--toy_dataset", type=str, default="True")
+    parser.add_argument("--num_workers", type=int, default=0)
     parser.add_argument("--model_type", type=str, default="bert_prof")
     parser.add_argument("--input_type", type=str, default="jobs")  # can be job or edu
     parser.add_argument("--lr", type=float, default=1e-4)
