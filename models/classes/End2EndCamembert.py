@@ -96,7 +96,28 @@ class End2EndCamembert(pl.LightningModule):
         jobs_tokenized = inputs["input_ids"].cuda()
         jobs_to_generate_embedded = self.encoder.embeddings(jobs_tokenized)
         loss_nj, decoder_output, decoder_hidden = self.job_generator.forward(reshaped_profiles.cuda(), jobs_to_generate_embedded, jobs_tokenized)
+
+        if self.hp.print_preds == "True" and batch_nb == 0:
+            tmp = torch.argmax(decoder_output[0], dim=-1)
+            pred = self.tokenizer.decode(tmp, skip_special_tokens=True)
+            label = self.tokenizer.decode(jobs_tokenized[0], skip_special_tokens=True)
+            print("==================================================")
+
+            print("LABEL : " + label)
+            print("PRED : " + pred)
+            from sklearn.metrics import hamming_loss
+            from utils.model import get_preds_wrt_threshold, get_metrics_for_skills
+
+            tmp_sk_label = lab_sk_1_hot.clone().cpu().numpy()
+            tmp_sk_pred = get_preds_wrt_threshold(pred_sk, .5)
+            print("==================================================")
+            sk_met = get_metrics_for_skills(tmp_sk_label, tmp_sk_pred, 523, "skills")
+            print(f"METRICS SKILLS : {sk_met}")
+            print("==================================================")
+            print(f"LABEL INDUSTRY : {ind_indices[0]}")
+            print(f"PRED INDUSTRY : {torch.argmax(pred_ind[0], dim=-1)}")
         # return loss
+        # loss_total = loss_nj / sum(sum(mask))
 
         loss_total = loss_sk + loss_ind + (loss_nj / sum(sum(mask)))
 
