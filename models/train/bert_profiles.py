@@ -66,7 +66,7 @@ def main(hparams):
         raise Exception(
             "wrong input type, can be either \"job\" or \"edu\", " + str(hparams.input_type) + " was given.")
     if hparams.TRAIN == "True":
-        datasets = load_datasets(hparams, ["TRAIN", "VALID"])
+        datasets = load_datasets(hparams, ["TRAIN", "TRAIN"])
         dataset_train, dataset_valid = datasets[0], datasets[1]
         train_loader = DataLoader(dataset_train, batch_size=hparams.b_size, collate_fn=collate,
                                   num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True,
