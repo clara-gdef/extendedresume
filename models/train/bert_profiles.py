@@ -97,9 +97,9 @@ def main(hparams):
         model_file = get_latest_model(CFG["modeldir"], model_name)
         if hparams.TRAIN == "False":
             print("Loading from previous run...")
-            model.load_state_dict(torch.load(model_file))
+            model.load_state_dict(torch.load(model_file)["state_dict"])
         print("Evaluating model : " + model_file + ".")
-        datasets = load_datasets(hparams, ["TEST"])
+        datasets = load_datasets(hparams, ["TRAIN"])
         dataset_test = datasets[0]
         test_loader = DataLoader(dataset_test, batch_size=1, collate_fn=collate,
                                  num_workers=0, drop_last=False)
